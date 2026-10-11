@@ -4,7 +4,7 @@ import AddStock from "./AddStock";
 import "./App.css";
 import "./Stock.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://stoka-of78.onrender.com";
 
 const emptyForm = {
   stockName: "",

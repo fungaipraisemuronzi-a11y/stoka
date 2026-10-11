@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import "./Dashboard.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://stoka-of78.onrender.com";
 
 export default function Dashboard({ onLogout }) {
   const [page, setPage] = useState("businesses");

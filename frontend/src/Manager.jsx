@@ -7,7 +7,7 @@ import Reports from "./Reports";
 import "./App.css";
 import "./Stock.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://stoka-of78.onrender.com";
 const WHATSAPP_NUMBER = "263777847204";
 const SUBSCRIBE_CODE = "*151*1*1*0777847204*6#";
 

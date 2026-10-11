@@ -2,7 +2,7 @@
 import { useState } from "react";
 import "./Teller.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://stoka-of78.onrender.com";
 
 export default function Teller({ business, onBack, onLogin }) {
   const [mode, setMode] = useState("login");

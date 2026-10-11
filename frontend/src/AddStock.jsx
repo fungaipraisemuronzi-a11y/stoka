@@ -1,7 +1,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://stoka-of78.onrender.com";
 
 const emptyForm = {
   productId: "",

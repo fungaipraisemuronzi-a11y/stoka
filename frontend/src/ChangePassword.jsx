@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./Sales.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://stoka-of78.onrender.com";
 
 export default function ChangePassword({
   business,

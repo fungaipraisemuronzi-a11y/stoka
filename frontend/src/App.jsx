@@ -3,7 +3,7 @@ import { useState } from "react";
 import Home from "./Home";
 import "./App.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://stoka-of78.onrender.com";
 
 const emptyForm = {
   businessName: "",

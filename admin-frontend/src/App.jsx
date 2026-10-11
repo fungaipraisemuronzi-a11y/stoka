@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import Dashboard from "./Dashboard.jsx";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://stoka-of78.onrender.com";
 
 function getSavedAdmin() {
   const token = sessionStorage.getItem("stoka_admin_token");
