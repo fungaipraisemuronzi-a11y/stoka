@@ -1,0 +1,53 @@
+.ie-workspace { display: grid; gap: 20px; color: #182230; }
+.ie-page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.ie-page-heading h2 { margin: 3px 0 7px; font-size: clamp(1.45rem, 3vw, 2rem); color: #152238; }
+.ie-page-heading p:not(.ie-eyebrow) { margin: 0; color: #687589; }
+.ie-eyebrow { margin: 0 0 5px; font-size: .72rem; font-weight: 800; letter-spacing: .11em; color: #62748a; }
+.ie-period-picker { display: flex; gap: 12px; }
+.ie-period-picker label, .ie-form label { display: grid; gap: 7px; color: #344054; font-size: .85rem; font-weight: 700; }
+.ie-period-picker select, .ie-form input, .ie-form select { width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid #d8e0e9; border-radius: 10px; background: #fff; color: #182230; padding: 11px 12px; font: inherit; outline: none; }
+.ie-period-picker select:focus, .ie-form input:focus, .ie-form select:focus { border-color: #4778c7; box-shadow: 0 0 0 3px #4778c71c; }
+.ie-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.ie-summary-card { display: grid; gap: 8px; min-width: 0; padding: 20px; border: 1px solid #e0e7ef; border-radius: 16px; background: #fff; box-shadow: 0 4px 16px #16243a08; }
+.ie-summary-card span { color: #566579; font-size: .9rem; font-weight: 700; }
+.ie-summary-card strong { color: #172b48; font-size: clamp(1.35rem, 2.7vw, 1.85rem); overflow-wrap: anywhere; }
+.ie-summary-card small { color: #7a8798; font-size: .78rem; line-height: 1.4; }
+.ie-purchases-card { border-top: 4px solid #4978bf; }
+.ie-expenses-card { border-top: 4px solid #d18b37; }
+.ie-income-card { border-top: 4px solid #299875; }
+.ie-info-note { padding: 13px 16px; border: 1px solid #dbe7f8; border-radius: 12px; background: #f3f7fd; color: #43546b; font-size: .9rem; line-height: 1.6; }
+.ie-panel { min-width: 0; padding: 22px; border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; box-shadow: 0 4px 18px #16243a08; }
+.ie-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 20px; }
+.ie-panel-heading h3 { margin: 0; color: #192b43; font-size: 1.15rem; }
+.ie-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ie-notes-field { grid-column: 1 / -1; }
+.ie-form-actions { display: flex; align-items: flex-end; }
+.ie-primary-button, .ie-secondary-button { border: 0; border-radius: 10px; padding: 11px 16px; font: inherit; font-weight: 750; cursor: pointer; }
+.ie-primary-button { background: #1f4f91; color: #fff; }
+.ie-primary-button:hover { background: #173e75; }
+.ie-primary-button:disabled, .ie-secondary-button:disabled { opacity: .6; cursor: wait; }
+.ie-secondary-button { background: #edf2f7; color: #334155; }
+.ie-form-footnote { margin: 15px 0 0; color: #788597; font-size: .8rem; line-height: 1.5; }
+.ie-alert { margin: 0; padding: 12px 14px; border-radius: 10px; font-size: .9rem; }
+.ie-alert-error { color: #9f2525; border: 1px solid #f2caca; background: #fff4f4; }
+.ie-alert-success { color: #176c4b; border: 1px solid #bce8d4; background: #effbf5; }
+.ie-empty-state { display: grid; justify-items: center; gap: 8px; padding: 32px 18px; text-align: center; color: #66758a; }
+.ie-empty-state strong { color: #35445a; }
+.ie-empty-state p { max-width: 520px; margin: 0; font-size: .88rem; line-height: 1.55; }
+.ie-empty-icon { font-size: 1.8rem; color: #8ba0bb; }
+.ie-table-wrap { width: 100%; overflow-x: auto; }
+.ie-table { width: 100%; border-collapse: collapse; font-size: .87rem; }
+.ie-table th, .ie-table td { padding: 13px 12px; text-align: left; border-bottom: 1px solid #edf0f4; vertical-align: middle; }
+.ie-table th { background: #f8fafc; color: #64748b; font-size: .73rem; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.ie-table td { color: #344054; }
+.ie-amount-column { text-align: right !important; white-space: nowrap; font-weight: 750; font-variant-numeric: tabular-nums; }
+.ie-item-cell { min-width: 150px; font-weight: 700; color: #1d2c42 !important; }
+.ie-notes-cell { min-width: 130px; max-width: 230px; color: #788597 !important; }
+.ie-category-tag { display: inline-block; border-radius: 999px; padding: 5px 8px; background: #edf2f7; color: #45566e; font-size: .72rem; font-weight: 750; white-space: nowrap; }
+.ie-category-tag.purchase_cost { background: #eaf2ff; color: #28589a; }
+.ie-category-tag.operating_expense { background: #fff2df; color: #8c5817; }
+.ie-category-tag.income { background: #e5f8ef; color: #16734c; }
+.ie-row-actions { display: flex; gap: 7px; }
+.ie-row-actions button { border: 1px solid #d8e0e9; border-radius: 7px; padding: 6px 9px; background: #fff; color: #315b8f; font: inherit; font-size: .78rem; font-weight: 750; cursor: pointer; }
+.ie-row-actions .ie-delete-button { color: #b42318; border-color: #f0d0ce; }
+@media (max-width: 760px) { .ie-summary-grid { grid-template-columns: 1fr; } .ie-summary-card { padding: 16px; } .ie-panel { padding: 16px; } .ie-form { grid-template-columns: 1fr; } .ie-notes-field { grid-column: auto; } .ie-page-heading { align-items: stretch; } .ie-period-picker { width: 100%; } .ie-period-picker label { flex: 1; } }

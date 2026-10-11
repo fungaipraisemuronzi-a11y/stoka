@@ -1,0 +1,52 @@
+generator client {
+provider = "prisma-client-js"
+}
+
+datasource db {
+provider = "postgresql"
+url      = env("DATABASE_URL")
+}
+
+model Business {
+id           String    @id @db.VarChar(20)
+businessName String
+location     String
+phone        String
+username     String    @unique
+password     String
+isActive     Boolean   @default(true)
+createdAt    DateTime  @default(now())
+
+products     Product[]
+tellers      Teller[]
+}
+
+model Product {
+id               Int      @id @default(autoincrement())
+businessId       String   @db.VarChar(20)
+stockName        String
+unitName         String
+packName         String
+unitsPerPack     Float
+unitSellingPrice Float    @default(0)
+stockPacks       Float    @default(0)
+stockUnits       Float    @default(0)
+createdAt        DateTime @default(now())
+updatedAt        DateTime @updatedAt
+
+business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+@@unique([businessId, stockName])
+}
+
+model Teller {
+id           Int      @id @default(autoincrement())
+businessId   String   @db.VarChar(20)
+tellerNumber Int
+tellerName   String
+createdAt    DateTime @default(now())
+
+business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+@@unique([businessId, tellerNumber])
+}
