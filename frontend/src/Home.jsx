@@ -165,7 +165,7 @@ export default function Home({ business, onLogout }) {
         </div>
       </section>
       <a
-        href="https://github.com/fungaipraisemuronzi-a11y/stoka/releases/download/Stoka/stokazio.zip"
+        href="https://github.com/fungaipraisemuronzi-a11y/stoka/releases/download/Stoka/stokaandroid.zip"
         className="download-button"
         >Download Stoka Android for Teller functions</a>
 

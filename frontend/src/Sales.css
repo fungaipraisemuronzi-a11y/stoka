@@ -379,7 +379,7 @@
 /* Cart */
 
 .cart-panel {
-  position: sticky;
+  position: fixed;
   top: 10px;
 }
 
