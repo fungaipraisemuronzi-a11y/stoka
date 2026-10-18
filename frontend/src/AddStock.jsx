@@ -247,10 +247,7 @@ export default function AddStock({ business }) {
       <section className="stock-panel">
         <h2>{editingId ? "Edit Purchase" : "Add Stock / Record Purchase"}</h2>
 
-        <p>
-          Record stock received from a supplier. Purchase history changes will
-          also adjust the product's current stock.
-        </p>
+       
 
         {error && <div className="stock-message stock-error">{error}</div>}
         {message && (
@@ -267,6 +264,7 @@ export default function AddStock({ business }) {
             placeholder="Search or select a product"
             required
             disabled={Boolean(editingId)}
+            style={{backgroundColor: "white"}}
           />
 
           <datalist id="stoka-product-list">
@@ -300,8 +298,9 @@ export default function AddStock({ business }) {
 
           <div className="stock-form-grid">
             <div>
-              <label htmlFor="purchase-packs">Packs received</label>
+              <label htmlFor="purchase-packs">Packs received</label><br></br>
               <input
+               style={{backgroundColor: "white"}}
                 id="purchase-packs"
                 type="number"
                 min="0"
@@ -316,8 +315,9 @@ export default function AddStock({ business }) {
             </div>
 
             <div>
-              <label htmlFor="purchase-units">Loose units received</label>
+              <label htmlFor="purchase-units">Loose units received</label><br></br>
               <input
+               style={{backgroundColor: "white"}}
                 id="purchase-units"
                 type="number"
                 min="0"
@@ -334,8 +334,9 @@ export default function AddStock({ business }) {
             <div>
               <label htmlFor="purchase-price">
                 Purchase price per pack
-              </label>
+              </label><br></br>
               <input
+               style={{backgroundColor: "white"}}
                 id="purchase-price"
                 type="number"
                 min="0"
@@ -382,8 +383,7 @@ export default function AddStock({ business }) {
       </section>
 
       <section className="stock-panel">
-        <h2>Purchase History</h2>
-        <p>Edit or delete a recorded purchase using the actions on each row.</p>
+        <h2  style={{color: "black"}}>Purchase History</h2>
 
         {loading ? (
           <p>Loading purchase history...</p>

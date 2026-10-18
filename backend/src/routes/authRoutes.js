@@ -33,8 +33,8 @@ router.post("/register", async (req, res) => {
   }
 
   if (
-    businessName.length > 15 ||
-    location.length > 200 ||
+    businessName.length > 25 ||
+    location.length > 25 ||
     phone.length > 12 ||
     username.length > 15 ||
     password.length > 15
@@ -130,7 +130,7 @@ router.post("/register", async (req, res) => {
     return res.status(500).json({
       success: false,
       message:
-        "Registration failed. Check your database tables and connection.",
+        "Registration failed.",
     });
   } finally {
     client.release();
@@ -187,7 +187,7 @@ router.post("/login", async (req, res) => {
     return res.status(500).json({
       success: false,
       message:
-        "Login failed. Check your database connection and tables.",
+        "Login failed.",
     });
   }
 });

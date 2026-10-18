@@ -77,21 +77,7 @@ export default function Teller({ business, onBack, onLogin }) {
           ← Back
         </button>
 
-        <div className="teller-brand">
-          <div className="teller-brand-icon">S</div>
-          <h1>Stoka</h1>
-          <p>Teller access</p>
-        </div>
-
-        <div className="teller-heading">
-          <h2>
-            {mode === "login" ? "Teller Login" : "Create Teller"}
-          </h2>
-          <p>
-            Business: {business.businessName || business.id}
-          </p>
-        </div>
-
+        
         <div className="teller-mode-switch">
           <button
             type="button"
@@ -153,10 +139,6 @@ export default function Teller({ business, onBack, onLogin }) {
             {message}
           </p>
         )}
-
-        <p className="teller-footer">
-          Each teller has a separate workspace.
-        </p>
       </section>
     </main>
   );

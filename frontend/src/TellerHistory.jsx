@@ -320,23 +320,7 @@ export default function TellerHistory({ businessId }) {
 
   return (
     <div style={styles.page}>
-      <div style={styles.heading}>
-        <div>
-          <h2 style={styles.title}>Teller History</h2>
-          <div style={styles.muted}>
-            View sales, returns and stock withdrawals recorded by all tellers.
-          </div>
-        </div>
-
-        <button
-          type="button"
-          style={styles.button}
-          onClick={loadHistory}
-          disabled={loading}
-        >
-          {loading ? "Refreshing..." : "↻ Refresh"}
-        </button>
-      </div>
+      
 
       {error && <div style={styles.error}>{error}</div>}
 
@@ -380,13 +364,7 @@ export default function TellerHistory({ businessId }) {
           />
         </div>
 
-        <button
-          type="button"
-          style={styles.button}
-          onClick={clearFilters}
-        >
-          Clear filters
-        </button>
+       
       </div>
 
       <div style={styles.tabs}>

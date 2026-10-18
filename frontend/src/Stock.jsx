@@ -176,13 +176,9 @@ export default function Stock({ business }) {
     <div className="stock-workspace">
       <div className="stock-page-heading">
         <div>
-          <p className="eyebrow">MANAGER / STOCK</p>
+         
           <h2>{view === "setup" ? "Stock setup" : "Add stock"}</h2>
-          <p className="stock-subtitle">
-            {view === "setup"
-              ? "Create products and manage their selling prices."
-              : "Record stock purchases and update available quantities."}
-          </p>
+         
         </div>
 
         {view === "setup" && (
@@ -208,7 +204,7 @@ export default function Stock({ business }) {
             loadProducts();
           }}
         >
-          📦 Stock Setup
+          Stock Setup
         </button>
 
         <button
@@ -220,7 +216,7 @@ export default function Stock({ business }) {
             setError("");
           }}
         >
-          ➕ Add Stock / Purchases
+          Purchases
         </button>
       </div>
 
@@ -244,11 +240,7 @@ export default function Stock({ business }) {
             <div className="stock-form-heading">
               <div>
                 <h3>{editingId ? "Edit stock item" : "Add stock item"}</h3>
-                <p>
-                  {editingId
-                    ? "Update the product details below."
-                    : "Register a product before recording purchases."}
-                </p>
+             
               </div>
 
               {editingId && (
@@ -362,7 +354,7 @@ export default function Stock({ business }) {
               <div className="stock-empty-state">Loading stock items...</div>
             ) : products.length === 0 ? (
               <div className="stock-empty-state">
-                <span className="stock-empty-icon">📦</span>
+               
                 <h4>No stock items yet</h4>
                 <p>Add your first item using the form above.</p>
               </div>
@@ -390,9 +382,7 @@ export default function Stock({ business }) {
                         <td>{Number(product.unitsPerPack)}</td>
                         <td>{formatMoney(product.unitSellingPrice)}</td>
                         <td>
-                          {Number(product.stockPacks || 0)} {product.packName}
-                          {" + "}
-                          {Number(product.stockUnits || 0)} {product.unitName}
+                          Go to other details in reports
                         </td>
                         <td>
                           <div className="stock-row-actions">

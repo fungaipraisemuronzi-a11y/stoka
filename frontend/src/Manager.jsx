@@ -114,7 +114,7 @@ export default function Manager({ business, onBack }) {
       setHasPassword(null);
       setError(
         err.message ||
-          "Could not connect to the server. Check that your backend is running."
+          "Could not connect to the server."
       );
     } finally {
       setCheckingPassword(false);
@@ -341,8 +341,7 @@ export default function Manager({ business, onBack }) {
     return (
       <main className="app-container auth-background">
         <section className="card manager-status-card">
-          <div className="manager-logo">S</div>
-          <h2>Stoka Manager</h2>
+          
           <p>Checking manager password...</p>
         </section>
       </main>
@@ -361,8 +360,7 @@ export default function Manager({ business, onBack }) {
             ← Back
           </button>
 
-          <div className="manager-logo">S</div>
-          <h2>Unable to connect</h2>
+          
 
           <p className="error-message">
             {error || "Could not check manager password status."}
@@ -389,36 +387,28 @@ export default function Manager({ business, onBack }) {
             className="back-button"
             onClick={onBack}
           >
-            ← Back to Home
+           Home
           </button>
 
-          <div className="manager-logo">S</div>
-
-          <p className="manager-eyebrow">SECURE WORKSPACE</p>
-          <h1 className="manager-auth-title">Stoka Manager</h1>
-          <p className="manager-business-name">{businessName}</p>
+          
 
           <div className="manager-auth-divider" />
 
           <h2 className="manager-auth-subtitle">
             {hasPassword
-              ? "Welcome back"
+              ? "Welcome back!"
               : "Set up your manager access"}
           </h2>
 
-          <p className="manager-auth-description">
-            {hasPassword
-              ? "Enter your manager password to continue."
-              : "Create a password to protect your management workspace."}
-          </p>
+          
 
           <form onSubmit={handleManagerAccess}>
             <div className="form-group">
               <label htmlFor="manager-password">
                 {hasPassword
-                  ? "Manager password"
+                  ? "Enter password"
                   : "Create manager password"}
-              </label>
+              </label><br></br>
 
               <input
                 id="manager-password"
@@ -464,14 +454,10 @@ export default function Manager({ business, onBack }) {
               {loading
                 ? "Please wait..."
                 : hasPassword
-                  ? "Unlock Manager →"
-                  : "Create Password →"}
+                  ? "Submit"
+                  : "Create Password "}
             </button>
           </form>
-
-          <p className="manager-security-note">
-            Your management workspace is protected by your manager password.
-          </p>
         </section>
       </main>
     );
@@ -482,13 +468,7 @@ export default function Manager({ business, onBack }) {
   return (
     <main className="manager-dashboard">
       <header className="manager-header">
-        <div className="manager-header-brand">
-          <div className="manager-logo manager-logo-small">S</div>
-          <div>
-            <strong>Stoka</strong>
-            <span>MANAGER WORKSPACE</span>
-          </div>
-        </div>
+       
 
         <div className="manager-header-actions">
           <button
@@ -496,7 +476,7 @@ export default function Manager({ business, onBack }) {
             className="manager-header-button"
             onClick={onBack}
           >
-            ← Home
+            Home
           </button>
 
           <button
@@ -505,7 +485,7 @@ export default function Manager({ business, onBack }) {
             onClick={handleSettingsClick}
             aria-pressed={showSettings}
           >
-            ⚙ {showSettings ? "Workspace" : "Settings"}
+            {showSettings ? "Workspace" : "More"}
           </button>
 
           <button
@@ -513,33 +493,12 @@ export default function Manager({ business, onBack }) {
             className="manager-lock-button"
             onClick={handleLockManager}
           >
-            <span aria-hidden="true">🔒</span> Lock
+            <span aria-hidden="true"></span> Lock
           </button>
         </div>
       </header>
 
-      <section className="manager-hero">
-        <div className="manager-hero-content">
-          <p className="manager-eyebrow manager-eyebrow-light">
-            {showSettings
-              ? "MANAGER PREFERENCES"
-              : "MANAGEMENT OVERVIEW"}
-          </p>
-
-          <h1>{showSettings ? "Settings" : "Manager Dashboard"}</h1>
-          <p className="manager-hero-business">{businessName}</p>
-
-          <p className="manager-hero-description">
-            {showSettings
-              ? "Change your business password, contact Stoka support, send feedback and subscribe."
-              : "Manage your stock, finances, tellers and business reports."}
-          </p>
-        </div>
-
-        <div className="manager-hero-mark" aria-hidden="true">
-          S
-        </div>
-      </section>
+      
 
       {message && (
         <p className="success-message manager-feedback" role="status">
@@ -555,28 +514,15 @@ export default function Manager({ business, onBack }) {
 
       {showSettings ? (
         <section className="manager-selected-section">
-          <div className="manager-selected-heading">
-            <div className="manager-selected-icon" aria-hidden="true">
-              ⚙️
-            </div>
-            <div>
-              <p className="manager-eyebrow">SETTINGS</p>
-              <h2>Business settings</h2>
-              <p>Manage your business account and Stoka support.</p>
-            </div>
-          </div>
+         
 
           <div className="manager-content manager-settings-grid">
             <section className="card manager-password-card">
               <div className="manager-panel-heading">
-                <div className="manager-panel-icon">🔐</div>
+               
                 <div>
-                  <h3>Change business password</h3>
-                  <p>
-                    Change the password used to log in to your Stoka business
-                    account. This is not your separate manager workspace
-                    password.
-                  </p>
+                  <h3>Change business login password</h3>
+                
                 </div>
               </div>
 
@@ -647,21 +593,16 @@ export default function Manager({ business, onBack }) {
 
             <section className="card manager-password-card">
               <div className="manager-panel-heading">
-                <div className="manager-panel-icon">💬</div>
+                
                 <div>
-                  <h3>Submit feedback</h3>
-                  <p>
-                    Send a suggestion, report a problem or tell us how to
-                    improve Stoka.
-                  </p>
+                  <h3>Send feedback</h3>
+                 
                 </div>
               </div>
 
               <form onSubmit={handleSubmitFeedback}>
                 <div className="form-group">
-                  <label htmlFor="manager-feedback-message">
-                    Your feedback
-                  </label>
+                 
                   <textarea
                     id="manager-feedback-message"
                     value={feedbackText}
@@ -669,16 +610,17 @@ export default function Manager({ business, onBack }) {
                       setFeedbackText(event.target.value)
                     }
                     placeholder="Write your feedback here..."
-                    rows={5}
+                    rows={8}
                     maxLength={3000}
                     required
                     style={{
                       width: "100%",
                       boxSizing: "border-box",
                       resize: "vertical",
+                      backgroundColor: "white"
                     }}
                   />
-                  <small>{feedbackText.length}/3000 characters</small>
+                 
                 </div>
 
                 <button
@@ -695,20 +637,15 @@ export default function Manager({ business, onBack }) {
 
             <section className="card manager-password-card">
               <div className="manager-panel-heading">
-                <div className="manager-panel-icon">📱</div>
+                
                 <div>
                   <h3>Contact Stoka</h3>
-                  <p>Need assistance? Contact us on WhatsApp.</p>
+                 
                 </div>
               </div>
-
-              <p>
-                <strong>WhatsApp:</strong> 0777847204
-              </p>
-
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-                  "Hello Stoka support, I need assistance."
+                  "Hello, I need assistance with Stoka."
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -720,31 +657,24 @@ export default function Manager({ business, onBack }) {
                   boxSizing: "border-box",
                 }}
               >
-                Open WhatsApp
+                WhatsApp Us
               </a>
             </section>
 
             <section className="card manager-password-card">
               <div className="manager-panel-heading">
-                <div className="manager-panel-icon">⭐</div>
+               
                 <div>
                   <h3>Subscribe to Stoka</h3>
-                  <p>
-                    Start the subscription process using your phone.
-                  </p>
+                 
                 </div>
               </div>
 
               <p>
-                Subscription activation is handled manually. After following
-                the phone prompts, please contact Stoka if you need help
-                confirming your subscription.
+                Subscription activation is currently handled manually. After following
+                the phone prompts, please contact Stoka to confirm your subscription or if you need help
+                with the process.
               </p>
-
-              <p>
-                <strong>USSD code:</strong> {SUBSCRIBE_CODE}
-              </p>
-
               <a
                 href={`tel:${SUBSCRIBE_CODE}`}
                 className="primary-button"
@@ -755,7 +685,7 @@ export default function Manager({ business, onBack }) {
                   boxSizing: "border-box",
                 }}
               >
-                ☎ Subscribe
+                Subscribe
               </a>
 
               <p className="manager-security-note">
@@ -777,21 +707,7 @@ export default function Manager({ business, onBack }) {
         </section>
       ) : (
         <>
-          <section className="manager-dashboard-tools">
-            <div className="manager-section-intro">
-              <h2>Workspace</h2>
-              <p>Select a section to manage your business.</p>
-            </div>
-
-            <button
-              type="button"
-              className="manager-password-button"
-              onClick={handleSettingsClick}
-            >
-              <span aria-hidden="true">⚙</span>
-              Settings
-            </button>
-          </section>
+         
 
           <nav className="manager-tabs" aria-label="Manager navigation">
             {tabs.map((tab) => (
@@ -819,14 +735,8 @@ export default function Manager({ business, onBack }) {
 
           <section className="manager-selected-section">
             <div className="manager-selected-heading">
-              <div className="manager-selected-icon" aria-hidden="true">
-                {active.icon}
-              </div>
-              <div>
-                <p className="manager-eyebrow">CURRENT SECTION</p>
-                <h2>{active.label}</h2>
-                <p>{active.description}</p>
-              </div>
+             
+             
             </div>
 
             <div className="manager-content">
@@ -843,10 +753,7 @@ export default function Manager({ business, onBack }) {
         </>
       )}
 
-      <footer className="manager-footer">
-        <span>Stoka Management</span>
-        <span>{businessName}</span>
-      </footer>
+     
     </main>
   );
 }

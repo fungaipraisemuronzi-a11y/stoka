@@ -91,7 +91,7 @@ export default function App() {
       setMessage("");
     } catch (error) {
       setMessage(
-        `${error.message} Check that the backend and database are running.`
+        `${error.message}`
       );
     } finally {
       setLoading(false);
@@ -119,13 +119,11 @@ export default function App() {
     <main className="app-container auth-background">
       <section className="auth-card">
         <div className="brand">
-          <div className="brand-icon">S</div>
-          <h1>Stoka</h1>
-          <p>Smart stock management</p>
+          <h1 color="black">Stoka</h1>
         </div>
 
         <div className="auth-heading">
-          <h2>
+          <h2 color="black">
             {page === "login"
               ? "Welcome back"
               : "Create your account"}

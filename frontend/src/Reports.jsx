@@ -273,7 +273,7 @@ export default function Reports({
     } catch (err) {
       setError(
         err.message ||
-          "Could not load reports. Check that the backend is running."
+          "Could not load reports. contact Stoka team if need assistance"
       );
     } finally {
       setLoading(false);
@@ -785,11 +785,7 @@ export default function Reports({
 
   return (
     <div style={styles.page}>
-      <h2 style={styles.heading}>Reports</h2>
-
-      <p style={styles.muted}>
-        View business performance, product demand and remaining stock.
-      </p>
+    
 
       <div style={styles.buttons}>
         {[
@@ -828,7 +824,7 @@ export default function Reports({
 
       {activeReport === "profit" && (
         <section style={styles.panel}>
-          <h3 style={{ marginTop: 0 }}>Profit and Loss</h3>
+       
 
           <label style={{ display: "block", marginBottom: 8 }}>
             Select month
@@ -898,19 +894,12 @@ export default function Reports({
             months use the full recorded amounts. This assumes both income
             and expense entries represent monthly amounts.
           </p>
-
-          <p style={styles.muted}>
-            Stock values are reconstructed from recorded movements using
-            average purchase cost, starting from zero opening stock.
-            Missing or unrecorded movements can make these estimates
-            incomplete.
-          </p>
         </section>
       )}
 
       {activeReport === "demand" && (
         <section style={styles.panel}>
-          <h3 style={{ marginTop: 0 }}>Goods on Demand</h3>
+         
 
           <label style={{ display: "block", marginBottom: 8 }}>
             Select month
@@ -977,9 +966,7 @@ export default function Reports({
 
       {activeReport === "stock" && (
         <section style={styles.panel}>
-          <h3 style={{ marginTop: 0 }}>
-            Other Details — Remaining Stock
-          </h3>
+          
 
           <p style={styles.muted}>
             Current quantities and estimated stock value using recorded

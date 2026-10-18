@@ -70,7 +70,7 @@ router.get("/", async (req, res) => {
 
     if (!businessId) {
       return res.status(400).json({
-        message: "A valid active businessId is required.",
+        message: "Server error",
       });
     }
 
@@ -109,7 +109,7 @@ router.post("/", async (req, res) => {
 
     if (!businessId) {
       return res.status(400).json({
-        message: "A valid active businessId is required.",
+        message: "Server error",
       });
     }
 

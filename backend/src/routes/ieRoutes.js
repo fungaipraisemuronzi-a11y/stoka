@@ -111,7 +111,7 @@ async function verifyBusiness(businessId) {
 
   if (!result.rows[0].isActive) {
     return {
-      error: "This business account is suspended.",
+      error: "This business account is currently not active, please contact Stoka team if need assistance.",
       status: 403,
     };
   }

@@ -16,7 +16,7 @@ const { Pool } = pg;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
-    "DATABASE_URL is missing. Check that backend/.env exists and contains DATABASE_URL."
+    "Server error"
   );
 }
 

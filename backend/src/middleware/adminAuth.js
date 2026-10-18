@@ -46,7 +46,7 @@ export default async function adminAuth(req, res, next) {
 
     if (result.rowCount === 0) {
       return res.status(401).json({
-        message: "Admin account is inactive or no longer exists.",
+        message: "Unexpected error, please contact Stoka team",
       });
     }
 

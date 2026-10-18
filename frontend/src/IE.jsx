@@ -88,7 +88,7 @@ export default function IE({ business }) {
       setEntries(Array.isArray(data.entries) ? data.entries : []);
       setSummary(data.summary || null);
     } catch (loadError) {
-      setError(`${loadError.message} Check that the backend is running and the I&E table has been created.`);
+      setError(`${loadError.message}`);
     } finally {
       setLoading(false);
     }
@@ -193,11 +193,7 @@ export default function IE({ business }) {
   return (
     <div className="ie-workspace">
       <div className="ie-page-heading">
-        <div>
-          <p className="ie-eyebrow">BUSINESS FINANCES</p>
-          <h2>Income &amp; Expenditure</h2>
-          <p>Record costs and income, and review totals month by month.</p>
-        </div>
+       
         <div className="ie-period-picker">
           <label>
             Month
@@ -230,7 +226,7 @@ export default function IE({ business }) {
         <article className="ie-summary-card ie-expenses-card">
           <span>Operating Expenses</span>
           <strong>{money(operatingExpenses)}</strong>
-          <small>Manual operating expense entries</small>
+          <small>Monthly expense entries</small>
         </article>
         <article className="ie-summary-card ie-income-card">
           <span>Other Income</span>
@@ -239,9 +235,7 @@ export default function IE({ business }) {
         </article>
       </div>
 
-      <div className="ie-info-note">
-        <strong>{monthName} {year}:</strong> stock purchases are calculated from Purchase History. Sales Income and Discount Allowed will appear after the sales records and discount fields are connected.
-      </div>
+     
 
       <section className="ie-panel">
         <div className="ie-panel-heading">

@@ -1517,3 +1517,9 @@ input:focus-visible {
     transition: none;
   }
 }
+
+.download-button{
+  display: inline-block;
+  padding: 14px 24px;
+  background: hwb(158 97% 0%);
+}

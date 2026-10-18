@@ -38,9 +38,9 @@ export default function ChangePassword({
       return;
     }
 
-    if (newPassword.length < 4) {
+    if (newPassword.length < 6) {
       setMessage(
-        "The new password must contain at least 4 characters."
+        "The new password must contain at least 6 characters."
       );
       setMessageType("error");
       return;

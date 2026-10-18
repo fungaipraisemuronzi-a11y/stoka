@@ -57,9 +57,9 @@ router.post("/create", async (req, res) => {
       });
     }
 
-    if (password.length < 4) {
+    if (password.length < 6) {
       return res.status(400).json({
-        message: "Password must contain at least 4 characters.",
+        message: "Password must contain at least 6 characters.",
       });
     }
 
@@ -153,10 +153,10 @@ router.patch("/change", async (req, res) => {
       });
     }
 
-    if (newPassword.length < 4) {
+    if (newPassword.length < 6) {
       return res.status(400).json({
         message:
-          "New password must contain at least 4 characters.",
+          "New password must contain at least 6 characters.",
       });
     }
 

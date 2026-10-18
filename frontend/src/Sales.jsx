@@ -906,22 +906,12 @@ export default function Sales({
           className="sales-back-button"
           onClick={onBack}
         >
-          ← Log out teller
+          ← Logout
         </button>
 
-        <div className="sales-brand">
-          <span className="sales-brand-icon">S</span>
-          <div>
-            <strong>Stoka</strong>
-            <span>POINT OF SALE</span>
-          </div>
-        </div>
+        
 
         <div className="sales-header-actions">
-          <span className="sales-teller-label">
-            Teller: {tellerName || "Unknown"}
-          </span>
-
           <button
             type="button"
             className="sales-password-toggle"
@@ -941,15 +931,7 @@ export default function Sales({
         </div>
       </header>
 
-      <section className="sales-welcome">
-        <div>
-          <p className="sales-eyebrow">CASH REGISTER</p>
-          <h1>{business.businessName}</h1>
-          <p>Manage sales, discounts, returns and stock withdrawals.</p>
-        </div>
-
-        <div className="cash-badge">Cash only</div>
-      </section>
+     
 
       <nav className="sales-tabs">
         <button
@@ -1007,12 +989,7 @@ export default function Sales({
       {activeTab === "sale" && (
         <div className="sales-layout">
           <section className="products-panel">
-            <div className="sales-section-heading">
-              <div>
-                <p className="sales-eyebrow">PRODUCTS</p>
-                <h2>New Sale</h2>
-              </div>
-            </div>
+            
 
             <input
               className="sales-search"
@@ -1174,10 +1151,7 @@ export default function Sales({
                 <strong>{money(cartTotals.total)}</strong>
               </div>
 
-              <div className="payment-method">
-                <span>Payment</span>
-                <strong>Cash</strong>
-              </div>
+              
 
               <button
                 type="button"
@@ -1300,7 +1274,7 @@ export default function Sales({
                 </select>
               </label>
 
-              {selectedReturnSale && (
+              {selecedReturnSale && (
                 <>
                   <h3 className="form-section-title">Items to return</h3>
 
