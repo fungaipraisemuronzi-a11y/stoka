@@ -380,7 +380,19 @@
 
 .cart-panel {
   position: fixed;
-  top: 10px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+  max-height: 45vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-top: 2px solid #d1d5db;
+  border-radius: 14px 14px 0 0;
+  padding: 12px 16px;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.12);
 }
 
 .cart-empty {
