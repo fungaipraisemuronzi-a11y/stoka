@@ -174,51 +174,9 @@ export default function Stock({ business }) {
 
   return (
     <div className="stock-workspace">
-      <div className="stock-page-heading">
-        <div>
-         
-          <h2>{view === "setup" ? "Stock setup" : "Add stock"}</h2>
-         
-        </div>
+      
 
-        {view === "setup" && (
-          <button
-            type="button"
-            className="stock-refresh-button"
-            onClick={loadProducts}
-            disabled={loading}
-          >
-            {loading ? "Loading..." : "↻ Refresh"}
-          </button>
-        )}
-      </div>
-
-      <div className="stock-view-tabs">
-        <button
-          type="button"
-          className={view === "setup" ? "active" : ""}
-          onClick={() => {
-            setView("setup");
-            setMessage("");
-            setError("");
-            loadProducts();
-          }}
-        >
-          Stock Setup
-        </button>
-
-        <button
-          type="button"
-          className={view === "purchases" ? "active" : ""}
-          onClick={() => {
-            setView("purchases");
-            setMessage("");
-            setError("");
-          }}
-        >
-          Purchases
-        </button>
-      </div>
+      
 
       {view === "purchases" ? (
         <AddStock business={business} />

@@ -1,0 +1,22 @@
+ .good{
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  width: 100%;
+  min-height: 90px;
+  margin: 0;
+  padding: 14px 40px;
+
+  background: #ffffff;
+  border-bottom: 1px solid #e0e9e4;
+  box-shadow: 0 2px 10px rgba(18, 58, 42, 0.04);
+  box-sizing: border-box;
+ }

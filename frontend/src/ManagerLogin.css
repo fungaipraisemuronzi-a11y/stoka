@@ -1,0 +1,223 @@
+
+/* Manager login and authentication page */
+
+.manager-auth-card {
+  width: min(100%, 460px);
+  padding: 30px;
+  border: 1px solid #e0eae3;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 18px 55px rgba(15, 64, 42, 0.09);
+}
+
+.manager-auth-card > .back-button {
+  margin-bottom: 24px;
+}
+
+.manager-auth-card .manager-logo {
+  margin-top: 5px;
+}
+
+.manager-auth-card .manager-eyebrow {
+  text-align: center;
+}
+
+.manager-auth-title {
+  margin: 0;
+  color: #163e2d;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 850;
+  letter-spacing: -0.7px;
+}
+
+.manager-business-name {
+  margin: 8px 0 0;
+  color: #73847a;
+  text-align: center;
+  font-size: 14px;
+}
+
+.manager-auth-divider {
+  height: 1px;
+  margin: 24px 0;
+  background: #e7eee9;
+}
+
+.manager-auth-subtitle {
+  margin: 0;
+  color: #1b3f30;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.manager-auth-description {
+  margin: 7px 0 20px;
+  color: #718078;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.manager-unlock-button {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.manager-security-note {
+  margin: 20px 0 0;
+  color: #839087;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.manager-status-card {
+  width: min(100%, 420px);
+  padding: 30px;
+  border: 1px solid var(--manager-border, #e2ebe5);
+  border-radius: 18px;
+  background: #ffffff;
+  text-align: center;
+}
+
+/* Alternative manager login layout used by the Stoka manager page */
+
+.stoka-manager-page .manager-auth-card,
+.stoka-manager-page .manager-status-card {
+  width: min(100% - 32px, 460px);
+  margin: 55px auto;
+  padding: 32px;
+  border: 1px solid #e0e9e4;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 12px 36px rgba(20, 64, 45, 0.07);
+  box-sizing: border-box;
+}
+
+.manager-auth-heading {
+  margin-bottom: 27px;
+  text-align: center;
+}
+
+.manager-auth-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 16px;
+  border-radius: 18px;
+  background: #eaf6ef;
+  font-size: 27px;
+}
+
+.manager-auth-heading h2 {
+  margin: 10px 0;
+  color: #173a2d;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.manager-auth-heading > p:last-child {
+  margin: 0;
+  color: #728178;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Login form */
+
+.stoka-manager-page .manager-auth-card .form-group {
+  margin-bottom: 20px;
+}
+
+.stoka-manager-page .manager-auth-card label {
+  display: block;
+  margin-bottom: 8px;
+  color: #294a3c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.stoka-manager-page .manager-auth-card input {
+  width: 100%;
+  min-height: 45px;
+  padding: 11px 13px;
+  border: 1px solid #dce6df;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #18352d;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.stoka-manager-page .manager-auth-card input:focus {
+  outline: 2px solid #b6e3cb;
+  border-color: #078456;
+}
+
+.stoka-manager-page .manager-unlock-button {
+  width: 100%;
+  min-height: 47px;
+  margin-top: 5px;
+}
+
+.stoka-manager-page .manager-home-button {
+  display: block;
+  margin: 18px auto 0;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: #087b52;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.stoka-manager-page .manager-home-button:hover {
+  text-decoration: underline;
+}
+
+.stoka-manager-page .manager-security-note {
+  color: #78877e;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.stoka-manager-header{
+    position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  width: 100%;
+  min-height: 90px;
+  margin: 0;
+  padding: 14px 40px;
+
+  background: #ffffff;
+  border-bottom: 1px solid #e0e9e4;
+  box-shadow: 0 2px 10px rgba(18, 58, 42, 0.04);
+  box-sizing: border-box;
+}
+
+/* Responsive manager login */
+
+@media (max-width: 600px) {
+  .manager-auth-card {
+    padding: 22px 18px;
+    border-radius: 18px;
+  }
+
+  .stoka-manager-page .manager-auth-card,
+  .stoka-manager-page .manager-status-card {
+    margin-top: 30px;
+    padding: 24px;
+  }
+}

@@ -3,10 +3,12 @@ import Manager from "./Manager";
 import Sales from "./Sales";
 import Teller from "./Teller";
 import ChangePassword from "./ChangePassword";
-import "./App.css";
+import "./Home.css";
+
 
 export default function Home({ business, onLogout }) {
   const [selectedArea, setSelectedArea] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [activeTeller, setActiveTeller] = useState(() => {
     try {
@@ -23,6 +25,7 @@ export default function Home({ business, onLogout }) {
   });
 
   function openTellerLogin() {
+    setMenuOpen(false);
     setActiveTeller(null);
     localStorage.removeItem("stoka_teller");
     setSelectedArea("TellerLogin");
@@ -39,12 +42,22 @@ export default function Home({ business, onLogout }) {
     setSelectedArea("TellerLogin");
   }
 
+  function openManager() {
+    setMenuOpen(false);
+    setSelectedArea("Manager");
+  }
+
   function openChangePassword() {
     setSelectedArea("ChangePassword");
   }
 
   function returnToSales() {
     setSelectedArea("TellerWorkspace");
+  }
+
+  function handleLogout() {
+    setMenuOpen(false);
+    onLogout();
   }
 
   if (selectedArea === "Manager") {
@@ -117,9 +130,7 @@ export default function Home({ business, onLogout }) {
         <section className="placeholder-card">
           <div className="placeholder-icon">🛒</div>
 
-          <p className="eyebrow">
-            STOKA WORKSPACE
-          </p>
+          <p className="eyebrow">STOKA WORKSPACE</p>
 
           <h1>{selectedArea}</h1>
 
@@ -141,48 +152,88 @@ export default function Home({ business, onLogout }) {
   return (
     <main className="dashboard">
       <header className="dashboard-header">
-        <div className="small-brand">
-          
+        <section className="welcome-banner">
+          <div className="small-brand">
             <strong>Stoka</strong>
-        
-        </div>
+          </div>
 
-        <button
-          className="logout-button"
-          onClick={onLogout}
-        >
-          <span>↪</span> Logout
-        </button>
+          <div className="welcome-text">
+            <h1>{business.businessName}</h1>
+           
+          </div>
+
+          <div className="overflow-container">
+            <button
+              type="button"
+              className="overflow-button"
+              aria-label="Open menu"
+              aria-expanded={menuOpen}
+              aria-haspopup="true"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              ⋮
+            </button>
+
+            {menuOpen && (
+              <>
+                <button
+                  type="button"
+                  className="menu-backdrop"
+                  aria-label="Close menu"
+                  onClick={() => setMenuOpen(false)}
+                />
+
+                <div className="overflow-menu">
+                  <button
+                    type="button"
+                    onClick={openTellerLogin}
+                  >
+                   
+                    Teller
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={openManager}
+                  >
+                   
+                    Manager
+                  </button>
+
+                  <div className="menu-divider" />
+
+                  <button
+                    type="button"
+                    className="menu-logout"
+                    onClick={handleLogout}
+                  >
+                   
+                    Logout
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
       </header>
 
-      <section className="welcome-banner">
-        <div>
-          <h1>{business.businessName}</h1>
-
-          <p className="welcome-description">
-            Welcome back!
-          </p>
-        </div>
-      </section>
       <a
         href="https://github.com/fungaipraisemuronzi-a11y/stoka/releases/download/Stoka/stokaandroid.zip"
         className="download-button"
-        >Download Stoka Android for Teller functions</a>
+      >
+        Download Stoka Android for Teller functions
+      </a>
 
       <section className="workspace-section">
-        
-
         <div className="workspace-grid">
           <button
             className="workspace-card teller-card"
             onClick={openTellerLogin}
           >
-            <div className="workspace-card-top">
-            </div>
+            <div className="workspace-card-top" />
 
             <div className="workspace-card-text">
               <h3>Teller</h3>
-
               <p>
                 Log in to teller account or create
                 a new teller.
@@ -192,21 +243,18 @@ export default function Home({ business, onLogout }) {
 
           <button
             className="workspace-card manager-card"
-            onClick={() => setSelectedArea("Manager")}
+            onClick={openManager}
           >
-            <div className="workspace-card-top">
-            </div>
+            <div className="workspace-card-top" />
 
             <div className="workspace-card-text">
               <h3>Manager</h3>
-
-              <p>
-                Stock, I&E, tellers and reports
-              </p>
+              <p>Stock, I&E, tellers and reports</p>
             </div>
           </button>
         </div>
       </section>
+
       <p>Business Id: {business.id}</p>
     </main>
   );
