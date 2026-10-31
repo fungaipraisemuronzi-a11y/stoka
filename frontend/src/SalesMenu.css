@@ -1,0 +1,283 @@
+/* =========================================
+   STOKA TELLER HEADER
+========================================= */
+
+.stoka-teller-header {
+  width: 100%;
+  min-height: 76px;
+  padding: 12px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e8eeeb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  position: relative;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+/* BRAND */
+
+.stoka-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.stoka-brand-mark {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 13px;
+  background: #087f5b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(8, 127, 91, 0.16);
+}
+
+.stoka-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.stoka-brand-copy strong {
+  color: #123d30;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.stoka-brand-copy span {
+  color: #82918a;
+  font-size: 12px;
+  font-weight: 500;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* HEADER RIGHT SIDE */
+
+.stoka-header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.stoka-teller-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.stoka-teller-identity strong {
+  color: #183d30;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.stoka-teller-identity span {
+  color: #87948e;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* =========================================
+   OVERFLOW MENU
+========================================= */
+
+.stoka-overflow-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.stoka-overflow-button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #e3ebe6;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #315d4b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stoka-overflow-button:hover {
+  background: #f0f8f4;
+  border-color: #b9d9ca;
+  color: #087f5b;
+}
+
+.stoka-overflow-button:active {
+  transform: scale(0.96);
+}
+
+/* BACKDROP */
+
+.stoka-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  z-index: 200;
+  cursor: default;
+}
+
+/* MENU PANEL */
+
+.stoka-overflow-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 220px;
+  padding: 8px;
+  background: #ffffff;
+  border: 1px solid #e8efeb;
+  border-radius: 14px;
+  box-shadow: 0 12px 35px rgba(21, 55, 40, 0.14);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  animation: stokaMenuOpen 0.16s ease-out;
+  box-sizing: border-box;
+}
+
+@keyframes stokaMenuOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stoka-overflow-menu button {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #385448;
+  text-align: left;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.stoka-overflow-menu button:hover {
+  background: #f0f8f4;
+  color: #087f5b;
+}
+
+.stoka-overflow-menu button.active {
+  background: #eaf6ef;
+  color: #087f5b;
+  font-weight: 700;
+}
+
+.stoka-menu-divider {
+  height: 1px;
+  margin: 5px 4px;
+  background: #e9efeb;
+}
+
+.stoka-overflow-menu button.stoka-menu-home {
+  color: #b54747;
+}
+
+.stoka-overflow-menu button.stoka-menu-home:hover {
+  background: #fff1f1;
+  color: #a83232;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 600px) {
+  .stoka-teller-header {
+    min-height: 68px;
+    padding: 10px 13px;
+    gap: 10px;
+  }
+
+  .stoka-brand-mark {
+    width: 39px;
+    height: 39px;
+    min-width: 39px;
+    border-radius: 11px;
+    font-size: 20px;
+  }
+
+  .stoka-brand-copy strong {
+    font-size: 17px;
+  }
+
+  .stoka-brand-copy span {
+    max-width: 125px;
+    font-size: 10px;
+  }
+
+  .stoka-header-right {
+    gap: 10px;
+  }
+
+  .stoka-teller-identity strong {
+    font-size: 11px;
+  }
+
+  .stoka-teller-identity span {
+    font-size: 10px;
+  }
+
+  .stoka-overflow-button {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .stoka-overflow-menu {
+    width: 205px;
+  }
+}
+
+@media (max-width: 380px) {
+  .stoka-teller-identity span {
+    display: none;
+  }
+
+  .stoka-header-right {
+    gap: 7px;
+  }
+
+  .stoka-brand-copy span {
+    max-width: 100px;
+  }
+}

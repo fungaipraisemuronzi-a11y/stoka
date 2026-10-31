@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "./Sales.css";
+import "./SalesMenu.css";
+import NewSale from "./NewSale";
+import Returns from "./Returns";
+import SalesHistory from "./SalesHistory";
+import Withdrawal from "./Withdrawal";
 
 const API_URL = "https://stoka-of78.onrender.com";
 
@@ -68,6 +73,7 @@ export default function Sales({
   const [saving, setSaving] = useState(false);
 
   const [activeTab, setActiveTab] = useState("sale");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Returns
   const [selectedSaleId, setSelectedSaleId] = useState("");
@@ -88,6 +94,8 @@ export default function Sales({
     setMessage(text);
     setMessageType(type);
   }, []);
+
+  // ---------------- LOAD DATA ----------------
 
   const loadProducts = useCallback(async () => {
     if (!businessId) return;
@@ -201,8 +209,13 @@ export default function Sales({
     loadWithdrawals,
   ]);
 
+  // ---------------- SEARCH AND SELECT ----------------
+
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
+
+    // Do not display products until the user searches.
+    if (!term) return [];
 
     return products.filter((product) =>
       String(product.stockName || "").toLowerCase().includes(term)
@@ -238,6 +251,33 @@ export default function Sales({
     [returnableSales, selectedSaleId]
   );
 
+  // ---------------- WITHDRAWAL QUANTITY CONVERSION ----------------
+
+  const withdrawalUnitsPerPack = Math.max(
+    1,
+    number(selectedWithdrawalProduct?.unitsPerPack)
+  );
+
+  const withdrawalTotalUnits = Math.max(0, number(withdrawalQuantity));
+
+  const withdrawalPacks = Math.floor(
+    withdrawalTotalUnits / withdrawalUnitsPerPack
+  );
+
+  const withdrawalUnits =
+    withdrawalTotalUnits % withdrawalUnitsPerPack;
+
+  function chooseWithdrawalProduct(product) {
+    setWithdrawalProductId(product ? String(product.id) : "");
+    setWithdrawalSearch(product?.stockName || "");
+
+    if (product) {
+      setWithdrawalQuantity("");
+    }
+  }
+
+  // ---------------- CART TOTALS ----------------
+
   const cartTotals = useMemo(() => {
     const subtotal = cart.reduce(
       (sum, item) => sum + item.quantity * item.unitSellingPrice,
@@ -264,6 +304,8 @@ export default function Sales({
       ),
     [cart]
   );
+
+  // ---------------- RETURN REFUND CALCULATION ----------------
 
   const estimatedRefund = useMemo(() => {
     if (!selectedReturnSale) return 0;
@@ -307,7 +349,9 @@ export default function Sales({
     );
   }, [selectedReturnSale, returnQuantities, editingReturnId, returns]);
 
-  // ---------------- SALES ----------------
+  // ============================================================
+  // SALES
+  // ============================================================
 
   function addToCart(product) {
     setMessage("");
@@ -467,9 +511,11 @@ export default function Sales({
       });
 
       setCart([]);
+
       notify(`Sale completed! Receipt: ${data.sale.receiptNumber}`);
 
       await Promise.all([loadProducts(), loadSales()]);
+
       setActiveTab("history");
     } catch (error) {
       notify(error.message, "error");
@@ -478,7 +524,9 @@ export default function Sales({
     }
   }
 
-  // ---------------- RETURNS ----------------
+  // ============================================================
+  // RETURNS
+  // ============================================================
 
   function selectSaleForReturn(saleId) {
     setSelectedSaleId(saleId);
@@ -492,6 +540,7 @@ export default function Sales({
         ...current,
         [itemId]: "",
       }));
+
       return;
     }
 
@@ -515,6 +564,7 @@ export default function Sales({
         "The original sale could not be loaded. Refresh the return history and try again.",
         "error"
       );
+
       return;
     }
 
@@ -530,6 +580,7 @@ export default function Sales({
 
     setReturnQuantities(quantities);
     setMessage("");
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -684,7 +735,9 @@ export default function Sales({
     }
   }
 
-  // ---------------- WITHDRAWALS ----------------
+  // ============================================================
+  // WITHDRAWALS
+  // ============================================================
 
   function startEditWithdrawal(item) {
     const product = products.find(
@@ -699,9 +752,11 @@ export default function Sales({
 
     setEditingWithdrawalId(item.id);
     setWithdrawalProductId(String(item.productId));
+
     setWithdrawalSearch(
       item.productName || item.stockName || product?.stockName || ""
     );
+
     setWithdrawalQuantity(String(totalUnits));
     setWithdrawalReason(item.reason || "");
     setMessage("");
@@ -857,6 +912,10 @@ export default function Sales({
     }
   }
 
+  // ============================================================
+  // TAB NAVIGATION
+  // ============================================================
+
   function changeTab(tab) {
     setActiveTab(tab);
     setMessage("");
@@ -876,7 +935,9 @@ export default function Sales({
     }
   }
 
-  // ---------------- PAGE ----------------
+  // ============================================================
+  // PAGE
+  // ============================================================
 
   if (!businessId || !tellerId) {
     return (
@@ -898,74 +959,123 @@ export default function Sales({
     );
   }
 
+  const menuItems = [
+    { id: "sale", label: "New Sale" },
+    { id: "returns", label: "Returns" },
+    { id: "history", label: "Sales History" },
+    { id: "withdrawals", label: "Withdrawal" },
+  ];
+
+  function selectMenuItem(tab) {
+    setMenuOpen(false);
+    changeTab(tab);
+  }
+
   return (
     <main className="sales-page">
-      <header className="sales-header">
-        <button
-          type="button"
-          className="sales-back-button"
-          onClick={onBack}
-        >
-          ← Logout
-        </button>
+      {/* HEADER */}
 
-        <div className="sales-header-actions">
-          <button
-            type="button"
-            className="sales-password-toggle"
-            onClick={() => {
-              if (typeof onChangePassword === "function") {
-                onChangePassword();
-              } else {
-                notify(
-                  "Change Password page navigation has not been connected yet.",
-                  "error"
-                );
-              }
-            }}
-          >
-            Change Password
-          </button>
+      <header className="sales-header stoka-teller-header">
+        <div className="stoka-header-brand">
+          <div className="stoka-brand-mark">S</div>
+
+          <div className="stoka-brand-copy">
+            <strong>Stoka</strong>
+            <span>
+              {business?.businessName ||
+                business?.name ||
+                "Stock Management"}
+            </span>
+          </div>
+        </div>
+
+        <div className="stoka-header-right">
+          <div className="stoka-teller-identity">
+            <strong>{tellerName || "Teller"}</strong>
+            <span>Sales workspace</span>
+          </div>
+
+          <div className="stoka-overflow-wrap">
+            <button
+              type="button"
+              className="stoka-overflow-button"
+              aria-label="Open workspace menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              ⋮
+            </button>
+
+            {menuOpen && (
+              <>
+                <button
+                  type="button"
+                  className="stoka-menu-backdrop"
+                  aria-label="Close menu"
+                  onClick={() => setMenuOpen(false)}
+                />
+
+                <div className="stoka-overflow-menu">
+                  {menuItems.map((item) => (
+                    <button
+                      type="button"
+                      key={item.id}
+                      className={activeTab === item.id ? "active" : ""}
+                      onClick={() => selectMenuItem(item.id)}
+                    >
+                      {item.label}
+
+                      {item.id === "history" && ` (${sales.length})`}
+                      {item.id === "returns" && ` (${returns.length})`}
+                      {item.id === "withdrawals" &&
+                        ` (${withdrawals.length})`}
+                    </button>
+                  ))}
+
+                  <div className="stoka-menu-divider" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+
+                      if (typeof onChangePassword === "function") {
+                        onChangePassword();
+                      } else {
+                        notify(
+                          "Change Password page navigation has not been connected yet.",
+                          "error"
+                        );
+                      }
+                    }}
+                  >
+                    Change Password
+                  </button>
+
+                  <button
+                    type="button"
+                    className="stoka-menu-home"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onBack?.();
+                    }}
+                  >
+                    Go to Home
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
-      <nav className="sales-tabs">
-        <button
-          type="button"
-          className={activeTab === "sale" ? "active" : ""}
-          onClick={() => changeTab("sale")}
-        >
-          New Sale
-        </button>
-
-        <button
-          type="button"
-          className={activeTab === "history" ? "active" : ""}
-          onClick={() => changeTab("history")}
-        >
-          Sales History ({sales.length})
-        </button>
-
-        <button
-          type="button"
-          className={activeTab === "returns" ? "active" : ""}
-          onClick={() => changeTab("returns")}
-        >
-          Returns ({returns.length})
-        </button>
-
-        <button
-          type="button"
-          className={activeTab === "withdrawals" ? "active" : ""}
-          onClick={() => changeTab("withdrawals")}
-        >
-          Withdrawals ({withdrawals.length})
-        </button>
-      </nav>
+      {/* NOTIFICATIONS */}
 
       {message && (
         <div
-          className={`sales-message ${messageType === "error" ? "error" : ""}`}
+          className={`sales-message ${
+            messageType === "error" ? "error" : ""
+          }`}
           role="status"
         >
           <span>{message}</span>
@@ -983,669 +1093,116 @@ export default function Sales({
       {/* NEW SALE */}
 
       {activeTab === "sale" && (
-        <div className="sales-layout">
-          <section className="products-panel">
-            <input
-              className="sales-search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search product"
-              aria-label="Search products"
-            />
-
-            {loadingProducts ? (
-              <p className="sales-empty">Loading products...</p>
-            ) : filteredProducts.length === 0 ? (
-              <p className="sales-empty">No matching products found.</p>
-            ) : (
-              <div className="sales-product-grid">
-                {filteredProducts.map((product) => {
-                  const available = availableUnits(product);
-
-                  return (
-                    <button
-                      type="button"
-                      className="sales-product-card"
-                      key={product.id}
-                      onClick={() => addToCart(product)}
-                      disabled={available <= 0}
-                    >
-                      <strong>{product.stockName}</strong>
-                      <span className="product-price">
-                        {money(product.unitSellingPrice)}
-                      </span>
-                      <span className="product-add">
-                        {available <= 0 ? "Out of stock" : "+ Add"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          <section className="cart-panel">
-            <div className="sales-section-heading">
-              <h2>Current Sale</h2>
-              <span>
-                {cartUnits} {cartUnits === 1 ? "unit" : "units"}
-              </span>
-            </div>
-
-            {cart.length === 0 ? (
-              <div className="cart-empty">
-                <strong>Your sale is empty</strong>
-                <p>Search and select products to begin.</p>
-              </div>
-            ) : (
-              <div className="cart-items">
-                {cart.map((item) => (
-                  <article
-                    className="cart-item cart-item-compact"
-                    key={item.productId}
-                  >
-                    <div className="cart-item-heading">
-                      <div className="cart-product-title">
-                        <strong>{item.stockName}</strong>
-                        <span>
-                          {money(item.unitSellingPrice)} × {item.quantity}
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="remove-cart-item"
-                        onClick={() => removeFromCart(item.productId)}
-                        aria-label={`Remove ${item.stockName}`}
-                      >
-                        ×
-                      </button>
-                    </div>
-
-                    <div className="cart-quick-controls">
-                      <div className="cart-quantity-control">
-                        <button
-                          type="button"
-                          className="quantity-step-button"
-                          onClick={() =>
-                            changeCartQuantity(item.productId, -1)
-                          }
-                          disabled={item.quantity <= 1}
-                          aria-label={`Decrease ${item.stockName}`}
-                        >
-                          −
-                        </button>
-
-                        <strong className="cart-quantity-value">
-                          {item.quantity}
-                        </strong>
-
-                        <button
-                          type="button"
-                          className="quantity-step-button"
-                          onClick={() =>
-                            changeCartQuantity(item.productId, 1)
-                          }
-                          disabled={item.quantity >= item.available}
-                          aria-label={`Increase ${item.stockName}`}
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      <label className="cart-discount-inline">
-                        <span>Discount ($)</span>
-                        <input
-                          type="number"
-                          min="0"
-                          max={item.quantity * item.unitSellingPrice}
-                          step="0.01"
-                          value={item.discountAmount}
-                          onChange={(event) =>
-                            updateCartItem(
-                              item.productId,
-                              "discountAmount",
-                              event.target.value
-                            )
-                          }
-                          aria-label={`Discount for ${item.stockName}`}
-                        />
-                      </label>
-                    </div>
-
-                    <div className="cart-line-total">
-                      <span>Line total</span>
-                      <strong>
-                        {money(
-                          item.quantity * item.unitSellingPrice -
-                            item.discountAmount
-                        )}
-                      </strong>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-
-            <div className="cart-summary">
-              <div>
-                <span>Subtotal</span>
-                <strong>{money(cartTotals.subtotal)}</strong>
-              </div>
-
-              <div>
-                <span>Discount</span>
-                <strong className="discount-value">
-                  − {money(cartTotals.discountTotal)}
-                </strong>
-              </div>
-
-              <div className="cart-grand-total">
-                <span>TOTAL</span>
-                <strong>{money(cartTotals.total)}</strong>
-              </div>
-
-              <button
-                type="button"
-                className="checkout-button"
-                onClick={checkout}
-                disabled={saving || cart.length === 0}
-              >
-                {saving
-                  ? "Processing sale..."
-                  : `Complete Sale · ${money(cartTotals.total)}`}
-              </button>
-            </div>
-          </section>
-        </div>
-      )}
-
-      {/* SALES HISTORY */}
-
-      {activeTab === "history" && (
-        <section className="sales-history-panel">
-          <div className="sales-section-heading">
-            <h2>Sales History</h2>
-
-            <button
-              type="button"
-              className="sales-refresh-button"
-              onClick={loadSales}
-              disabled={loadingSales}
-            >
-              {loadingSales ? "Loading..." : "Refresh"}
-            </button>
-          </div>
-
-          {loadingSales && sales.length === 0 ? (
-            <p className="sales-empty">Loading sales...</p>
-          ) : sales.length === 0 ? (
-            <p className="sales-empty">No completed sales yet.</p>
-          ) : (
-            <div className="sales-table-wrapper">
-              <table className="sales-table">
-                <thead>
-                  <tr>
-                    <th>Receipt</th>
-                    <th>Date</th>
-                    <th>Items</th>
-                    <th>Subtotal</th>
-                    <th>Discount</th>
-                    <th>Total</th>
-                    <th>Payment</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {sales.map((sale) => (
-                    <tr key={sale.id}>
-                      <td>{sale.receiptNumber}</td>
-                      <td>{formatDate(sale.createdAt)}</td>
-
-                      <td>
-                        <details>
-                          <summary>
-                            {(sale.items || []).length} products
-                          </summary>
-
-                          <ul className="sale-item-details">
-                            {(sale.items || []).map((item) => (
-                              <li key={item.id}>
-                                {item.stockName}: {item.quantity} ×{" "}
-                                {money(item.unitSellingPrice)}
-                                {number(item.discountAmount) > 0 &&
-                                  ` (discount ${money(item.discountAmount)})`}
-                              </li>
-                            ))}
-                          </ul>
-                        </details>
-                      </td>
-
-                      <td>{money(sale.subtotal)}</td>
-                      <td>{money(sale.discountTotal)}</td>
-                      <td>
-                        <strong>{money(sale.totalAmount)}</strong>
-                      </td>
-                      <td>{sale.paymentMethod || "Cash"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
+        <NewSale
+          products={products}
+          search={search}
+          setSearch={setSearch}
+          loadingProducts={loadingProducts}
+          addToCart={addToCart}
+          cart={cart}
+          cartUnits={cartUnits}
+          cartTotals={cartTotals}
+          changeCartQuantity={changeCartQuantity}
+          updateCartItem={updateCartItem}
+          removeFromCart={removeFromCart}
+          checkout={checkout}
+          saving={saving}
+        />
       )}
 
       {/* RETURNS */}
 
       {activeTab === "returns" && (
-        <div className="returns-layout">
-          <section className="returns-panel">
-            <div className="sales-section-heading">
-              <h2>{editingReturnId ? "Edit Return" : "New Return"}</h2>
-            </div>
+        <Returns
+          returnableSales={returnableSales}
+          returns={returns}
+          loadingReturns={loadingReturns}
+          selectedSaleId={selectedSaleId}
+          selectSaleForReturn={selectSaleForReturn}
+          selectedReturnSale={selectedReturnSale}
+          editingReturnId={editingReturnId}
+          returnReason={returnReason}
+          setReturnReason={setReturnReason}
+          returnQuantities={returnQuantities}
+          setReturnQuantity={setReturnQuantity}
+          estimatedRefund={estimatedRefund}
+          saving={saving}
+          submitReturn={() =>
+            submitReturn({ preventDefault() {} })
+          }
+          cancelEditReturn={cancelEditReturn}
+          startEditReturn={startEditReturn}
+          deleteReturn={(id) => {
+            const item = returns.find(
+              (entry) => String(entry.id) === String(id)
+            );
 
-            <form className="return-form" onSubmit={submitReturn}>
-              <label>
-                Original receipt
-                <select
-                  value={selectedSaleId}
-                  onChange={(event) =>
-                    selectSaleForReturn(event.target.value)
-                  }
-                  required
-                >
-                  <option value="">Select receipt...</option>
+            if (item) deleteReturn(item);
+          }}
+          loadReturns={loadReturns}
+          loadReturnableSales={loadReturnableSales}
+        />
+      )}
 
-                  {returnableSales.map((sale) => (
-                    <option key={sale.id} value={sale.id}>
-                      {sale.receiptNumber || `Sale #${sale.id}`} —{" "}
-                      {formatDate(sale.createdAt)} — {money(sale.totalAmount)}
-                    </option>
-                  ))}
-                </select>
-              </label>
+      {/* SALES HISTORY */}
 
-              {selectedReturnSale && (
-                <>
-                  <h3 className="form-section-title">Items to return</h3>
-
-                  {(selectedReturnSale.items || []).map((item) => {
-                    const previousReturn = editingReturnId
-                      ? returns
-                          .find(
-                            (entry) =>
-                              String(entry.id) === String(editingReturnId)
-                          )
-                          ?.items?.find(
-                            (returnedItem) =>
-                              Number(returnedItem.saleItemId) === Number(item.id)
-                          )
-                      : null;
-
-                    const remaining =
-                      number(item.returnableQuantity ?? item.returnable) +
-                      number(previousReturn?.quantity);
-
-                    return (
-                      <div className="return-item-row" key={item.id}>
-                        <div className="return-item-info">
-                          <strong>{item.stockName}</strong>
-                          <span>{money(item.unitSellingPrice)} per unit</span>
-                        </div>
-
-                        <label>
-                          Quantity
-                          <input
-                            type="number"
-                            min="0"
-                            max={remaining}
-                            step="1"
-                            value={returnQuantities[item.id] ?? ""}
-                            disabled={remaining <= 0}
-                            placeholder="0"
-                            onChange={(event) =>
-                              setReturnQuantity(item.id, event.target.value)
-                            }
-                          />
-                        </label>
-                      </div>
-                    );
-                  })}
-
-                  <label>
-                    Reason
-                    <select
-                      value={returnReason}
-                      onChange={(event) => setReturnReason(event.target.value)}
-                      required
-                    >
-                      <option value="">Select reason...</option>
-                      <option value="Damaged">Damaged</option>
-                      <option value="Wrong item">Wrong item</option>
-                      <option value="Customer changed mind">
-                        Customer changed mind
-                      </option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </label>
-
-                  <div className="return-total">
-                    <span>Estimated refund</span>
-                    <strong>{money(estimatedRefund)}</strong>
-                  </div>
-
-                  <div className="history-actions">
-                    <button
-                      type="submit"
-                      className="primary-action"
-                      disabled={saving}
-                    >
-                      {saving
-                        ? "Saving..."
-                        : editingReturnId
-                        ? "Save Changes"
-                        : "Record Return"}
-                    </button>
-
-                    {editingReturnId && (
-                      <button
-                        type="button"
-                        className="history-edit-button"
-                        onClick={cancelEditReturn}
-                        disabled={saving}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </div>
-                </>
-              )}
-            </form>
-
-            {!selectedReturnSale && (
-              <p className="sales-empty">
-                {returnableSales.length === 0
-                  ? "No sales with returnable items were found."
-                  : "Select a receipt to continue."}
-              </p>
-            )}
-          </section>
-
-          <section className="returns-panel">
-            <div className="sales-section-heading">
-              <h2>Return History</h2>
-
-              <button
-                type="button"
-                className="sales-refresh-button"
-                onClick={() => {
-                  loadReturns();
-                  loadReturnableSales();
-                }}
-                disabled={loadingReturns}
-              >
-                {loadingReturns ? "Loading..." : "Refresh"}
-              </button>
-            </div>
-
-            {loadingReturns && returns.length === 0 ? (
-              <p className="sales-empty">Loading returns...</p>
-            ) : returns.length === 0 ? (
-              <p className="sales-empty">No returns recorded yet.</p>
-            ) : (
-              <div className="sales-table-wrapper">
-                <table className="sales-table">
-                  <thead>
-                    <tr>
-                      <th>Return</th>
-                      <th>Receipt</th>
-                      <th>Date</th>
-                      <th>Reason</th>
-                      <th>Refund</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {returns.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.returnNumber || `RET-${item.id}`}</td>
-                        <td>{item.receiptNumber || `Sale #${item.saleId}`}</td>
-                        <td>{formatDate(item.createdAt)}</td>
-                        <td className="history-reason">{item.reason}</td>
-                        <td>
-                          <strong>
-                            {money(item.totalRefund ?? item.refundAmount)}
-                          </strong>
-                        </td>
-                        <td>
-                          <div className="history-actions">
-                            <button
-                              type="button"
-                              className="history-edit-button"
-                              onClick={() => startEditReturn(item)}
-                              disabled={saving}
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              type="button"
-                              className="history-delete-button"
-                              onClick={() => deleteReturn(item)}
-                              disabled={saving}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-        </div>
+      {activeTab === "history" && (
+        <SalesHistory
+          sales={sales}
+          loadingSales={loadingSales}
+          loadSales={loadSales}
+        />
       )}
 
       {/* WITHDRAWALS */}
 
       {activeTab === "withdrawals" && (
-        <div className="withdrawals-layout">
-          <section className="withdrawals-panel">
-            <div className="sales-section-heading">
-              <h2>{editingWithdrawalId ? "Edit Withdrawal" : "Withdraw Stock"}</h2>
-            </div>
+        <Withdrawal
+          products={products}
+          withdrawals={withdrawals}
+          loadingWithdrawals={loadingWithdrawals}
+          withdrawalSearch={withdrawalSearch}
+          setWithdrawalSearch={(value) => {
+            setWithdrawalSearch(value);
 
-            <form className="withdrawal-form" onSubmit={submitWithdrawal}>
-              <label>
-                Product
-                <input
-                  type="search"
-                  className="sales-search"
-                  value={withdrawalSearch}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setWithdrawalSearch(value);
+            if (
+              !selectedWithdrawalProduct ||
+              String(selectedWithdrawalProduct.stockName || "")
+                .trim()
+                .toLowerCase() !==
+                String(value || "").trim().toLowerCase()
+            ) {
+              setWithdrawalProductId("");
+            }
+          }}
+          selectedWithdrawalProduct={selectedWithdrawalProduct}
+          selectWithdrawalProduct={chooseWithdrawalProduct}
+          withdrawalQuantity={withdrawalQuantity}
+          setWithdrawalQuantity={setWithdrawalQuantity}
+          withdrawalReason={withdrawalReason}
+          setWithdrawalReason={setWithdrawalReason}
+          withdrawalPacks={withdrawalPacks}
+          withdrawalUnits={withdrawalUnits}
+          editingWithdrawalId={editingWithdrawalId}
+          saving={saving}
+          submitWithdrawal={() =>
+            submitWithdrawal({ preventDefault() {} })
+          }
+          startEditWithdrawal={startEditWithdrawal}
+          cancelEditWithdrawal={cancelEditWithdrawal}
+          deleteWithdrawal={(id) => {
+            const item = withdrawals.find(
+              (entry) => String(entry.id) === String(id)
+            );
 
-                    if (
-                      !selectedWithdrawalProduct ||
-                      String(selectedWithdrawalProduct.stockName || "")
-                        .trim()
-                        .toLowerCase() !== value.trim().toLowerCase()
-                    ) {
-                      setWithdrawalProductId("");
-                    }
-                  }}
-                  placeholder="Search product..."
-                  autoComplete="off"
-                  required={!withdrawalProductId}
-                />
-              </label>
-
-              {withdrawalSearch.trim() &&
-                filteredWithdrawalProducts.length > 0 && (
-                  <div className="withdrawal-search-results">
-                    {filteredWithdrawalProducts.map((product) => (
-                      <button
-                        type="button"
-                        key={product.id}
-                        className="withdrawal-search-result"
-                        onClick={() => {
-                          setWithdrawalProductId(String(product.id));
-                          setWithdrawalSearch(product.stockName);
-                        }}
-                      >
-                        <strong>{product.stockName}</strong>
-                        <span>Select →</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-              {withdrawalSearch.trim() &&
-                filteredWithdrawalProducts.length === 0 &&
-                !selectedWithdrawalProduct && (
-                  <p className="sales-empty">No matching products found.</p>
-                )}
-
-              {selectedWithdrawalProduct && (
-                <div className="withdrawal-product-card">
-                  <div className="withdrawal-product-heading">
-                    <strong>{selectedWithdrawalProduct.stockName}</strong>
-                  </div>
-
-                  <label>
-                    Quantity to withdraw (units)
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      value={withdrawalQuantity}
-                      onChange={(event) =>
-                        setWithdrawalQuantity(event.target.value)
-                      }
-                      placeholder="Enter quantity"
-                      required
-                    />
-                  </label>
-                </div>
-              )}
-
-              <label>
-                Reason
-                <select
-                  value={withdrawalReason}
-                  onChange={(event) => setWithdrawalReason(event.target.value)}
-                  required
-                >
-                  <option value="">Select reason...</option>
-                  <option value="Damaged">Damaged</option>
-                  <option value="Expired">Expired</option>
-                  <option value="Internal use">Internal use</option>
-                  <option value="Personal use">Personal use</option>
-                  <option value="Other">Other</option>
-                </select>
-              </label>
-
-              <div className="history-actions">
-                <button
-                  type="submit"
-                  className="primary-action"
-                  disabled={saving || !selectedWithdrawalProduct}
-                >
-                  {saving
-                    ? "Saving..."
-                    : editingWithdrawalId
-                    ? "Save Changes"
-                    : "Record Withdrawal"}
-                </button>
-
-                {editingWithdrawalId && (
-                  <button
-                    type="button"
-                    className="history-edit-button"
-                    onClick={cancelEditWithdrawal}
-                    disabled={saving}
-                  >
-                    Cancel
-                  </button>
-                )}
-              </div>
-            </form>
-          </section>
-
-          <section className="withdrawals-panel">
-            <div className="sales-section-heading">
-              <h2>Withdrawal History</h2>
-
-              <button
-                type="button"
-                className="sales-refresh-button"
-                onClick={() => {
-                  loadWithdrawals();
-                  loadProducts();
-                }}
-                disabled={loadingWithdrawals}
-              >
-                {loadingWithdrawals ? "Loading..." : "Refresh"}
-              </button>
-            </div>
-
-            {loadingWithdrawals && withdrawals.length === 0 ? (
-              <p className="sales-empty">Loading withdrawals...</p>
-            ) : withdrawals.length === 0 ? (
-              <p className="sales-empty">No withdrawals recorded yet.</p>
-            ) : (
-              <div className="sales-table-wrapper">
-                <table className="sales-table">
-                  <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>Date</th>
-                      <th>Reason</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {withdrawals.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.productName || item.stockName}</td>
-                        <td>{formatDate(item.createdAt)}</td>
-                        <td className="history-reason">{item.reason}</td>
-                        <td>
-                          <div className="history-actions">
-                            <button
-                              type="button"
-                              className="history-edit-button"
-                              onClick={() => startEditWithdrawal(item)}
-                              disabled={saving}
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              type="button"
-                              className="history-delete-button"
-                              onClick={() => deleteWithdrawal(item)}
-                              disabled={saving}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-        </div>
+            if (item) deleteWithdrawal(item);
+          }}
+          loadWithdrawals={loadWithdrawals}
+          loadProducts={loadProducts}
+        />
       )}
+
+      {/* FOOTER */}
 
       <footer className="sales-footer">
         Stoka · Sales, returns and withdrawals are recorded against this

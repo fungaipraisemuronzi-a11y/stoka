@@ -22,7 +22,7 @@ body,
 body {
   font-family: "Manrope", Arial, Helvetica, sans-serif;
   background: #f5f8f6;
-  color: #182b27;
+  color: black;
   overflow-x: hidden;
 }
 
@@ -43,7 +43,7 @@ textarea {
   margin: 0;
   padding: 0;
   background: #f5f8f6;
-  color: #182b27;
+  color: #050808;
   overflow-x: clip;
 }
 
