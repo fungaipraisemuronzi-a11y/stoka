@@ -1,832 +1,117 @@
+
 /* ==========================================
-   STOKA MANAGER WORKSPACE
-========================================== */
+   STOKA MANAGER — FULL-SCREEN LAYOUT FIX
+   ========================================== */
 
+.stoka-manager-page,
 .manager-dashboard {
-  --manager-green: #087f5b;
-  --manager-green-dark: #07583f;
-  --manager-green-pale: #e8f5ee;
-  --manager-ink: #18352a;
-  --manager-muted: #708078;
-  --manager-border: #e2ebe5;
-
-  width: 100%;
-  min-height: 100vh;
-  padding: 0 clamp(14px, 3vw, 44px) 24px;
-  margin: 0;
-  box-sizing: border-box;
-  background: #f5f8f6;
-  color: var(--manager-ink);
-}
-
-.manager-dashboard *,
-.manager-dashboard *::before,
-.manager-dashboard *::after {
-  box-sizing: border-box;
-}
-
-/* Manager workspace header */
-
-.manager-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  min-height: 78px;
-  border-bottom: 1px solid var(--manager-border);
-}
-
-.manager-header-brand,
-.manager-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.manager-header-brand > div:last-child {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.manager-header-brand strong {
-  color: var(--manager-ink);
-  font-size: 19px;
-  font-weight: 800;
-}
-
-.manager-header-brand span:not(.manager-logo) {
-  color: var(--manager-muted);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.3px;
-}
-
-.manager-logo {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  margin: 0 auto 16px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #0b9569, #07583f);
-  color: #ffffff;
-  font-size: 31px;
-  font-weight: 900;
-  box-shadow: 0 8px 20px rgba(8, 127, 91, 0.2);
-}
-
-.manager-logo-small {
-  width: 42px;
-  height: 42px;
-  margin: 0;
-  border-radius: 13px;
-  font-size: 23px;
-}
-
-.manager-header-button,
-.manager-lock-button,
-.manager-password-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 10px 15px;
-  border: 1px solid var(--manager-border);
-  border-radius: 10px;
-  background: #ffffff;
-  color: #345246;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 750;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.manager-header-button:hover,
-.manager-password-button:hover {
-  border-color: #a8cdb8;
-  background: var(--manager-green-pale);
-}
-
-.manager-lock-button {
-  border-color: #f1d7d2;
-  background: #fff8f7;
-  color: #a33c31;
-}
-
-.manager-lock-button:hover {
-  background: #ffebe8;
-}
-
-/* Manager hero banner */
-
-.manager-hero {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  min-height: 205px;
-  margin-top: 26px;
-  padding: clamp(24px, 4vw, 42px);
-  overflow: hidden;
-  border-radius: 22px;
-  background: linear-gradient(
-    120deg,
-    #07583f 0%,
-    #087f5b 58%,
-    #15966c 100%
-  );
-  color: #ffffff;
-  box-shadow: 0 12px 30px rgba(7, 88, 63, 0.13);
-}
-
-.manager-hero-content {
-  position: relative;
-  z-index: 1;
-}
-
-.manager-eyebrow {
-  margin: 0 0 7px;
-  color: #638174;
-  font-size: 10px;
-  font-weight: 850;
-  letter-spacing: 1.6px;
-}
-
-.manager-eyebrow-light {
-  color: #b8e6d1;
-}
-
-.manager-hero h1 {
-  margin: 0;
-  color: #ffffff;
-  font-size: clamp(26px, 3.5vw, 38px);
-  font-weight: 850;
-  letter-spacing: -1px;
-}
-
-.manager-hero-business {
-  margin: 9px 0 0;
-  color: #e0f5e9;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.manager-hero-description {
-  margin: 8px 0 0;
-  color: #d0ecdf;
-  font-size: 14px;
-}
-
-.manager-hero-mark {
-  position: absolute;
-  right: 35px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.09);
-  font-size: clamp(140px, 20vw, 240px);
-  line-height: 1;
-  font-weight: 900;
-  pointer-events: none;
-}
-
-/* Manager dashboard tools and headings */
-
-.manager-dashboard-tools {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 30px 0 18px;
-}
-
-.manager-section-intro h2 {
-  margin: 0;
-  color: var(--manager-ink);
-  font-size: 22px;
-  font-weight: 850;
-}
-
-.manager-section-intro p {
-  margin: 5px 0 0;
-  color: var(--manager-muted);
-  font-size: 13px;
-}
-
-.manager-password-button {
-  flex-shrink: 0;
-}
-
-.manager-feedback {
-  padding: 12px 15px;
-  border-radius: 10px;
-}
-
-/* Password settings panel */
-
-.manager-password-card {
-  margin: 0 0 20px;
-  padding: 24px;
-  border: 1px solid var(--manager-border);
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 5px 20px rgba(20, 60, 42, 0.04);
-}
-
-.manager-panel-heading {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  margin-bottom: 20px;
-}
-
-.manager-panel-icon {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  border-radius: 12px;
-  background: var(--manager-green-pale);
-  font-size: 21px;
-}
-
-.manager-panel-heading h3 {
-  margin: 0;
-  color: var(--manager-ink);
-  font-size: 17px;
-}
-
-.manager-panel-heading p {
-  margin: 5px 0 0;
-  color: var(--manager-muted);
-  font-size: 13px;
-}
-
-.manager-password-form {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  align-items: end;
-}
-
-.manager-password-form .form-group {
-  min-width: 0;
-  margin: 0;
-}
-
-.manager-password-form input {
-  width: 100%;
-}
-
-.manager-password-form .primary-button {
-  grid-column: 1 / -1;
-  justify-self: start;
-  width: auto;
-}
-
-/* Manager section navigation */
-
-.manager-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  width: 100%;
-  margin: 0 0 24px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  overflow: visible;
-}
-
-.manager-tab {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  min-width: 0;
-  min-height: 66px;
-  padding: 14px 16px;
-  border: 1px solid var(--manager-border);
-  border-radius: 14px;
-  background: #ffffff;
-  color: #5f7469;
-  text-align: left;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 750;
-  cursor: pointer;
-  box-shadow: 0 3px 12px rgba(20, 60, 42, 0.025);
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.manager-tab span {
-  font-size: 17px;
-  line-height: 1;
-}
-
-.manager-tab:hover {
-  transform: translateY(-2px);
-  border-color: #acd2bc;
-  color: var(--manager-green);
-  box-shadow: 0 6px 15px rgba(20, 60, 42, 0.06);
-}
-
-.manager-tab:focus-visible {
-  outline: 3px solid rgba(22, 163, 74, 0.3);
-  outline-offset: 2px;
-}
-
-.manager-tab.active {
-  border-color: var(--manager-green);
-  background: var(--manager-green);
-  color: #ffffff;
-  box-shadow: 0 7px 18px rgba(8, 127, 91, 0.17);
-}
-
-.manager-tab.active:hover {
-  background: #07583f;
-  border-color: #07583f;
-  color: #ffffff;
-}
-
-.manager-tab-icon {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  background: #edf6f0;
-  font-size: 19px;
-}
-
-.manager-tab.active .manager-tab-icon {
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.manager-tab-label {
-  min-width: 0;
-  line-height: 1.35;
-}
-
-.manager-tab-arrow {
-  margin-left: auto;
-  font-size: 23px;
-  opacity: 0.6;
-}
-
-/* Selected manager section */
-
-.manager-selected-section {
-  min-width: 0;
-}
-
-.manager-selected-heading {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 0 0 20px;
-}
-
-.manager-selected-icon {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
-  border: 1px solid #d7eade;
-  border-radius: 15px;
-  background: var(--manager-green-pale);
-  font-size: 25px;
-}
-
-.manager-selected-heading h2 {
-  margin: 0;
-  color: var(--manager-ink);
-  font-size: 22px;
-  font-weight: 850;
-}
-
-.manager-selected-heading p:last-child {
-  margin: 5px 0 0;
-  color: var(--manager-muted);
-  font-size: 13px;
-}
-
-.manager-content {
-  min-width: 0;
-  width: 100%;
-  animation: managerContentEnter 0.2s ease;
-}
-
-.manager-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 240px;
-  padding: 30px;
-  border: 1px solid var(--manager-border);
-  border-radius: 16px;
-  background: #ffffff;
-  text-align: center;
-}
-
-.manager-placeholder-icon {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  margin-bottom: 13px;
-  border-radius: 17px;
-  background: var(--manager-green-pale);
-  font-size: 27px;
-}
-
-.manager-placeholder h3 {
-  margin: 0;
-  color: var(--manager-ink);
-}
-
-.manager-placeholder p {
-  max-width: 400px;
-  margin: 8px 0 0;
-  color: var(--manager-muted);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.manager-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 35px;
-  padding-top: 17px;
-  border-top: 1px solid var(--manager-border);
-  color: #809087;
-  font-size: 11px;
-}
-
-@keyframes managerContentEnter {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ========================================
-   SHARED MANAGER HEADER AND OVERFLOW MENU
-======================================== */
-
-.stoka-manager-page {
-  width: 100%;
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-  background: #f5f7f6;
-  color: #18352d;
-  overflow-x: clip;
-  box-sizing: border-box;
-}
-
-.stoka-manager-header {
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-
-  width: 100%;
-  min-height: 90px;
-  margin: 0;
-  padding: 14px 40px;
-
-  background: #ffffff;
-  border-bottom: 1px solid #e0e9e4;
-  box-shadow: 0 2px 10px rgba(18, 58, 42, 0.04);
-  box-sizing: border-box;
-}
-
-.stoka-manager-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.stoka-manager-brand-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 43px;
-  height: 43px;
-  border-radius: 13px;
-  background: #087b52;
-  color: #ffffff;
-  font-size: 25px;
-  font-weight: 800;
-}
-
-.stoka-manager-brand-name {
-  color: #087b52;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
-}
-
-.stoka-manager-business {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-  padding-left: 16px;
-}
-
-.stoka-manager-business-label {
-  color: #7b8d84;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1.4px;
-}
-
-.stoka-manager-business strong {
-  display: block;
-  overflow: hidden;
-  color: #18352d;
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.3;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Overflow button */
-
-.stoka-manager-menu-container {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.stoka-manager-menu-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid #dce8e1;
-  border-radius: 13px;
-  background: #f5f8f6;
-  color: #087b52;
-  font-size: 29px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.stoka-manager-menu-button:hover {
-  background: #e6f4ed;
-  border-color: #a8d7bf;
-}
-
-.stoka-manager-menu-backdrop {
-  position: fixed;
-  z-index: 1001;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: default;
-}
-
-.stoka-manager-overflow-menu {
-  position: absolute;
-  z-index: 1002;
-  top: calc(100% + 12px);
-  right: 0;
-  width: 260px;
-  max-width: calc(100vw - 28px);
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
-  padding: 9px;
-  border: 1px solid #e0e9e4;
-  border-radius: 17px;
-  background: #ffffff;
-  box-shadow: 0 16px 42px rgba(18, 58, 42, 0.17);
-  box-sizing: border-box;
-}
-
-.stoka-manager-menu-heading {
-  padding: 12px 12px 10px;
-  color: #829187;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.3px;
-  text-transform: uppercase;
-}
-
-.stoka-manager-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 47px;
-  padding: 11px 12px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: #28483b;
-  font-size: 14px;
-  font-weight: 650;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.stoka-manager-menu-item:hover,
-.stoka-manager-menu-item.active {
-  background: #eaf6ef;
-  color: #087b52;
-}
-
-.stoka-manager-menu-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 25px;
-  flex-shrink: 0;
-  font-size: 18px;
-}
-
-.stoka-manager-menu-arrow {
-  margin-left: auto;
-  color: #9aaba1;
-  font-size: 22px;
-  font-weight: 400;
-}
-
-.stoka-manager-menu-divider {
-  height: 1px;
-  margin: 8px 5px;
-  background: #e8eeea;
-}
-
-.stoka-manager-home-item {
-  color: #52665b;
-}
-
-/* Full-width workspace below fixed header */
-
-.stoka-manager-workspace {
   width: 100%;
   max-width: none;
   min-height: 100vh;
   margin: 0;
-  padding: 118px 40px 45px;
   box-sizing: border-box;
 }
 
-.stoka-manager-page-heading {
-  display: none;
+.stoka-manager-page {
+  padding: 0;
+  background: #f5f8f6;
+  overflow-x: clip;
 }
 
-.stoka-manager-page .eyebrow {
-  margin: 0;
-  color: #078456;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
+.manager-dashboard {
+  padding: 0 clamp(16px, 3vw, 40px) 30px;
+  background: #f5f8f6;
 }
+
+/* Full-width sticky header */
+
+.stoka-manager-header {
+  position: sticky;
+  top: 0;
+  left: auto;
+  right: auto;
+  z-index: 1000;
+
+  width: 100%;
+  min-height: 78px;
+  margin: 0;
+  padding: 12px clamp(16px, 3vw, 40px);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  background: #fff;
+  border-bottom: 1px solid #e0e9e4;
+  box-shadow: 0 3px 12px rgba(18, 58, 42, 0.05);
+  box-sizing: border-box;
+}
+
+/* Let the workspace start directly below the header */
+
+.stoka-manager-workspace {
+  width: 100%;
+  max-width: none;
+  min-height: calc(100vh - 78px);
+  margin: 0;
+  padding: 28px clamp(16px, 3vw, 40px) 40px;
+  box-sizing: border-box;
+}
+
+/* Use the available screen width */
 
 .stoka-manager-page .manager-selected-section,
-.stoka-manager-page .manager-content {
+.stoka-manager-page .manager-content,
+.stoka-manager-page .manager-feedback {
   width: 100%;
+  max-width: none;
   min-width: 0;
 }
-
-.stoka-manager-page .manager-feedback {
-  margin: 0 0 15px;
-}
-
-/* Manager settings */
 
 .stoka-manager-page .manager-settings-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
+  width: 100%;
 }
 
 .stoka-manager-page .manager-password-card {
-  min-width: 0;
-  padding: 22px;
-  border: 1px solid #e0e9e4;
-  border-radius: 16px;
-  background: #ffffff;
-  box-sizing: border-box;
-}
-
-.stoka-manager-page .manager-password-card h3 {
-  margin: 0 0 17px;
-  color: #183d2e;
-  font-size: 17px;
-}
-
-.stoka-manager-page .manager-password-card label {
-  display: block;
-  margin-bottom: 8px;
-  color: #294a3c;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.stoka-manager-page .manager-password-card input,
-.stoka-manager-page .manager-password-card textarea {
   width: 100%;
-  min-height: 45px;
-  padding: 11px 13px;
-  border: 1px solid #dce6df;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #18352d;
-  font: inherit;
+  min-width: 0;
   box-sizing: border-box;
 }
 
-.stoka-manager-page .manager-password-card input:focus,
-.stoka-manager-page .manager-password-card textarea:focus {
-  outline: 2px solid #b6e3cb;
-  border-color: #078456;
+/* Keep navigation cards evenly spaced */
+
+.manager-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  gap: 14px;
 }
 
-.stoka-manager-page .manager-password-form .form-group {
-  margin-bottom: 16px;
+.manager-tab {
+  min-width: 0;
 }
 
-.stoka-manager-page .manager-password-card .primary-button {
-  cursor: pointer;
+/* Prevent long business names and content from breaking layout */
+
+.stoka-manager-business {
+  flex: 1;
+  min-width: 0;
 }
 
-.stoka-manager-page .manager-security-note {
-  color: #78877e;
-  font-size: 12px;
-  line-height: 1.6;
+.stoka-manager-business strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Laptop and large screens */
-
-@media (min-width: 1200px) {
-  .stoka-manager-header {
-    min-height: 90px;
-    padding-right: 40px;
-    padding-left: 40px;
-  }
-
-  .stoka-manager-workspace {
-    padding: 118px 40px 45px;
-  }
-
-  .stoka-manager-business strong {
-    font-size: 24px;
-  }
-}
-
-/* Tablet and smaller laptops */
-
-@media (min-width: 701px) and (max-width: 1199px) {
-  .stoka-manager-header {
-    min-height: 84px;
-    padding-right: 24px;
-    padding-left: 24px;
-  }
-
-  .stoka-manager-workspace {
-    padding: 108px 24px 35px;
-  }
-
-  .stoka-manager-business strong {
-    font-size: 20px;
-  }
+.manager-content,
+.manager-selected-section,
+.manager-selected-heading {
+  min-width: 0;
 }
 
 /* Tablet layout */
@@ -836,12 +121,12 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .manager-password-form {
+  .stoka-manager-page .manager-settings-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .manager-password-form .primary-button {
-    grid-column: 1 / -1;
+  .manager-password-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -849,29 +134,28 @@
 
 @media (max-width: 700px) {
   .stoka-manager-header {
-    min-height: 76px;
+    min-height: 70px;
     gap: 10px;
-    padding: 12px 16px;
+    padding: 10px 14px;
   }
 
   .stoka-manager-brand-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 11px;
-    font-size: 22px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
   }
 
   .stoka-manager-brand-name {
-    font-size: 21px;
+    font-size: 20px;
   }
 
   .stoka-manager-business {
-    padding-left: 3px;
+    padding-left: 4px;
   }
 
   .stoka-manager-business strong {
-    max-width: 40vw;
-    font-size: 16px;
+    max-width: 38vw;
+    font-size: 15px;
   }
 
   .stoka-manager-business-label {
@@ -884,136 +168,28 @@
   }
 
   .stoka-manager-workspace {
-    padding: 98px 16px 30px;
-  }
-
-  .stoka-manager-page .manager-settings-grid {
-    grid-template-columns: 1fr;
+    min-height: calc(100vh - 70px);
+    padding: 20px 14px 28px;
   }
 
   .manager-dashboard {
-    padding: 0 12px 18px;
-  }
-
-  .manager-header {
-    min-height: 68px;
-    gap: 8px;
-  }
-
-  .manager-header-brand {
-    gap: 8px;
-  }
-
-  .manager-logo-small {
-    width: 36px;
-    height: 36px;
-    border-radius: 11px;
-    font-size: 20px;
-  }
-
-  .manager-header-brand strong {
-    font-size: 16px;
-  }
-
-  .manager-header-brand span:not(.manager-logo) {
-    font-size: 8px;
-    letter-spacing: 0.8px;
-  }
-
-  .manager-header-actions {
-    gap: 6px;
-  }
-
-  .manager-header-button,
-  .manager-lock-button {
-    min-height: 36px;
-    padding: 8px 9px;
-    font-size: 11px;
-  }
-
-  .manager-hero {
-    min-height: 175px;
-    margin-top: 16px;
-    padding: 22px 18px;
-    border-radius: 17px;
-  }
-
-  .manager-hero h1 {
-    font-size: 27px;
-  }
-
-  .manager-hero-business {
-    font-size: 15px;
-  }
-
-  .manager-hero-description {
-    max-width: 270px;
-    font-size: 12px;
-    line-height: 1.6;
-  }
-
-  .manager-hero-mark {
-    right: -5px;
-    font-size: 145px;
-  }
-
-  .manager-dashboard-tools {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 13px;
-    margin: 23px 0 16px;
-  }
-
-  .manager-section-intro h2 {
-    font-size: 20px;
+    padding: 0 14px 24px;
   }
 
   .manager-tabs {
-    gap: 8px;
-    margin-bottom: 22px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
   }
 
   .manager-tab {
-    min-height: 58px;
-    gap: 8px;
+    min-height: 56px;
     padding: 10px;
-    border-radius: 12px;
-    font-size: 12px;
+    gap: 8px;
   }
 
-  .manager-tab-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    font-size: 16px;
-  }
-
-  .manager-tab-arrow {
-    font-size: 18px;
-  }
-
-  .manager-selected-heading {
-    gap: 11px;
-  }
-
-  .manager-selected-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    font-size: 21px;
-  }
-
-  .manager-selected-heading h2 {
-    font-size: 19px;
-  }
-
-  .manager-selected-heading p:last-child {
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .manager-password-card {
-    padding: 17px;
+  .stoka-manager-page .manager-settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
   }
 
   .manager-password-form {
@@ -1026,50 +202,65 @@
     width: 100%;
   }
 
-  .manager-footer {
-    margin-top: 25px;
-    font-size: 10px;
+  .manager-hero {
+    min-height: 170px;
+    margin-top: 16px;
+    padding: 22px 18px;
   }
 
-  .stoka-manager-page .manager-auth-card,
-  .stoka-manager-page .manager-status-card {
-    margin-top: 30px;
-    padding: 24px;
+  .manager-dashboard-tools {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .manager-header-actions {
+    gap: 6px;
+  }
+
+  .manager-header-button,
+  .manager-lock-button {
+    padding: 8px 10px;
+    font-size: 11px;
   }
 }
 
-/* Small mobile */
+/* Very small phones */
 
 @media (max-width: 380px) {
   .stoka-manager-header {
-    padding-right: 10px;
-    padding-left: 10px;
+    padding-right: 9px;
+    padding-left: 9px;
   }
 
   .stoka-manager-brand {
-    gap: 7px;
+    gap: 6px;
   }
 
   .stoka-manager-brand-name {
-    font-size: 19px;
+    font-size: 18px;
   }
 
   .stoka-manager-business strong {
     max-width: 30vw;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .stoka-manager-workspace {
-    padding: 94px 10px 24px;
+    padding-right: 10px;
+    padding-left: 10px;
   }
 
-  .stoka-manager-page .manager-lock-button {
-    padding: 8px 10px;
-    font-size: 12px;
+  .manager-tabs {
+    gap: 7px;
+  }
+
+  .manager-tab {
+    font-size: 11px;
   }
 }
 
-/* Respect reduced-motion preferences */
+/* Accessibility */
 
 @media (prefers-reduced-motion: reduce) {
   .manager-content,
