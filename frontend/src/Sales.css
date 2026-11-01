@@ -1755,3 +1755,195 @@
     font-size: 10px;
   }
 }
+
+/* =========================================================
+   STOKA SALES — RESPONSIVE CART AND FIXED HEADER
+   Desktop: Cart on the right
+   Mobile: Cart fixed at the bottom
+   Header: Fixed at the top on all devices
+   ========================================================= */
+
+/* -----------------------------------------
+   FIXED HEADER — ALL SCREEN SIZES
+----------------------------------------- */
+
+.sales-header,
+.stoka-teller-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1200 !important;
+  width: 100%;
+  min-height: 58px;
+  background: #ffffff !important;
+  border-bottom: 1px solid var(--stoka-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Push page content below the fixed header */
+
+.sales-page {
+  padding-top: 70px !important;
+}
+
+/* -----------------------------------------
+   LAPTOPS AND DESKTOPS
+   Cart stays on the RIGHT
+----------------------------------------- */
+
+@media (min-width: 768px) {
+
+  .sales-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 360px !important;
+    align-items: start !important;
+    gap: 14px !important;
+  }
+
+  .products-panel {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .cart-panel {
+    position: sticky !important;
+    top: 75px !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    z-index: 100 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 90px) !important;
+
+    overflow-y: auto !important;
+    box-sizing: border-box;
+
+    padding: 12px !important;
+    border: 1px solid var(--stoka-border) !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    box-shadow: var(--stoka-shadow) !important;
+  }
+
+  .cart-items {
+    max-height: 45vh !important;
+    overflow-y: auto !important;
+  }
+
+}
+
+/* -----------------------------------------
+   MOBILE PHONES
+   Cart stays FIXED AT THE BOTTOM
+----------------------------------------- */
+
+@media (max-width: 767px) {
+
+  .sales-page {
+    padding-left: 9px;
+    padding-right: 9px;
+    padding-bottom: 50vh !important;
+  }
+
+  .sales-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    align-items: start !important;
+  }
+
+  .products-panel {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cart-panel {
+    position: fixed !important;
+
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+
+    z-index: 1100 !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 45vh !important;
+
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+
+    padding: 10px 12px !important;
+
+    border: 1px solid var(--stoka-border) !important;
+    border-bottom: none !important;
+    border-radius: 14px 14px 0 0 !important;
+
+    background: #ffffff !important;
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.13) !important;
+  }
+
+  .cart-items {
+    max-height: 23vh !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  .cart-item-compact {
+    padding: 5px 7px;
+  }
+
+  .cart-summary {
+    margin-top: 5px;
+  }
+
+  .checkout-button {
+    min-height: 38px;
+  }
+
+}
+
+/* -----------------------------------------
+   SMALL MOBILE PHONES
+----------------------------------------- */
+
+@media (max-width: 380px) {
+
+  .cart-panel {
+    max-height: 48vh !important;
+    padding: 8px !important;
+  }
+
+  .cart-items {
+    max-height: 24vh !important;
+  }
+
+  .sales-page {
+    padding-bottom: 53vh !important;
+  }
+
+}
+
+/* -----------------------------------------
+   CART SCROLLBAR
+----------------------------------------- */
+
+.cart-panel::-webkit-scrollbar,
+.cart-items::-webkit-scrollbar {
+  width: 5px;
+}
+
+.cart-panel::-webkit-scrollbar-thumb,
+.cart-items::-webkit-scrollbar-thumb {
+  background: #cbd8ce;
+  border-radius: 10px;
+}
+
+.cart-panel::-webkit-scrollbar-track,
+.cart-items::-webkit-scrollbar-track {
+  background: #f5f8f5;
+}

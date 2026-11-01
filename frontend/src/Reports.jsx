@@ -11,7 +11,6 @@ const money = (value) =>
 
 const number = (value) => Number(value || 0);
 
-// Quantities: no thousands separators and no unnecessary decimal zeros.
 const quantity = (value) =>
   Number(value || 0).toLocaleString("en-US", {
     useGrouping: false,
@@ -62,35 +61,64 @@ const dateLabel = (date) =>
     year: "numeric",
   });
 
+/*
+ * Combine repeated income or expense entries with the same item name.
+ * This combines their amounts in the report display.
+ */
+const combineEntries = (entries) => {
+  const grouped = new Map();
+
+  entries.forEach((item) => {
+    const name = String(item.itemName || "Other").trim();
+    const key = name.toLowerCase();
+
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        id: key,
+        itemName: name,
+        amount: 0,
+      });
+    }
+
+    grouped.get(key).amount += number(item.amount);
+  });
+
+  return [...grouped.values()];
+};
+
 const styles = {
   page: {
-    padding: 20,
+    padding: "16px",
     maxWidth: 1200,
     margin: "0 auto",
     color: "#172033",
-  },
-  heading: {
-    fontSize: 25,
-    margin: "0 0 8px",
+    width: "100%",
+    boxSizing: "border-box",
+    minWidth: 0,
   },
   muted: {
     color: "#64748b",
-    fontSize: 14,
+    fontSize: 13,
+    lineHeight: 1.5,
   },
   buttons: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 10,
-    margin: "22px 0",
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: 8,
+    margin: "12px 0 18px",
+    width: "100%",
   },
   button: {
     border: "1px solid #dbe2ea",
     background: "#fff",
     color: "#243047",
     borderRadius: 8,
-    padding: "11px 16px",
+    padding: "11px 7px",
     cursor: "pointer",
-    fontWeight: 600,
+    fontWeight: 700,
+    fontSize: 13,
+    whiteSpace: "nowrap",
+    minWidth: 0,
   },
   activeButton: {
     background: "#173f35",
@@ -100,24 +128,39 @@ const styles = {
   panel: {
     background: "#fff",
     border: "1px solid #e2e8f0",
-    borderRadius: 10,
-    padding: 18,
-    marginTop: 14,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+    minWidth: 0,
   },
   field: {
-    padding: 9,
+    padding: "10px 12px",
     border: "1px solid #cbd5e1",
-    borderRadius: 6,
-    fontSize: 14,
+    borderRadius: 8,
+    fontSize: 13,
+    background: "#fff",
+    color: "#172033",
+    boxSizing: "border-box",
+    minWidth: 0,
+  },
+  controls: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+    width: "100%",
   },
   tableWrap: {
+    width: "100%",
     overflowX: "auto",
     marginTop: 16,
+    border: "1px solid #e2e8f0",
+    borderRadius: 9,
   },
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    fontSize: 14,
+    fontSize: 13,
   },
   th: {
     textAlign: "left",
@@ -125,13 +168,18 @@ const styles = {
     background: "#f1f5f9",
     borderBottom: "1px solid #dbe2ea",
     whiteSpace: "nowrap",
+    color: "#334155",
+    fontWeight: 700,
   },
   td: {
     padding: 11,
     borderBottom: "1px solid #e2e8f0",
+    textAlign: "left",
+    verticalAlign: "middle",
   },
   right: {
     textAlign: "right",
+    whiteSpace: "nowrap",
   },
   total: {
     fontWeight: 700,
@@ -146,14 +194,19 @@ const styles = {
   },
   metric: {
     border: "1px solid #e2e8f0",
-    borderRadius: 8,
-    padding: 14,
-    minWidth: 145,
+    borderRadius: 9,
+    padding: 13,
+    minWidth: 0,
     flex: "1 1 145px",
+    background: "#fff",
   },
 };
 
-function Table({ columns, rows, emptyMessage = "No records found." }) {
+function Table({
+  columns,
+  rows,
+  emptyMessage = "No records found.",
+}) {
   return (
     <div style={styles.tableWrap}>
       <table style={styles.table}>
@@ -164,7 +217,7 @@ function Table({ columns, rows, emptyMessage = "No records found." }) {
                 key={column.key}
                 style={{
                   ...styles.th,
-                  ...(column.right ? styles.right : {}),
+                  textAlign: column.right ? "right" : "left",
                 }}
               >
                 {column.label}
@@ -178,7 +231,12 @@ function Table({ columns, rows, emptyMessage = "No records found." }) {
             <tr>
               <td
                 colSpan={columns.length}
-                style={{ ...styles.td, textAlign: "center" }}
+                style={{
+                  ...styles.td,
+                  textAlign: "center",
+                  padding: 25,
+                  color: "#64748b",
+                }}
               >
                 {emptyMessage}
               </td>
@@ -191,7 +249,7 @@ function Table({ columns, rows, emptyMessage = "No records found." }) {
                     key={column.key}
                     style={{
                       ...styles.td,
-                      ...(column.right ? styles.right : {}),
+                      textAlign: column.right ? "right" : "left",
                       ...(row.bold ? styles.total : {}),
                     }}
                   >
@@ -273,7 +331,7 @@ export default function Reports({
     } catch (err) {
       setError(
         err.message ||
-          "Could not load reports. contact Stoka team if need assistance"
+          "Could not load reports. Contact Stoka team if you need assistance."
       );
     } finally {
       setLoading(false);
@@ -507,42 +565,20 @@ export default function Reports({
       (item) => item.category === "operating_expense"
     );
 
-    /*
-     * Apply the same proration rule to both income and expenses.
-     * Current month: day of month / 30 * recorded amount.
-     * Past months: use the full recorded amount.
-     */
-    const now = new Date();
-
-    const isCurrentMonth =
-      start.getFullYear() === now.getFullYear() &&
-      start.getMonth() === now.getMonth();
-
-    const daysToProrate = isCurrentMonth ? now.getDate() : 30;
-    const prorationFactor = daysToProrate / 30;
-
+    // Always use the full recorded income and expense amounts.
     const otherIncome = incomes.reduce(
-      (sum, item) =>
-        sum +
-        number(item.amount) *
-          (isCurrentMonth ? prorationFactor : 1),
+      (sum, item) => sum + number(item.amount),
       0
     );
 
     const operatingExpenses = expenses.reduce(
-      (sum, item) =>
-        sum +
-        number(item.amount) *
-          (isCurrentMonth ? prorationFactor : 1),
+      (sum, item) => sum + number(item.amount),
       0
     );
 
     const openingStock = stockLedger.valueBefore(start);
     const closingStock = stockLedger.valueBefore(end);
 
-    /*
-     * Estimate withdrawal value using moving-average purchase cost.
-     */
     const withdrawnValue = stockLedger.events
       .filter(
         (event) =>
@@ -625,8 +661,6 @@ export default function Reports({
       expenses,
       otherIncome,
       operatingExpenses,
-      prorationFactor,
-      isCurrentMonth,
       profit,
       profitPercentage,
       monthSales,
@@ -643,6 +677,19 @@ export default function Reports({
     ieEntries,
     stockLedger,
   ]);
+
+  /*
+   * Combine repeated income and expense names for display.
+   */
+  const combinedIncomes = useMemo(
+    () => combineEntries(report.incomes),
+    [report.incomes]
+  );
+
+  const combinedExpenses = useMemo(
+    () => combineEntries(report.expenses),
+    [report.expenses]
+  );
 
   /*
    * Every current product is included, even if it had zero sales.
@@ -748,30 +795,26 @@ export default function Reports({
     },
     { name: "Gross profit", amount: report.grossProfit, bold: true },
 
-    ...report.incomes.map((item) => ({
+    ...combinedIncomes.map((item) => ({
       id: `income-${item.id}`,
       name: `Income: ${item.itemName}`,
-      amount:
-        number(item.amount) *
-        (report.isCurrentMonth ? report.prorationFactor : 1),
+      amount: item.amount,
     })),
 
     {
-      name: "Total other income (prorated)",
+      name: "Total other income",
       amount: report.otherIncome,
       bold: true,
     },
 
-    ...report.expenses.map((item) => ({
+    ...combinedExpenses.map((item) => ({
       id: `expense-${item.id}`,
       name: `Expense: ${item.itemName}`,
-      amount:
-        -number(item.amount) *
-        (report.isCurrentMonth ? report.prorationFactor : 1),
+      amount: -item.amount,
     })),
 
     {
-      name: "Total operating expenses (prorated)",
+      name: "Total operating expenses",
       amount: -report.operatingExpenses,
       bold: true,
     },
@@ -783,16 +826,106 @@ export default function Reports({
     },
   ];
 
+  const reportTabs = [
+    ["profit", "Profit and Loss"],
+    ["demand", "Goods on Demand"],
+    ["stock", "Other Details"],
+  ];
+
   return (
     <div style={styles.page}>
-    
+      <style>{`
+        .stoka-report-tabs {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+        }
 
-      <div style={styles.buttons}>
-        {[
-          ["profit", "Profit and Loss"],
-          ["demand", "Goods on Demand"],
-          ["stock", "Other Details"],
-        ].map(([value, label]) => (
+        .stoka-report-tabs button {
+          min-width: 0;
+          white-space: nowrap;
+        }
+
+        .stoka-demand-controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+        }
+
+        .stoka-demand-controls input {
+          flex: 1 1 0;
+          min-width: 0;
+        }
+
+        .stoka-demand-ranking {
+          display: flex;
+          gap: 6px;
+          flex: 1 1 0;
+          min-width: 0;
+        }
+
+        .stoka-demand-ranking button {
+          flex: 1 1 0;
+          min-width: 0;
+          white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+          .stoka-report-tabs {
+            gap: 5px;
+          }
+
+          .stoka-report-tabs button {
+            padding: 10px 3px !important;
+            font-size: 11px !important;
+          }
+
+          .stoka-demand-controls {
+            gap: 5px;
+          }
+
+          .stoka-demand-controls input {
+            width: 0;
+            font-size: 11px !important;
+            padding: 9px 4px !important;
+          }
+
+          .stoka-demand-ranking {
+            gap: 4px;
+          }
+
+          .stoka-demand-ranking button {
+            padding: 9px 3px !important;
+            font-size: 10px !important;
+          }
+
+          .stoka-report-panel {
+            padding: 12px !important;
+          }
+
+          .stoka-report-metrics {
+            gap: 8px !important;
+          }
+
+          .stoka-report-metrics > div {
+            flex: 1 1 calc(50% - 8px) !important;
+          }
+        }
+
+        @media (max-width: 350px) {
+          .stoka-report-tabs button {
+            font-size: 10px !important;
+          }
+
+          .stoka-demand-ranking button {
+            font-size: 9px !important;
+          }
+        }
+      `}</style>
+
+      <div className="stoka-report-tabs" style={styles.buttons}>
+        {reportTabs.map(([value, label]) => (
           <button
             key={value}
             type="button"
@@ -805,15 +938,6 @@ export default function Reports({
             {label}
           </button>
         ))}
-
-        <button
-          type="button"
-          onClick={loadReports}
-          style={{ ...styles.button, marginLeft: "auto" }}
-          disabled={loading}
-        >
-          {loading ? "Refreshing..." : "Refresh"}
-        </button>
       </div>
 
       {error && <div style={styles.error}>{error}</div>}
@@ -823,21 +947,25 @@ export default function Reports({
       )}
 
       {activeReport === "profit" && (
-        <section style={styles.panel}>
-       
+        <section className="stoka-report-panel" style={styles.panel}>
+          <div style={styles.controls}>
+            <label
+              htmlFor="profit-month"
+              style={{ fontWeight: 700, fontSize: 13 }}
+            >
+              Select month
+            </label>
 
-          <label style={{ display: "block", marginBottom: 8 }}>
-            Select month
-          </label>
+            <input
+              id="profit-month"
+              type="month"
+              value={month}
+              onChange={(event) => setMonth(event.target.value)}
+              style={styles.field}
+            />
+          </div>
 
-          <input
-            type="month"
-            value={month}
-            onChange={(event) => setMonth(event.target.value)}
-            style={styles.field}
-          />
-
-          <p style={styles.muted}>
+          <p style={{ ...styles.muted, marginTop: 10 }}>
             Period: {dateLabel(monthStart(month))} to{" "}
             {dateLabel(
               new Date(nextMonthStart(month).getTime() - 86400000)
@@ -845,6 +973,7 @@ export default function Reports({
           </p>
 
           <div
+            className="stoka-report-metrics"
             style={{
               display: "flex",
               flexWrap: "wrap",
@@ -877,7 +1006,10 @@ export default function Reports({
 
           <Table
             columns={[
-              { key: "name", label: "Description" },
+              {
+                key: "name",
+                label: "Description",
+              },
               {
                 key: "amount",
                 label: "Amount ($)",
@@ -888,59 +1020,53 @@ export default function Reports({
             rows={pnlRows}
           />
 
-          <p style={{ ...styles.muted, marginTop: 16 }}>
-            For the current month, both other income and operating expenses
-            are prorated using the day of the month divided by 30. Past
-            months use the full recorded amounts. This assumes both income
-            and expense entries represent monthly amounts.
+          <p style={{ ...styles.muted, marginTop: 14 }}>
+            Full recorded income and operating expense amounts are shown.
+            No proration is applied to any month.
           </p>
         </section>
       )}
 
       {activeReport === "demand" && (
-        <section style={styles.panel}>
-         
+        <section className="stoka-report-panel" style={styles.panel}>
+          <div className="stoka-demand-controls">
+            <input
+              type="month"
+              value={month}
+              onChange={(event) => setMonth(event.target.value)}
+              style={styles.field}
+              aria-label="Select month"
+            />
 
-          <label style={{ display: "block", marginBottom: 8 }}>
-            Select month
-          </label>
+            <div className="stoka-demand-ranking">
+              <button
+                type="button"
+                onClick={() => setRanking("most")}
+                style={{
+                  ...styles.button,
+                  ...(ranking === "most" ? styles.activeButton : {}),
+                }}
+              >
+                Most demanded
+              </button>
 
-          <input
-            type="month"
-            value={month}
-            onChange={(event) => setMonth(event.target.value)}
-            style={styles.field}
-          />
-
-          <div style={{ marginTop: 16 }}>
-            <button
-              type="button"
-              onClick={() => setRanking("most")}
-              style={{
-                ...styles.button,
-                ...(ranking === "most" ? styles.activeButton : {}),
-                marginRight: 8,
-              }}
-            >
-              Most demanded
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setRanking("least")}
-              style={{
-                ...styles.button,
-                ...(ranking === "least" ? styles.activeButton : {}),
-              }}
-            >
-              Least demanded
-            </button>
+              <button
+                type="button"
+                onClick={() => setRanking("least")}
+                style={{
+                  ...styles.button,
+                  ...(ranking === "least" ? styles.activeButton : {}),
+                }}
+              >
+                Least demanded
+              </button>
+            </div>
           </div>
 
-          <p style={styles.muted}>
+          <p style={{ ...styles.muted, marginTop: 14 }}>
             Based on completed sales for the selected month. Every current
             product is included, including products with zero sales.
-            “Times sold” counts how often a product appears as a line in
+            "Times sold" counts how often a product appears as a line in
             a completed sale.
           </p>
 
@@ -965,9 +1091,7 @@ export default function Reports({
       )}
 
       {activeReport === "stock" && (
-        <section style={styles.panel}>
-          
-
+        <section className="stoka-report-panel" style={styles.panel}>
           <p style={styles.muted}>
             Current quantities and estimated stock value using recorded
             purchase costs.
@@ -1006,7 +1130,7 @@ export default function Reports({
             rows={remainingStock}
           />
 
-          <p style={{ ...styles.muted, marginTop: 16 }}>
+          <p style={{ ...styles.muted, marginTop: 14 }}>
             Stock value is an estimate based on recorded purchase costs,
             not selling prices.
           </p>

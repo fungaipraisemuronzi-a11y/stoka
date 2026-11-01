@@ -1057,7 +1057,7 @@ export default function Sales({
                     className="stoka-menu-home"
                     onClick={() => {
                       setMenuOpen(false);
-                      onBack?.();
+    onBack?.();
                     }}
                   >
                     Go to Home

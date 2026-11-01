@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const API_URL = "https://stoka-of78.onrender.com";
@@ -6,51 +7,32 @@ const styles = {
   page: {
     display: "flex",
     flexDirection: "column",
-    gap: "18px",
+    gap: "16px",
     width: "100%",
+    minWidth: 0,
     color: "#1f2937",
-  },
-  heading: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "12px",
-    flexWrap: "wrap",
-  },
-  title: {
-    margin: 0,
-    fontSize: "23px",
-    fontWeight: 750,
   },
   muted: {
     color: "#6b7280",
     fontSize: "13px",
-    marginTop: "5px",
-  },
-  button: {
-    border: "1px solid #d1d5db",
-    background: "#fff",
-    padding: "10px 14px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: 600,
+    marginTop: "2px",
   },
   filters: {
-    display: "flex",
-    flexWrap: "wrap",
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
     gap: "12px",
     alignItems: "end",
-    padding: "16px",
+    padding: "15px",
     background: "#fff",
     border: "1px solid #e5e7eb",
-    borderRadius: "12px",
+    borderRadius: "13px",
+    boxShadow: "0 2px 8px rgba(15, 23, 42, 0.03)",
   },
   field: {
     display: "flex",
     flexDirection: "column",
     gap: "6px",
-    minWidth: "150px",
-    flex: "1",
+    minWidth: 0,
   },
   label: {
     fontSize: "12px",
@@ -60,17 +42,34 @@ const styles = {
   input: {
     width: "100%",
     minWidth: 0,
+    height: "42px",
     boxSizing: "border-box",
-    padding: "10px",
+    padding: "9px 10px",
     border: "1px solid #d1d5db",
-    borderRadius: "7px",
+    borderRadius: "8px",
     background: "#fff",
     color: "#111827",
+    fontSize: "13px",
+    outlineColor: "#16794b",
   },
   tabs: {
-    display: "flex",
-    flexWrap: "wrap",
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
     gap: "8px",
+    width: "100%",
+  },
+  tab: {
+    minWidth: 0,
+    padding: "11px 8px",
+    border: "1px solid #e5e7eb",
+    borderRadius: "9px",
+    background: "#fff",
+    color: "#4b5563",
+    fontSize: "13px",
+    fontWeight: 700,
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    whiteSpace: "nowrap",
   },
   tableWrap: {
     width: "100%",
@@ -78,6 +77,7 @@ const styles = {
     border: "1px solid #e5e7eb",
     borderRadius: "12px",
     background: "#fff",
+    boxShadow: "0 2px 8px rgba(15, 23, 42, 0.03)",
   },
   table: {
     width: "100%",
@@ -86,11 +86,12 @@ const styles = {
     fontSize: "13px",
   },
   th: {
-    background: "#f3f4f6",
+    background: "#f3f6f4",
     padding: "12px",
     textAlign: "left",
     whiteSpace: "nowrap",
     borderBottom: "1px solid #e5e7eb",
+    color: "#374151",
     fontWeight: 750,
   },
   td: {
@@ -101,14 +102,16 @@ const styles = {
   error: {
     padding: "12px 14px",
     border: "1px solid #fecaca",
-    borderRadius: "8px",
+    borderRadius: "9px",
     background: "#fef2f2",
     color: "#991b1b",
+    fontSize: "13px",
   },
   empty: {
     padding: "35px 15px",
     textAlign: "center",
     color: "#6b7280",
+    fontSize: "13px",
   },
 };
 
@@ -122,7 +125,6 @@ const getDateValue = (value) => {
   if (!value) return "";
 
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "";
 
   const year = date.getFullYear();
@@ -136,7 +138,6 @@ const formatDate = (value) => {
   if (!value) return "—";
 
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "—";
 
   return date.toLocaleString();
@@ -149,7 +150,6 @@ const quantity = (value) =>
 
 async function fetchJson(url) {
   const response = await fetch(url);
-
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
@@ -185,7 +185,6 @@ export default function TellerHistory({ businessId }) {
     try {
       const encodedBusinessId = encodeURIComponent(businessId);
 
-      // No tellerId is sent: all tellers in this business are included.
       const [salesData, returnsData, withdrawalsData, tellersData] =
         await Promise.all([
           fetchJson(
@@ -305,27 +304,57 @@ export default function TellerHistory({ businessId }) {
     0
   );
 
-  const clearFilters = () => {
-    setSelectedTeller("all");
-    setDateFrom("");
-    setDateTo("");
-  };
-
   const tabStyle = (tab) => ({
-    ...styles.button,
-    background: activeHistory === tab ? "#1d4ed8" : "#fff",
-    color: activeHistory === tab ? "#fff" : "#374151",
-    borderColor: activeHistory === tab ? "#1d4ed8" : "#d1d5db",
+    ...styles.tab,
+    background: activeHistory === tab ? "#16794b" : "#fff",
+    color: activeHistory === tab ? "#fff" : "#4b5563",
+    borderColor: activeHistory === tab ? "#16794b" : "#e5e7eb",
+    boxShadow:
+      activeHistory === tab
+        ? "0 2px 6px rgba(22, 121, 75, 0.18)"
+        : "none",
   });
 
   return (
     <div style={styles.page}>
-      
+      <style>
+        {`
+          @media (max-width: 600px) {
+            .teller-history-filters {
+              grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+              gap: 10px !important;
+              padding: 12px !important;
+            }
+
+            .teller-history-teller {
+              grid-column: 1 / -1;
+            }
+
+            .teller-history-tabs button {
+              padding: 11px 3px !important;
+              font-size: 12px !important;
+            }
+          }
+
+          @media (max-width: 350px) {
+            .teller-history-tabs button {
+              font-size: 11px !important;
+              padding: 10px 2px !important;
+            }
+          }
+        `}
+      </style>
 
       {error && <div style={styles.error}>{error}</div>}
 
-      <div style={styles.filters}>
-        <div style={styles.field}>
+      <div
+        className="teller-history-filters"
+        style={styles.filters}
+      >
+        <div
+          className="teller-history-teller"
+          style={styles.field}
+        >
           <label style={styles.label}>Teller</label>
           <select
             style={styles.input}
@@ -363,11 +392,12 @@ export default function TellerHistory({ businessId }) {
             onChange={(event) => setDateTo(event.target.value)}
           />
         </div>
-
-       
       </div>
 
-      <div style={styles.tabs}>
+      <div
+        className="teller-history-tabs"
+        style={styles.tabs}
+      >
         {["Sales", "Returns", "Withdrawals"].map((tab) => (
           <button
             type="button"
@@ -376,26 +406,21 @@ export default function TellerHistory({ businessId }) {
             onClick={() => setActiveHistory(tab)}
           >
             {tab}
-            {" ("}
-            {tab === "Sales"
-              ? filteredSales.length
-              : tab === "Returns"
-                ? filteredReturns.length
-                : filteredWithdrawals.length}
-            {")"}
           </button>
         ))}
       </div>
 
       {activeHistory === "Sales" && (
         <div style={styles.muted}>
-          Sales value for the selected filters: <strong>{money(salesTotal)}</strong>
+          Sales value for the selected filters:{" "}
+          <strong>{money(salesTotal)}</strong>
         </div>
       )}
 
       {activeHistory === "Returns" && (
         <div style={styles.muted}>
-          Refund value for the selected filters: <strong>{money(refundsTotal)}</strong>
+          Refund value for the selected filters:{" "}
+          <strong>{money(refundsTotal)}</strong>
         </div>
       )}
 
@@ -429,7 +454,9 @@ export default function TellerHistory({ businessId }) {
                       <td style={styles.td}>
                         {sale.receiptNumber || `Sale #${sale.id}`}
                       </td>
-                      <td style={styles.td}>{sale.tellerName || "Unknown teller"}</td>
+                      <td style={styles.td}>
+                        {sale.tellerName || "Unknown teller"}
+                      </td>
                       <td style={styles.td}>
                         {Array.isArray(sale.items)
                           ? sale.items
@@ -445,7 +472,9 @@ export default function TellerHistory({ businessId }) {
                       <td style={styles.td}>
                         <strong>{money(sale.totalAmount)}</strong>
                       </td>
-                      <td style={styles.td}>{sale.paymentMethod || "—"}</td>
+                      <td style={styles.td}>
+                        {sale.paymentMethod || "—"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -473,9 +502,13 @@ export default function TellerHistory({ businessId }) {
                         {record.returnNumber || `Return #${record.id}`}
                       </td>
                       <td style={styles.td}>
-                        {record.receiptNumber || record.originalReceiptNumber || "—"}
+                        {record.receiptNumber ||
+                          record.originalReceiptNumber ||
+                          "—"}
                       </td>
-                      <td style={styles.td}>{record.tellerName || "Unknown teller"}</td>
+                      <td style={styles.td}>
+                        {record.tellerName || "Unknown teller"}
+                      </td>
                       <td style={styles.td}>
                         {Array.isArray(record.items)
                           ? record.items
@@ -513,10 +546,18 @@ export default function TellerHistory({ businessId }) {
                   {filteredWithdrawals.map((record) => (
                     <tr key={record.id}>
                       <td style={styles.td}>{formatDate(record.createdAt)}</td>
-                      <td style={styles.td}>{record.tellerName || "Unknown teller"}</td>
-                      <td style={styles.td}>{record.productName || "—"}</td>
-                      <td style={styles.td}>{quantity(record.packsWithdrawn)}</td>
-                      <td style={styles.td}>{quantity(record.unitsWithdrawn)}</td>
+                      <td style={styles.td}>
+                        {record.tellerName || "Unknown teller"}
+                      </td>
+                      <td style={styles.td}>
+                        {record.productName || "—"}
+                      </td>
+                      <td style={styles.td}>
+                        {quantity(record.packsWithdrawn)}
+                      </td>
+                      <td style={styles.td}>
+                        {quantity(record.unitsWithdrawn)}
+                      </td>
                       <td style={styles.td}>
                         <strong>{quantity(record.totalUnits)}</strong>
                       </td>
