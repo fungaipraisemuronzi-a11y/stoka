@@ -240,7 +240,7 @@ export default function Stock({ business }) {
               </div>
 
               <div className="stock-field">
-                <label htmlFor="packName">Pack name</label>
+                <label htmlFor="packName">Packaging name</label>
                 <input
                   id="packName"
                   name="packName"
@@ -253,7 +253,7 @@ export default function Stock({ business }) {
               </div>
 
               <div className="stock-field">
-                <label htmlFor="unitsPerPack">Units per pack</label>
+                <label htmlFor="unitsPerPack">Units per packaging</label>
                 <input
                   id="unitsPerPack"
                   name="unitsPerPack"
@@ -314,7 +314,7 @@ export default function Stock({ business }) {
               <div className="stock-empty-state">
                
                 <h4>No stock items yet</h4>
-                <p>Add your first item using the form above.</p>
+               
               </div>
             ) : (
               <div className="stock-table-wrapper">
@@ -323,8 +323,8 @@ export default function Stock({ business }) {
                     <tr>
                       <th>Stock name</th>
                       <th>Unit</th>
-                      <th>Pack</th>
-                      <th>Units per pack</th>
+                      <th>Packaging</th>
+                      <th>Units per packaging</th>
                       <th>Selling price / unit</th>
                       <th>Current quantity</th>
                       <th>Actions</th>

@@ -657,7 +657,7 @@ export default function AddStock({ business }) {
 
           <div className="as-form-grid">
             <div className="as-form-group">
-              <label htmlFor="purchase-packs">Packs received</label>
+              <label htmlFor="purchase-packs">Packaging received</label>
               <input
                 id="purchase-packs"
                 type="number"
@@ -689,7 +689,7 @@ export default function AddStock({ business }) {
             </div>
 
             <div className="as-form-group">
-              <label htmlFor="purchase-price">Purchase price per pack</label>
+              <label htmlFor="purchase-price">Purchase price per packaging</label>
               <input
                 id="purchase-price"
                 type="number"

@@ -1060,7 +1060,7 @@ export default function Reports({
                   ...(ranking === "most" ? styles.activeButton : {}),
                 }}
               >
-                Most demanded
+                Most
               </button>
 
               <button
@@ -1071,7 +1071,7 @@ export default function Reports({
                   ...(ranking === "least" ? styles.activeButton : {}),
                 }}
               >
-                Least demanded
+                Least
               </button>
             </div>
           </div>
@@ -1105,17 +1105,14 @@ export default function Reports({
 
       {activeReport === "stock" && (
         <section className="stoka-report-panel" style={styles.panel}>
-          <p style={styles.muted}>
-            Current quantities and estimated stock value using recorded
-            purchase costs.
-          </p>
+        
 
           <Table
             columns={[
               { key: "name", label: "Product" },
               {
                 key: "packs",
-                label: "Packs remaining",
+                label: "Packaging remaining",
                 right: true,
                 render: (row) =>
                   `${quantity(row.packs)} ${row.packName}`,
