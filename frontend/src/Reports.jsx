@@ -1036,10 +1036,7 @@ export default function Reports({
             rows={pnlRows}
           />
 
-          <p style={{ ...styles.muted, marginTop: 14 }}>
-            Full recorded income and operating expense amounts are shown.
-            No proration is applied to any month.
-          </p>
+          
         </section>
       )}
 

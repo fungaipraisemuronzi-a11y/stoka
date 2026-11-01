@@ -429,7 +429,7 @@ export default function IE({ business }) {
         <article className="ie-summary-card ie-income-card">
           <span>Other Income</span>
           <strong>{money(otherIncome)}</strong>
-          <small>Delivery, service and other income</small>
+          <small>Monthly income entries</small>
         </article>
       </div>
 
@@ -567,10 +567,7 @@ export default function IE({ business }) {
           </div>
         </form>
 
-        <p className="ie-form-footnote">
-          Stock purchases, Sales Income and Discount Allowed are not
-          manually entered here to avoid double counting.
-        </p>
+        
       </section>
 
       <section className="ie-panel">
@@ -589,12 +586,9 @@ export default function IE({ business }) {
           </div>
         ) : entries.length === 0 ? (
           <div className="ie-empty-state">
-            <span className="ie-empty-icon">▤</span>
+            
             <strong>No manual entries for this month yet</strong>
-            <p>
-              Add an expense or income above. Stock purchases are
-              included separately from Purchase History.
-            </p>
+            
           </div>
         ) : (
           <div className="ie-table-wrap">

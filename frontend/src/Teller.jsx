@@ -69,13 +69,7 @@ export default function Teller({ business, onBack, onLogin }) {
   return (
     <main className="teller-auth-page">
       <section className="teller-auth-card">
-        <button
-          type="button"
-          className="teller-back-button"
-          onClick={onBack}
-        >
-          ← Back
-        </button>
+        
 
         
         <div className="teller-mode-switch">
@@ -139,7 +133,15 @@ export default function Teller({ business, onBack, onLogin }) {
             {message}
           </p>
         )}
+        <button
+          type="button"
+          className="teller-back-button"
+          onClick={onBack}
+        >
+          Back
+        </button>
       </section>
+      
     </main>
   );
 }

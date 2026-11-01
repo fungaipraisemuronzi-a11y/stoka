@@ -116,21 +116,17 @@ export default function Home({ business, onLogout }) {
             className="back-button"
             onClick={() => setSelectedArea(null)}
           >
-            ← Back to Home
+            Back to Home
           </button>
 
           <div className="small-brand">
-            <span className="brand-icon small-icon">
-              S
-            </span>
+           
             <span>Stoka</span>
           </div>
         </header>
 
         <section className="placeholder-card">
-          <div className="placeholder-icon">🛒</div>
-
-          <p className="eyebrow">STOKA WORKSPACE</p>
+         
 
           <h1>{selectedArea}</h1>
 

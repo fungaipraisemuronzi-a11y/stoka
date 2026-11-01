@@ -977,10 +977,11 @@ export default function Sales({
 
       <header className="sales-header stoka-teller-header">
         <div className="stoka-header-brand">
-          <div className="stoka-brand-mark">S</div>
+          
 
-          <div className="stoka-brand-copy">
-            <strong>Stoka</strong>
+          <div className="stoka-brand-copy"
+          >
+           
             <span>
               {business?.businessName ||
                 business?.name ||
@@ -992,7 +993,7 @@ export default function Sales({
         <div className="stoka-header-right">
           <div className="stoka-teller-identity">
             <strong>{tellerName || "Teller"}</strong>
-            <span>Sales workspace</span>
+           
           </div>
 
           <div className="stoka-overflow-wrap">
@@ -1043,7 +1044,7 @@ export default function Sales({
                         onChangePassword();
                       } else {
                         notify(
-                          "Change Password page navigation has not been connected yet.",
+                          "Unexpected error",
                           "error"
                         );
                       }
@@ -1055,12 +1056,9 @@ export default function Sales({
                   <button
                     type="button"
                     className="stoka-menu-home"
-                    onClick={() => {
-                      setMenuOpen(false);
-    onBack?.();
-                    }}
+                    onClick={onBack}
                   >
-                    Go to Home
+                    Back
                   </button>
                 </div>
               </>
@@ -1204,10 +1202,7 @@ export default function Sales({
 
       {/* FOOTER */}
 
-      <footer className="sales-footer">
-        Stoka · Sales, returns and withdrawals are recorded against this
-        business&apos;s stock.
-      </footer>
+      
     </main>
   );
 }

@@ -118,22 +118,14 @@ export default function App() {
   return (
     <main className="app-container auth-background">
       <section className="auth-card">
-        <div className="brand">
-          <h1 color="black">Stoka</h1>
-        </div>
+        
 
         <div className="auth-heading">
-          <h2 color="black">
+          <label>
             {page === "login"
-              ? "Welcome back"
-              : "Create your account"}
-          </h2>
-
-          <p>
-            {page === "login"
-              ? "Sign in to manage your business."
-              : "Register your business to get started."}
-          </p>
+              ? "Stoka Sign in"
+              : "Stoka Business Register"}
+          </label>
         </div>
 
         <div className="auth-switch">
@@ -247,9 +239,7 @@ export default function App() {
           </p>
         )}
 
-        <p className="footer-text">
-          Stoka — stock management made simple.
-        </p>
+       
       </section>
     </main>
   );

@@ -110,39 +110,16 @@ export default function ChangePassword({
 
   return (
     <main className="sales-page">
-      <header className="sales-header">
-        <button
-          type="button"
-          className="back-button"
-          onClick={onBack}
-          disabled={loading}
-        >
-          ← Back to Sales
-        </button>
-
-        <div className="small-brand">
-          <span className="brand-icon small-icon">S</span>
-          <div>
-            <strong>Stoka</strong>
-            <span className="brand-subtitle">
-              STOCK MANAGEMENT
-            </span>
-          </div>
-        </div>
-      </header>
+     
 
       <section className="password-page-card">
         <div className="password-page-heading">
-          <div className="password-page-icon">🔐</div>
+         
+        
 
-          <p className="eyebrow">TELLER ACCOUNT</p>
+          <h1>Change your Password</h1>
 
-          <h1>Change Password</h1>
-
-          <p>
-            Update the password for{" "}
-            <strong>{tellerName}</strong>.
-          </p>
+          
         </div>
 
         {message && (
@@ -229,9 +206,14 @@ export default function ChangePassword({
           </button>
         </form>
 
-        <p className="password-page-note">
-          Keep your password private and secure.
-        </p>
+        <button
+          type="button"
+          className="back-button"
+          onClick={onBack}
+          disabled={loading}
+        >
+          Go Back
+        </button>
       </section>
     </main>
   );

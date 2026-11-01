@@ -593,7 +593,7 @@ export default function AddStock({ business }) {
 
       <section className="as-panel">
         <h2 className="as-title">
-          {editingId ? "Edit Purchase" : "Add Stock / Record Purchase"}
+          {editingId ? "Edit Purchase" : "Record Purchase"}
         </h2>
 
         {error && (

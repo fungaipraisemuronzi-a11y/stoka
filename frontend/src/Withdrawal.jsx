@@ -54,10 +54,10 @@ export default function Withdrawal({
       <section className="withdrawals-panel">
         <div className="sales-section-heading">
           <div>
-            <h2>
+            <span>
               {editingWithdrawalId ? "Edit Withdrawal" : "New Withdrawal"}
-            </h2>
-            <p>Search for a product and enter the quantity withdrawn.</p>
+            </span>
+            
           </div>
         </div>
 
@@ -216,8 +216,8 @@ export default function Withdrawal({
       <section className="withdrawals-panel">
         <div className="sales-section-heading">
           <div>
-            <h2>Withdrawal History</h2>
-            <p>Withdrawals recorded by this teller.</p>
+            <span>Withdrawal History</span>
+           
           </div>
 
           <button

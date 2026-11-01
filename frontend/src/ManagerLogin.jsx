@@ -116,34 +116,21 @@ try {
 
 return (
 <main className="stoka-manager-page">
-<header className="stoka-manager-header">
-<div className="stoka-manager-brand">
-<span className="stoka-manager-brand-name">Stoka</span>
-</div>
 
-    <div className="stoka-manager-business">
-      <strong>
-        {business?.businessName ||
-          business?.business_name ||
-          business?.name ||
-          "Business"}
-      </strong>
-    </div>
-  </header>
 
   <section className="card manager-auth-card">
     {checkingPassword ? (
       <div className="manager-auth-heading">
-        <span className="manager-auth-icon">🔐</span>
-        <h2>Manager Access</h2>
-        <p>Checking manager password...</p>
+       
+       
+        <p>Loading. please wait...</p>
       </div>
     ) : hasPassword === null ? (
       <>
-        <h2>Manager Access</h2>
+      
 
         <p className="error-message" role="alert">
-          {error || "Could not check manager password status."}
+          {error || "Unexpected error"}
         </p>
 
         <button
@@ -159,25 +146,19 @@ return (
           className="manager-home-button"
           onClick={onBack}
         >
-          ← Back to Home
+          Back to Home
         </button>
       </>
     ) : (
       <>
         <div className="manager-auth-heading">
-          <span className="manager-auth-icon">🔐</span>
+          
 
-          <p className="eyebrow">STOKA MANAGER</p>
-
-          <h2>
-            {hasPassword
-              ? "Welcome back!"
-              : "Set up your manager access"}
-          </h2>
+          
 
           <p>
             {hasPassword
-              ? "Enter your manager password to continue."
+              ? "Enter your password to continue."
               : "Create a password to protect your manager workspace."}
           </p>
         </div>
@@ -242,7 +223,7 @@ return (
           className="manager-home-button"
           onClick={onBack}
         >
-          ← Back to Home
+          Back to Home
         </button>
       </>
     )}

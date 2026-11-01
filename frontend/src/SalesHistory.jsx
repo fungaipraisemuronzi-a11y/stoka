@@ -33,8 +33,8 @@ export default function SalesHistory({
     <div className="sales-history-panel">
       <div className="sales-section-heading">
         <div>
-          <h2>Sales History</h2>
-          <p>View sales recorded by this teller.</p>
+          <span>Sales History</span>
+         
         </div>
 
         <button

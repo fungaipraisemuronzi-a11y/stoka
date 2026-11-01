@@ -15,7 +15,7 @@ const WHATSAPP_NUMBER = "263777847204";
 const SUBSCRIBE_CODE = "*151*1*1*0777847204*6#";
 
 const menuItems = [
-  { id: "Stock", label: "Stock Setup", icon: "📦" },
+  { id: "Stock", label: "Stock Setup" },
   { id: "Purchases", label: "Purchases", icon: "🛒" },
   { id: "IE", label: "Income and Expenses", icon: "🧾" },
   { id: "Tellers", label: "Tellers", icon: "👥" },
@@ -262,9 +262,7 @@ export default function Manager({ business, onBack }) {
                   }
                   onClick={() => handleMenuSelect(item.id)}
                 >
-                  <span className="stoka-manager-menu-icon">
-                    {item.icon}
-                  </span>
+                  
 
                   <span>{item.label}</span>
 
@@ -283,19 +281,12 @@ export default function Manager({ business, onBack }) {
                 }
                 onClick={() => handleMenuSelect("More")}
               >
-                <span className="stoka-manager-menu-icon">⚙️</span>
+                
                 <span>More</span>
                 <span className="stoka-manager-menu-arrow">›</span>
               </button>
 
-              <button
-                type="button"
-                className="stoka-manager-menu-item"
-                onClick={() => handleMenuSelect("Logout")}
-              >
-                <span className="stoka-manager-menu-icon">🚪</span>
-                <span>Logout</span>
-              </button>
+              
 
               <div className="stoka-manager-menu-divider" />
 
@@ -304,7 +295,7 @@ export default function Manager({ business, onBack }) {
                 className="stoka-manager-menu-item stoka-manager-home-item"
                 onClick={handleHomeClick}
               >
-                <span className="stoka-manager-menu-icon">⌂</span>
+                
                 <span>Back to Home</span>
               </button>
             </div>

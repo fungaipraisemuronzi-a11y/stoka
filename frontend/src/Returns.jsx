@@ -39,7 +39,7 @@ export default function Returns({
       <section className="returns-panel">
         <div className="sales-section-heading">
           <div>
-            <h2>{editingReturnId ? "Edit Return" : "New Return"}</h2>
+            
             <p>Select a receipt and enter the quantities being returned.</p>
           </div>
         </div>
@@ -179,8 +179,8 @@ export default function Returns({
       <section className="returns-panel">
         <div className="sales-section-heading">
           <div>
-            <h2>Return History</h2>
-            <p>Returns recorded by this teller.</p>
+            <span>Return History</span>
+           
           </div>
 
           <button
