@@ -27,10 +27,11 @@ const getList = (data, ...keys) => {
   return [];
 };
 
+// Use the accounting date first for I&E entries.
 const getDate = (item) =>
   new Date(
-    item?.createdAt ||
-      item?.transactionDate ||
+    item?.transactionDate ||
+      item?.createdAt ||
       item?.date ||
       item?.created_at ||
       0
@@ -63,7 +64,7 @@ const dateLabel = (date) =>
 
 /*
  * Combine repeated income or expense entries with the same item name.
- * This combines their amounts in the report display.
+ * This combines their amounts in the report display only.
  */
 const combineEntries = (entries) => {
   const grouped = new Map();
@@ -297,13 +298,22 @@ export default function Reports({
     setError("");
 
     try {
+      // Split the selected month into the values expected by /api/ie.
+      const [selectedYear, selectedMonth] = month.split("-");
+
+      const ieQuery = new URLSearchParams({
+        businessId: String(businessId),
+        month: selectedMonth,
+        year: selectedYear,
+      });
+
       const endpoints = [
         `/api/products?businessId=${encodeURIComponent(businessId)}`,
         `/api/sales?businessId=${encodeURIComponent(businessId)}`,
         `/api/returns?businessId=${encodeURIComponent(businessId)}`,
         `/api/stock/purchases?businessId=${encodeURIComponent(businessId)}`,
         `/api/withdrawals?businessId=${encodeURIComponent(businessId)}`,
-        `/api/ie?businessId=${encodeURIComponent(businessId)}`,
+        `/api/ie?${ieQuery.toString()}`,
       ];
 
       const responses = await Promise.all(
@@ -327,6 +337,8 @@ export default function Reports({
       setReturns(getList(responses[2], "returns"));
       setPurchases(getList(responses[3], "purchases"));
       setWithdrawals(getList(responses[4], "withdrawals"));
+
+      // The backend returns { entries, summary }.
       setIEEntries(getList(responses[5], "entries"));
     } catch (err) {
       setError(
@@ -336,7 +348,7 @@ export default function Reports({
     } finally {
       setLoading(false);
     }
-  }, [businessId]);
+  }, [businessId, month]);
 
   useEffect(() => {
     loadReports();
@@ -534,6 +546,9 @@ export default function Reports({
     const monthReturns = returns.filter(inSelectedMonth);
     const monthPurchases = purchases.filter(inSelectedMonth);
     const monthWithdrawals = withdrawals.filter(inSelectedMonth);
+
+    // I&E entries have already been fetched for the selected month.
+    // Filter again to ensure only matching transaction dates are used.
     const monthIE = ieEntries.filter(inSelectedMonth);
 
     const totalSales = monthSales.reduce(
@@ -553,6 +568,7 @@ export default function Reports({
       0
     );
 
+    // Additional costs entered manually in I&E.
     const purchaseCosts = monthIE
       .filter((item) => item.category === "purchase_cost")
       .reduce((sum, item) => sum + number(item.amount), 0);
@@ -565,7 +581,7 @@ export default function Reports({
       (item) => item.category === "operating_expense"
     );
 
-    // Always use the full recorded income and expense amounts.
+    // Use the full recorded amounts. No proration.
     const otherIncome = incomes.reduce(
       (sum, item) => sum + number(item.amount),
       0
@@ -678,9 +694,6 @@ export default function Reports({
     stockLedger,
   ]);
 
-  /*
-   * Combine repeated income and expense names for display.
-   */
   const combinedIncomes = useMemo(
     () => combineEntries(report.incomes),
     [report.incomes]
@@ -781,8 +794,11 @@ export default function Reports({
     { name: "Sales returns", amount: -report.salesReturns },
     { name: "Turnover", amount: report.turnover, bold: true },
     { name: "Opening stock", amount: report.openingStock },
-    { name: "Purchases", amount: report.stockPurchases },
-    { name: "Cost on purchases", amount: report.purchaseCosts },
+    { name: "Stock purchases", amount: report.stockPurchases },
+    {
+      name: "Additional cost on purchases",
+      amount: report.purchaseCosts,
+    },
     {
       name: "Withdrawals (at cost)",
       amount: -report.withdrawnValue,
