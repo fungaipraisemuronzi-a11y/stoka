@@ -87,7 +87,9 @@ function validateEntry({
   }
 
   if (
-    SYSTEM_ITEMS.includes(String(itemName).trim().toLowerCase())
+    SYSTEM_ITEMS.includes(
+      String(itemName).trim().toLowerCase()
+    )
   ) {
     return `"${itemName}" is calculated automatically and cannot be entered manually.`;
   }
@@ -128,13 +130,34 @@ async function verifyBusiness(businessId) {
   return { business: result.rows[0] };
 }
 
-// GET /api/ie?businessId=B60001&month=10&year=2026
+function checkBusinessAccess(requestedBusinessId, managerBusinessId) {
+  if (
+    requestedBusinessId &&
+    String(requestedBusinessId) !== String(managerBusinessId)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+// ======================================================
+// GET MONTHLY I&E RECORDS
+// GET /api/ie?businessId=B60001&month=11&year=2026
+// ======================================================
+
 router.get("/", requireManager, async (req, res) => {
   const businessId = req.manager.businessId;
 
   const now = new Date();
   const month = req.query.month ?? now.getMonth() + 1;
   const year = req.query.year ?? now.getFullYear();
+
+  if (!checkBusinessAccess(req.query.businessId, businessId)) {
+    return res.status(403).json({
+      message: "You cannot access another business's records.",
+    });
+  }
 
   const range = getMonthRange(month, year);
 
@@ -202,6 +225,7 @@ router.get("/", requireManager, async (req, res) => {
              WHERE category = 'income'
            ), 0
          ) AS "otherIncome"
+
        FROM "IEEntry"
        WHERE "businessId" = $1
          AND "transactionDate" >= $2::date
@@ -211,29 +235,38 @@ router.get("/", requireManager, async (req, res) => {
 
     const totals = totalsResult.rows[0];
 
-    const stockPurchases = Number(purchaseResult.rows[0].total);
+    const stockPurchases = Number(
+      purchaseResult.rows[0].total || 0
+    );
 
     const additionalPurchaseCosts = Number(
-      totals.additionalPurchaseCosts
+      totals.additionalPurchaseCosts || 0
     );
 
     const operatingExpenses = Number(
-      totals.operatingExpenses
+      totals.operatingExpenses || 0
     );
 
-    const otherIncome = Number(totals.otherIncome);
+    const otherIncome = Number(
+      totals.otherIncome || 0
+    );
 
     return res.json({
       month: Number(month),
       year: Number(year),
+
       entries: entriesResult.rows,
+
       summary: {
         stockPurchases,
         additionalPurchaseCosts,
+
         totalPurchaseCosts:
           stockPurchases + additionalPurchaseCosts,
+
         operatingExpenses,
         otherIncome,
+
         salesIncome: null,
         discountAllowed: null,
         netBeforeOtherAccountingItems: null,
@@ -241,26 +274,47 @@ router.get("/", requireManager, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Load I&E error:", error.message);
+    console.error("Load I&E error:", error);
 
     return res.status(500).json({
       message: "Failed to load monthly I&E records.",
+      details:
+        process.env.NODE_ENV !== "production"
+          ? error.message
+          : undefined,
     });
   }
 });
 
+// ======================================================
+// CREATE I&E ENTRY
 // POST /api/ie
+// ======================================================
+
 router.post("/", requireManager, async (req, res) => {
   const businessId = req.manager.businessId;
   const managerUsername = req.manager.username;
 
   const {
+    businessId: requestedBusinessId,
     category,
     itemName,
     amount,
     notes,
     transactionDate,
   } = req.body;
+
+  if (!checkBusinessAccess(requestedBusinessId, businessId)) {
+    return res.status(403).json({
+      message: "You cannot add records to another business.",
+    });
+  }
+
+  if (!managerUsername) {
+    return res.status(401).json({
+      message: "Manager username could not be verified. Please log in again.",
+    });
+  }
 
   const date =
     transactionDate || new Date().toISOString().slice(0, 10);
@@ -289,8 +343,15 @@ router.post("/", requireManager, async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO "IEEntry"
-         ("businessId", category, "itemName", amount, notes,
-          "transactionDate", "editedBy")
+         (
+           "businessId",
+           category,
+           "itemName",
+           amount,
+           notes,
+           "transactionDate",
+           "editedBy"
+         )
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [
@@ -309,21 +370,30 @@ router.post("/", requireManager, async (req, res) => {
       entry: result.rows[0],
     });
   } catch (error) {
-    console.error("Create I&E entry error:", error.message);
+    console.error("Create I&E entry error:", error);
 
     return res.status(500).json({
       message: "Failed to record I&E entry.",
+      details:
+        process.env.NODE_ENV !== "production"
+          ? error.message
+          : undefined,
     });
   }
 });
 
+// ======================================================
+// UPDATE I&E ENTRY
 // PUT /api/ie/:id
+// ======================================================
+
 router.put("/:id", requireManager, async (req, res) => {
   const id = Number(req.params.id);
   const businessId = req.manager.businessId;
   const managerUsername = req.manager.username;
 
   const {
+    businessId: requestedBusinessId,
     category,
     itemName,
     amount,
@@ -334,6 +404,18 @@ router.put("/:id", requireManager, async (req, res) => {
   if (!Number.isInteger(id) || id <= 0) {
     return res.status(400).json({
       message: "A valid entry ID is required.",
+    });
+  }
+
+  if (!checkBusinessAccess(requestedBusinessId, businessId)) {
+    return res.status(403).json({
+      message: "You cannot update another business's records.",
+    });
+  }
+
+  if (!managerUsername) {
+    return res.status(401).json({
+      message: "Manager username could not be verified. Please log in again.",
     });
   }
 
@@ -394,15 +476,23 @@ router.put("/:id", requireManager, async (req, res) => {
       entry: result.rows[0],
     });
   } catch (error) {
-    console.error("Update I&E entry error:", error.message);
+    console.error("Update I&E entry error:", error);
 
     return res.status(500).json({
       message: "Failed to update I&E entry.",
+      details:
+        process.env.NODE_ENV !== "production"
+          ? error.message
+          : undefined,
     });
   }
 });
 
-// DELETE /api/ie/:id
+// ======================================================
+// DELETE I&E ENTRY
+// DELETE /api/ie/:id?businessId=B60001
+// ======================================================
+
 router.delete("/:id", requireManager, async (req, res) => {
   const id = Number(req.params.id);
   const businessId = req.manager.businessId;
@@ -410,6 +500,12 @@ router.delete("/:id", requireManager, async (req, res) => {
   if (!Number.isInteger(id) || id <= 0) {
     return res.status(400).json({
       message: "A valid entry ID is required.",
+    });
+  }
+
+  if (!checkBusinessAccess(req.query.businessId, businessId)) {
+    return res.status(403).json({
+      message: "You cannot delete another business's records.",
     });
   }
 
@@ -440,10 +536,14 @@ router.delete("/:id", requireManager, async (req, res) => {
       message: "I&E entry deleted successfully.",
     });
   } catch (error) {
-    console.error("Delete I&E entry error:", error.message);
+    console.error("Delete I&E entry error:", error);
 
     return res.status(500).json({
       message: "Failed to delete I&E entry.",
+      details:
+        process.env.NODE_ENV !== "production"
+          ? error.message
+          : undefined,
     });
   }
 });
