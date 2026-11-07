@@ -14,6 +14,10 @@ const router = express.Router();
 const USERNAME_REGEX = /^[a-zA-Z0-9]+$/;
 const MIN_PASSWORD_LENGTH = 6;
 
+// --------------------------------------------------
+// VALIDATION
+// --------------------------------------------------
+
 function validateManagerDetails(username, password) {
   if (
     !username ||
@@ -30,6 +34,10 @@ function validateManagerDetails(username, password) {
 
   return null;
 }
+
+// --------------------------------------------------
+// TOKEN
+// --------------------------------------------------
 
 function createManagerToken(manager) {
   if (!process.env.MANAGER_JWT_SECRET) {
@@ -48,6 +56,10 @@ function createManagerToken(manager) {
   );
 }
 
+// --------------------------------------------------
+// PUBLIC MANAGER DATA
+// --------------------------------------------------
+
 function publicManager(manager) {
   return {
     id: manager.id,
@@ -57,10 +69,53 @@ function publicManager(manager) {
     isPrimary: manager.is_primary,
     status: manager.status,
     isActive: manager.is_active,
+    isDeleted: manager.is_deleted ?? false,
     createdAt: manager.created_at,
     approvedAt: manager.approved_at,
   };
 }
+
+// --------------------------------------------------
+// AUDIT LOG
+// --------------------------------------------------
+
+async function writeManagerAudit(
+  client,
+  manager,
+  action,
+  beforeData,
+  afterData
+) {
+  await client.query(
+    `INSERT INTO manager_audit_logs
+       (
+         business_id,
+         manager_id,
+         manager_username,
+         manager_number,
+         entity_type,
+         record_id,
+         action,
+         before_data,
+         after_data
+       )
+     VALUES ($1, $2, $3, $4, 'manager_account', $5, $6, $7, $8)`,
+    [
+      manager.business_id,
+      manager.id,
+      manager.username,
+      manager.manager_number,
+      String(afterData.id ?? beforeData.id),
+      action,
+      JSON.stringify(beforeData),
+      JSON.stringify(afterData),
+    ]
+  );
+}
+
+// --------------------------------------------------
+// BUSINESS CREDENTIAL VERIFICATION
+// --------------------------------------------------
 
 async function verifyBusinessCredentials(
   client,
@@ -88,9 +143,11 @@ async function verifyBusinessCredentials(
   return result.rows[0];
 }
 
-/*
-  GET /api/manager-passwords/status?businessId=B60001
-*/
+// --------------------------------------------------
+// GET MANAGER STATUS
+// GET /api/manager-passwords/status?businessId=B60001
+// --------------------------------------------------
+
 router.get("/status", async (req, res) => {
   try {
     const { businessId } = req.query;
@@ -103,10 +160,16 @@ router.get("/status", async (req, res) => {
 
     const result = await pool.query(
       `SELECT
-         COUNT(*)::int AS total,
          COUNT(*) FILTER (
-           WHERE status = 'approved' AND is_active = true
+           WHERE is_deleted = false
+         )::int AS total,
+
+         COUNT(*) FILTER (
+           WHERE status = 'approved'
+           AND is_active = true
+           AND is_deleted = false
          )::int AS approved
+
        FROM manager_accounts
        WHERE business_id = $1`,
       [businessId]
@@ -126,11 +189,11 @@ router.get("/status", async (req, res) => {
   }
 });
 
-/*
-  POST /api/manager-passwords/setup
+// --------------------------------------------------
+// FIRST MANAGER SETUP
+// POST /api/manager-passwords/setup
+// --------------------------------------------------
 
-  Creates the first manager account.
-*/
 router.post("/setup", async (req, res) => {
   const {
     businessId,
@@ -207,10 +270,11 @@ router.post("/setup", async (req, res) => {
            is_primary,
            status,
            is_active,
+           is_deleted,
            created_at,
            approved_at
          )
-       VALUES ($1, 1, $2, $3, true, 'approved', true, NOW(), NOW())
+       VALUES ($1, 1, $2, $3, true, 'approved', true, false, NOW(), NOW())
        RETURNING *`,
       [businessId, username.trim(), passwordHash]
     );
@@ -244,12 +308,11 @@ router.post("/setup", async (req, res) => {
   }
 });
 
-/*
-  POST /api/manager-passwords/login
+// --------------------------------------------------
+// MANAGER LOGIN
+// POST /api/manager-passwords/login
+// --------------------------------------------------
 
-  Supports existing legacy manager passwords.
-  Migrates legacy passwords to bcrypt after successful login.
-*/
 router.post("/login", async (req, res) => {
   try {
     const { businessId, username, password } = req.body;
@@ -281,6 +344,12 @@ router.post("/login", async (req, res) => {
 
     const manager = result.rows[0];
 
+    if (manager.is_deleted) {
+      return res.status(403).json({
+        message: "This manager account has been deleted.",
+      });
+    }
+
     if (
       manager.status !== "approved" ||
       !manager.is_active ||
@@ -290,7 +359,9 @@ router.post("/login", async (req, res) => {
         message:
           manager.status === "pending"
             ? "Your manager registration is waiting for Primary Manager approval."
-            : "This manager account is not active or approved.",
+            : manager.status === "rejected"
+              ? "Your manager registration was rejected."
+              : "This manager account is inactive or not approved.",
       });
     }
 
@@ -343,11 +414,11 @@ router.post("/login", async (req, res) => {
   }
 });
 
-/*
-  POST /api/manager-passwords/register
+// --------------------------------------------------
+// ADDITIONAL MANAGER REGISTRATION
+// POST /api/manager-passwords/register
+// --------------------------------------------------
 
-  Additional managers require Primary Manager approval.
-*/
 router.post("/register", async (req, res) => {
   const {
     businessId,
@@ -449,9 +520,10 @@ router.post("/register", async (req, res) => {
            is_primary,
            status,
            is_active,
+           is_deleted,
            created_at
          )
-       VALUES ($1, $2, $3, $4, false, 'pending', true, NOW())
+       VALUES ($1, $2, $3, $4, false, 'pending', true, false, NOW())
        RETURNING *`,
       [
         businessId,
@@ -486,15 +558,18 @@ router.post("/register", async (req, res) => {
   }
 });
 
-/*
-  GET /api/manager-passwords/me
-*/
+// --------------------------------------------------
+// GET CURRENT MANAGER
+// GET /api/manager-passwords/me
+// --------------------------------------------------
+
 router.get("/me", requireManager, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT *
        FROM manager_accounts
-       WHERE id = $1`,
+       WHERE id = $1
+         AND is_deleted = false`,
       [req.manager.id]
     );
 
@@ -516,10 +591,12 @@ router.get("/me", requireManager, async (req, res) => {
   }
 });
 
-/*
-  GET /api/manager-passwords/accounts
-  Primary Manager only.
-*/
+// --------------------------------------------------
+// GET ALL MANAGER ACCOUNTS
+// PRIMARY MANAGER ONLY
+// GET /api/manager-passwords/accounts
+// --------------------------------------------------
+
 router.get(
   "/accounts",
   requireManager,
@@ -547,10 +624,11 @@ router.get(
   }
 );
 
-/*
-  GET /api/manager-passwords/pending
-  Primary Manager only.
-*/
+// --------------------------------------------------
+// GET PENDING MANAGERS
+// PRIMARY MANAGER ONLY
+// --------------------------------------------------
+
 router.get(
   "/pending",
   requireManager,
@@ -562,6 +640,7 @@ router.get(
          FROM manager_accounts
          WHERE business_id = $1
            AND status = 'pending'
+           AND is_deleted = false
          ORDER BY created_at ASC`,
         [req.manager.businessId]
       );
@@ -579,9 +658,12 @@ router.get(
   }
 );
 
-/*
-  POST /api/manager-passwords/accounts/:id/approve
-*/
+// --------------------------------------------------
+// APPROVE MANAGER
+// PRIMARY MANAGER ONLY
+// POST /api/manager-passwords/accounts/:id/approve
+// --------------------------------------------------
+
 router.post(
   "/accounts/:id/approve",
   requireManager,
@@ -611,11 +693,11 @@ router.post(
 
       const manager = target.rows[0];
 
-      if (manager.is_primary) {
+      if (manager.is_primary || manager.is_deleted) {
         await client.query("ROLLBACK");
 
         return res.status(400).json({
-          message: "The Primary Manager cannot be changed here.",
+          message: "This manager account cannot be approved.",
         });
       }
 
@@ -639,29 +721,12 @@ router.post(
         [req.manager.id, manager.id]
       );
 
-      await client.query(
-        `INSERT INTO manager_audit_logs
-           (
-             business_id,
-             manager_id,
-             manager_username,
-             manager_number,
-             entity_type,
-             record_id,
-             action,
-             before_data,
-             after_data
-           )
-         VALUES ($1, $2, $3, $4, 'manager_account', $5, 'UPDATE', $6, $7)`,
-        [
-          req.manager.businessId,
-          req.manager.id,
-          req.manager.username,
-          req.manager.managerNumber,
-          String(manager.id),
-          JSON.stringify(publicManager(manager)),
-          JSON.stringify(publicManager(updated.rows[0])),
-        ]
+      await writeManagerAudit(
+        client,
+        req.manager,
+        "approve",
+        publicManager(manager),
+        publicManager(updated.rows[0])
       );
 
       await client.query("COMMIT");
@@ -684,9 +749,12 @@ router.post(
   }
 );
 
-/*
-  POST /api/manager-passwords/accounts/:id/reject
-*/
+// --------------------------------------------------
+// REJECT MANAGER
+// PRIMARY MANAGER ONLY
+// POST /api/manager-passwords/accounts/:id/reject
+// --------------------------------------------------
+
 router.post(
   "/accounts/:id/reject",
   requireManager,
@@ -716,7 +784,11 @@ router.post(
 
       const manager = target.rows[0];
 
-      if (manager.is_primary || manager.status !== "pending") {
+      if (
+        manager.is_primary ||
+        manager.is_deleted ||
+        manager.status !== "pending"
+      ) {
         await client.query("ROLLBACK");
 
         return res.status(400).json({
@@ -734,29 +806,12 @@ router.post(
         [manager.id]
       );
 
-      await client.query(
-        `INSERT INTO manager_audit_logs
-           (
-             business_id,
-             manager_id,
-             manager_username,
-             manager_number,
-             entity_type,
-             record_id,
-             action,
-             before_data,
-             after_data
-           )
-         VALUES ($1, $2, $3, $4, 'manager_account', $5, 'UPDATE', $6, $7)`,
-        [
-          req.manager.businessId,
-          req.manager.id,
-          req.manager.username,
-          req.manager.managerNumber,
-          String(manager.id),
-          JSON.stringify(publicManager(manager)),
-          JSON.stringify(publicManager(updated.rows[0])),
-        ]
+      await writeManagerAudit(
+        client,
+        req.manager,
+        "reject",
+        publicManager(manager),
+        publicManager(updated.rows[0])
       );
 
       await client.query("COMMIT");
@@ -779,12 +834,190 @@ router.post(
   }
 );
 
-/*
-  POST /api/manager-passwords/accounts/:id/deactivate
-  Primary Manager only.
-*/
+// --------------------------------------------------
+// DEACTIVATE MANAGER
+// PRIMARY MANAGER ONLY
+// POST /api/manager-passwords/accounts/:id/deactivate
+// --------------------------------------------------
+
 router.post(
   "/accounts/:id/deactivate",
+  requireManager,
+  requirePrimaryManager,
+  async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const target = await client.query(
+        `SELECT *
+         FROM manager_accounts
+         WHERE id = $1
+           AND business_id = $2
+         FOR UPDATE`,
+        [req.params.id, req.manager.businessId]
+      );
+
+      if (!target.rows.length) {
+        await client.query("ROLLBACK");
+
+        return res.status(404).json({
+          message: "Manager account not found.",
+        });
+      }
+
+      const manager = target.rows[0];
+
+      if (manager.is_primary || manager.is_deleted) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          message: "This manager account cannot be deactivated.",
+        });
+      }
+
+      if (manager.status !== "approved") {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          message: "Only approved managers can be deactivated.",
+        });
+      }
+
+      const updated = await client.query(
+        `UPDATE manager_accounts
+         SET is_active = false,
+             updated_at = NOW()
+         WHERE id = $1
+         RETURNING *`,
+        [manager.id]
+      );
+
+      await writeManagerAudit(
+        client,
+        req.manager,
+        "deactivate",
+        publicManager(manager),
+        publicManager(updated.rows[0])
+      );
+
+      await client.query("COMMIT");
+
+      return res.json({
+        message: "Manager account deactivated.",
+        manager: publicManager(updated.rows[0]),
+      });
+    } catch (error) {
+      await client.query("ROLLBACK");
+
+      console.error("Deactivate manager error:", error);
+
+      return res.status(500).json({
+        message: "Could not deactivate manager.",
+      });
+    } finally {
+      client.release();
+    }
+  }
+);
+
+// --------------------------------------------------
+// REACTIVATE MANAGER
+// PRIMARY MANAGER ONLY
+// POST /api/manager-passwords/accounts/:id/reactivate
+// --------------------------------------------------
+
+router.post(
+  "/accounts/:id/reactivate",
+  requireManager,
+  requirePrimaryManager,
+  async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const target = await client.query(
+        `SELECT *
+         FROM manager_accounts
+         WHERE id = $1
+           AND business_id = $2
+         FOR UPDATE`,
+        [req.params.id, req.manager.businessId]
+      );
+
+      if (!target.rows.length) {
+        await client.query("ROLLBACK");
+
+        return res.status(404).json({
+          message: "Manager account not found.",
+        });
+      }
+
+      const manager = target.rows[0];
+
+      if (manager.is_primary || manager.is_deleted) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          message: "This manager account cannot be reactivated.",
+        });
+      }
+
+      if (manager.status !== "approved") {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          message: "Only previously approved managers can be reactivated.",
+        });
+      }
+
+      const updated = await client.query(
+        `UPDATE manager_accounts
+         SET is_active = true,
+             updated_at = NOW()
+         WHERE id = $1
+         RETURNING *`,
+        [manager.id]
+      );
+
+      await writeManagerAudit(
+        client,
+        req.manager,
+        "reactivate",
+        publicManager(manager),
+        publicManager(updated.rows[0])
+      );
+
+      await client.query("COMMIT");
+
+      return res.json({
+        message: "Manager account reactivated successfully.",
+        manager: publicManager(updated.rows[0]),
+      });
+    } catch (error) {
+      await client.query("ROLLBACK");
+
+      console.error("Reactivate manager error:", error);
+
+      return res.status(500).json({
+        message: "Could not reactivate manager.",
+      });
+    } finally {
+      client.release();
+    }
+  }
+);
+
+// --------------------------------------------------
+// SOFT DELETE MANAGER
+// PRIMARY MANAGER ONLY
+// POST /api/manager-passwords/accounts/:id/delete
+// --------------------------------------------------
+
+router.post(
+  "/accounts/:id/delete",
   requireManager,
   requirePrimaryManager,
   async (req, res) => {
@@ -816,57 +1049,49 @@ router.post(
         await client.query("ROLLBACK");
 
         return res.status(400).json({
-          message: "The Primary Manager account cannot be deactivated.",
+          message: "The Primary Manager account cannot be deleted.",
+        });
+      }
+
+      if (manager.is_deleted) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          message: "This manager account has already been deleted.",
         });
       }
 
       const updated = await client.query(
         `UPDATE manager_accounts
-         SET is_active = false,
+         SET is_deleted = true,
+             is_active = false,
              updated_at = NOW()
          WHERE id = $1
          RETURNING *`,
         [manager.id]
       );
 
-      await client.query(
-        `INSERT INTO manager_audit_logs
-           (
-             business_id,
-             manager_id,
-             manager_username,
-             manager_number,
-             entity_type,
-             record_id,
-             action,
-             before_data,
-             after_data
-           )
-         VALUES ($1, $2, $3, $4, 'manager_account', $5, 'UPDATE', $6, $7)`,
-        [
-          req.manager.businessId,
-          req.manager.id,
-          req.manager.username,
-          req.manager.managerNumber,
-          String(manager.id),
-          JSON.stringify(publicManager(manager)),
-          JSON.stringify(publicManager(updated.rows[0])),
-        ]
+      await writeManagerAudit(
+        client,
+        req.manager,
+        "delete",
+        publicManager(manager),
+        publicManager(updated.rows[0])
       );
 
       await client.query("COMMIT");
 
       return res.json({
-        message: "Manager account deactivated.",
+        message: "Manager account deleted. Historical records have been preserved.",
         manager: publicManager(updated.rows[0]),
       });
     } catch (error) {
       await client.query("ROLLBACK");
 
-      console.error("Deactivate manager error:", error);
+      console.error("Delete manager error:", error);
 
       return res.status(500).json({
-        message: "Could not deactivate manager.",
+        message: "Could not delete manager.",
       });
     } finally {
       client.release();
@@ -874,10 +1099,12 @@ router.post(
   }
 );
 
-/*
-  PATCH /api/manager-passwords/change-password
-  Also retains the old /change path for compatibility.
-*/
+// --------------------------------------------------
+// CHANGE MANAGER PASSWORD
+// PATCH /api/manager-passwords/change-password
+// PATCH /api/manager-passwords/change
+// --------------------------------------------------
+
 async function changeManagerPassword(req, res) {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -895,7 +1122,8 @@ async function changeManagerPassword(req, res) {
     const result = await pool.query(
       `SELECT *
        FROM manager_accounts
-       WHERE id = $1`,
+       WHERE id = $1
+         AND is_deleted = false`,
       [req.manager.id]
     );
 
