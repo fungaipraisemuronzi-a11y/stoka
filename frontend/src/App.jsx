@@ -11,6 +11,7 @@ const emptyForm = {
   phone: "",
   username: "",
   password: "",
+  confirmPassword: "",
 };
 
 export default function App() {
@@ -30,9 +31,20 @@ export default function App() {
   });
 
   function handleChange(event) {
+    const { name, value } = event.target;
+
     setForm((current) => ({
       ...current,
-      [event.target.name]: event.target.value,
+      [name]:
+        name === "username"
+          ? value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 15).toLowerCase()
+          : name === "password" || name === "confirmPassword"
+            ? value.slice(0, 15)
+            : name === "businessName" || name === "location"
+              ? value.slice(0, 25)
+              : name === "phone"
+                ? value.slice(0, 12)
+                : value,
     }));
   }
 
@@ -50,14 +62,45 @@ export default function App() {
 
     const isRegister = page === "register";
 
+    if (isRegister) {
+      if (!/^[a-zA-Z0-9]+$/.test(form.username.trim())) {
+        setMessage(
+          "Username must contain letters and numbers only."
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (form.password !== form.confirmPassword) {
+        setMessage("Passwords do not match.");
+        setLoading(false);
+        return;
+      }
+
+      if (!form.password || form.password.length > 15) {
+        setMessage(
+          "Password must contain between 1 and 15 characters."
+        );
+        setLoading(false);
+        return;
+      }
+    }
+
     const endpoint = isRegister
       ? "/api/auth/register"
       : "/api/auth/login";
 
     const payload = isRegister
-      ? form
+      ? {
+          businessName: form.businessName.trim(),
+          location: form.location.trim(),
+          phone: form.phone.trim(),
+          username: form.username.trim().toLowerCase(),
+          password: form.password,
+          confirmPassword: form.confirmPassword,
+        }
       : {
-          username: form.username,
+          username: form.username.trim().toLowerCase(),
           password: form.password,
         };
 
@@ -90,9 +133,7 @@ export default function App() {
       setForm(emptyForm);
       setMessage("");
     } catch (error) {
-      setMessage(
-        `${error.message}`
-      );
+      setMessage(error.message);
     } finally {
       setLoading(false);
     }
@@ -118,7 +159,6 @@ export default function App() {
   return (
     <main className="app-container auth-background">
       <section className="auth-card">
-        
 
         <div className="auth-heading">
           <label>
@@ -159,6 +199,7 @@ export default function App() {
                 value={form.businessName}
                 onChange={handleChange}
                 placeholder="Enter business name"
+                maxLength={25}
                 required
               />
 
@@ -172,6 +213,7 @@ export default function App() {
                 value={form.location}
                 onChange={handleChange}
                 placeholder="Enter location"
+                maxLength={25}
                 required
               />
 
@@ -186,24 +228,32 @@ export default function App() {
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="Enter phone number"
+                maxLength={12}
                 required
               />
             </>
           )}
 
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">
+            Username
+          </label>
 
           <input
             id="username"
             name="username"
             value={form.username}
             onChange={handleChange}
-            placeholder="Enter username"
+            placeholder="Letters and numbers only"
             autoComplete="username"
+            maxLength={15}
+            pattern="[a-zA-Z0-9]+"
+            title="Use letters and numbers only. No spaces or special characters."
             required
           />
 
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">
+            Password
+          </label>
 
           <input
             id="password"
@@ -217,8 +267,29 @@ export default function App() {
                 ? "current-password"
                 : "new-password"
             }
+            maxLength={15}
             required
           />
+
+          {page === "register" && (
+            <>
+              <label htmlFor="confirmPassword">
+                Confirm Password
+              </label>
+
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                placeholder="Re-enter password"
+                autoComplete="new-password"
+                maxLength={15}
+                required
+              />
+            </>
+          )}
 
           <button
             className="submit-button"
@@ -239,7 +310,6 @@ export default function App() {
           </p>
         )}
 
-       
       </section>
     </main>
   );

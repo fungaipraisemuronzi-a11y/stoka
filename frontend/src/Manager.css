@@ -1,274 +1,44 @@
 
-/* ==========================================
-   STOKA MANAGER — FULL-SCREEN LAYOUT FIX
-   ========================================== */
+/* Profile submenu */
 
-.stoka-manager-page,
-.manager-dashboard {
-  width: 100%;
-  max-width: none;
-  min-height: 100vh;
-  margin: 0;
-  box-sizing: border-box;
+.stoka-manager-profile-submenu {
+  padding-left: 12px;
+  border-left: 2px solid #e6f5ee;
+  margin-left: 12px;
 }
 
-.stoka-manager-page {
-  padding: 0;
-  background: #f5f8f6;
-  overflow-x: clip;
+.stoka-manager-profile-submenu .stoka-manager-menu-item {
+  font-size: 13px;
+  padding-top: 11px;
+  padding-bottom: 11px;
 }
 
-.manager-dashboard {
-  padding: 0 clamp(16px, 3vw, 40px) 30px;
-  background: #f5f8f6;
-}
+/* Profile page heading */
 
-/* Full-width sticky header */
-
-.stoka-manager-header {
-  position: sticky;
-  top: 0;
-  left: auto;
-  right: auto;
-  z-index: 1000;
-
-  width: 100%;
-  min-height: 78px;
-  margin: 0;
-  padding: 12px clamp(16px, 3vw, 40px);
-
+.manager-profile-page-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-
-  background: #fff;
-  border-bottom: 1px solid #e0e9e4;
-  box-shadow: 0 3px 12px rgba(18, 58, 42, 0.05);
-  box-sizing: border-box;
+  margin-bottom: 20px;
 }
 
-/* Let the workspace start directly below the header */
-
-.stoka-manager-workspace {
-  width: 100%;
-  max-width: none;
-  min-height: calc(100vh - 78px);
-  margin: 0;
-  padding: 28px clamp(16px, 3vw, 40px) 40px;
-  box-sizing: border-box;
+.manager-profile-page-heading h2 {
+  margin: 12px 0 0;
+  color: #182230;
+  font-size: 23px;
 }
 
-/* Use the available screen width */
-
-.stoka-manager-page .manager-selected-section,
-.stoka-manager-page .manager-content,
-.stoka-manager-page .manager-feedback {
-  width: 100%;
-  max-width: none;
-  min-width: 0;
+.manager-profile-back-button {
+  border: none;
+  background: transparent;
+  color: #087f5b;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 5px 0;
+  cursor: pointer;
 }
 
-.stoka-manager-page .manager-settings-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-  width: 100%;
-}
-
-.stoka-manager-page .manager-password-card {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-/* Keep navigation cards evenly spaced */
-
-.manager-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  width: 100%;
-  gap: 14px;
-}
-
-.manager-tab {
-  min-width: 0;
-}
-
-/* Prevent long business names and content from breaking layout */
-
-.stoka-manager-business {
-  flex: 1;
-  min-width: 0;
-}
-
-.stoka-manager-business strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.manager-content,
-.manager-selected-section,
-.manager-selected-heading {
-  min-width: 0;
-}
-
-/* Tablet layout */
-
-@media (max-width: 900px) {
-  .manager-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .stoka-manager-page .manager-settings-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .manager-password-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* Mobile layout */
-
-@media (max-width: 700px) {
-  .stoka-manager-header {
-    min-height: 70px;
-    gap: 10px;
-    padding: 10px 14px;
-  }
-
-  .stoka-manager-brand-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 20px;
-  }
-
-  .stoka-manager-brand-name {
-    font-size: 20px;
-  }
-
-  .stoka-manager-business {
-    padding-left: 4px;
-  }
-
-  .stoka-manager-business strong {
-    max-width: 38vw;
-    font-size: 15px;
-  }
-
-  .stoka-manager-business-label {
-    font-size: 9px;
-  }
-
-  .stoka-manager-menu-button {
-    width: 40px;
-    height: 40px;
-  }
-
-  .stoka-manager-workspace {
-    min-height: calc(100vh - 70px);
-    padding: 20px 14px 28px;
-  }
-
-  .manager-dashboard {
-    padding: 0 14px 24px;
-  }
-
-  .manager-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
-  }
-
-  .manager-tab {
-    min-height: 56px;
-    padding: 10px;
-    gap: 8px;
-  }
-
-  .stoka-manager-page .manager-settings-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
-
-  .manager-password-form {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
-  }
-
-  .manager-password-form .primary-button {
-    grid-column: auto;
-    width: 100%;
-  }
-
-  .manager-hero {
-    min-height: 170px;
-    margin-top: 16px;
-    padding: 22px 18px;
-  }
-
-  .manager-dashboard-tools {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .manager-header-actions {
-    gap: 6px;
-  }
-
-  .manager-header-button,
-  .manager-lock-button {
-    padding: 8px 10px;
-    font-size: 11px;
-  }
-}
-
-/* Very small phones */
-
-@media (max-width: 380px) {
-  .stoka-manager-header {
-    padding-right: 9px;
-    padding-left: 9px;
-  }
-
-  .stoka-manager-brand {
-    gap: 6px;
-  }
-
-  .stoka-manager-brand-name {
-    font-size: 18px;
-  }
-
-  .stoka-manager-business strong {
-    max-width: 30vw;
-    font-size: 13px;
-  }
-
-  .stoka-manager-workspace {
-    padding-right: 10px;
-    padding-left: 10px;
-  }
-
-  .manager-tabs {
-    gap: 7px;
-  }
-
-  .manager-tab {
-    font-size: 11px;
-  }
-}
-
-/* Accessibility */
-
-@media (prefers-reduced-motion: reduce) {
-  .manager-content,
-  .manager-tab,
-  .manager-header-button,
-  .manager-lock-button,
-  .manager-password-button {
-    animation: none;
-    transition: none;
-  }
+.manager-profile-back-button:hover {
+  color: #065c43;
+  text-decoration: underline;
 }

@@ -1,0 +1,96 @@
+
+.feedback-page {
+  display: grid;
+  gap: 20px;
+  color: #182230;
+}
+
+.feedback-heading h2 {
+  margin: 0 0 6px;
+}
+
+.feedback-heading p {
+  margin: 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.feedback-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 23px;
+}
+
+.feedback-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 20px;
+}
+
+.feedback-icon {
+  display: grid;
+  place-items: center;
+  width: 45px;
+  height: 45px;
+  background: #e6f5ee;
+  border-radius: 12px;
+  font-size: 22px;
+}
+
+.feedback-card-heading h3,
+.feedback-contact-card h3 {
+  margin: 0 0 5px;
+}
+
+.feedback-card-heading p,
+.feedback-contact-card p {
+  color: #667085;
+  font-size: 13px;
+  margin: 0;
+}
+
+.feedback-card textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  background: white;
+  min-height: 150px;
+}
+
+.feedback-card small {
+  display: block;
+  color: #667085;
+  margin-top: 6px;
+  text-align: right;
+}
+
+.feedback-card .primary-button {
+  min-width: 180px;
+}
+
+.feedback-contact-card {
+  background: #fbfdfc;
+}
+
+.feedback-contact-card p {
+  margin: 8px 0 18px;
+}
+
+.feedback-contact-card .primary-button {
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .feedback-card {
+    padding: 16px;
+  }
+
+  .feedback-card .primary-button {
+    width: 100%;
+  }
+}

@@ -1,217 +1,157 @@
 
 import { useState } from "react";
+
 import Stock from "./Stock";
 import AddStock from "./AddStock";
 import IE from "./IE";
 import TellerHistory from "./TellerHistory";
 import Reports from "./Reports";
 import ManagerLogin from "./ManagerLogin";
+
+import BusinessProfile from "./BusinessProfile";
+import ManageUsers from "./ManageUsers";
+import Subscribe from "./Subscribe";
+import Feedback from "./Feedback";
+
 import "./Stock.css";
 import "./Manager.css";
 
-
-const API_URL = "https://stoka-of78.onrender.com";
-const WHATSAPP_NUMBER = "263777847204";
-const SUBSCRIBE_CODE = "*151*1*1*0777847204*6#";
-
 const menuItems = [
-  { id: "Stock", label: "Stock Setup" },
-  { id: "Purchases", label: "Purchases", icon: "🛒" },
-  { id: "IE", label: "Income and Expenses", icon: "🧾" },
+  { id: "Stock", label: "Stock Setup", icon: "📦" },
+  { id: "Purchases", label: "Purchases", icon: "🧾" },
+  { id: "IE", label: "Income and Expenses", icon: "💰" },
   { id: "Tellers", label: "Tellers", icon: "👥" },
   { id: "Reports", label: "Reports", icon: "📊" },
 ];
 
+const profileItems = [
+  { id: "BusinessProfile", label: "Business Profile", icon: "🏢" },
+  { id: "ManageUsers", label: "Manage Users", icon: "👥" },
+  { id: "Subscribe", label: "Subscribe", icon: "💳" },
+  { id: "Feedback", label: "Feedback", icon: "💬" },
+];
+
+const profileTitles = {
+  BusinessProfile: "Business Profile",
+  ManageUsers: "Manage Users",
+  Subscribe: "Subscribe",
+  Feedback: "Feedback",
+};
+
 export default function Manager({ business, onBack }) {
-  const [unlocked, setUnlocked] = useState(false);
+  const [currentBusiness, setCurrentBusiness] = useState(business);
+
+  const businessId = currentBusiness?.id;
+
+  const sessionStorageKey = businessId
+    ? `stoka_manager_session_${businessId}`
+    : null;
+
+  const [managerSession, setManagerSession] = useState(() => {
+    if (!businessId || !sessionStorageKey) return null;
+
+    try {
+      const saved = localStorage.getItem(sessionStorageKey);
+
+      if (!saved) return null;
+
+      const parsed = JSON.parse(saved);
+
+      if (
+        parsed?.manager?.businessId === businessId &&
+        parsed?.token &&
+        parsed?.manager
+      ) {
+        return parsed;
+      }
+
+      localStorage.removeItem(sessionStorageKey);
+      return null;
+    } catch {
+      return null;
+    }
+  });
+
   const [activeTab, setActiveTab] = useState("Stock");
-  const [showSettings, setShowSettings] = useState(false);
+  const [activeProfilePage, setActiveProfilePage] = useState(null);
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
-  const [currentManagerPassword, setCurrentManagerPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const unlocked = Boolean(managerSession?.token && managerSession?.manager);
 
-  const [feedbackText, setFeedbackText] = useState("");
-  const [submittingFeedback, setSubmittingFeedback] = useState(false);
-
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  const businessId = business?.id;
+  const manager = managerSession?.manager || null;
+  const managerToken = managerSession?.token || "";
 
   const businessName =
-    business?.businessName ||
-    business?.business_name ||
-    business?.name ||
+    currentBusiness?.businessName ||
+    currentBusiness?.business_name ||
+    currentBusiness?.name ||
     "Business";
 
-  const clearMessages = () => {
-    setMessage("");
-    setError("");
-  };
-
-  const getResponseData = async (response) => {
-    try {
-      return await response.json();
-    } catch {
-      return {};
-    }
-  };
-
-  const handleChangePassword = async (event) => {
-    event.preventDefault();
-    clearMessages();
-
-    if (businessId === undefined || businessId === null) {
-      setError("Business information is missing. Please log in again.");
+  const handleManagerLogin = (session) => {
+    if (!session?.token || !session?.manager) {
       return;
     }
 
-    if (!currentManagerPassword || !newPassword || !confirmPassword) {
-      setError("Please complete all password fields.");
-      return;
-    }
+    setManagerSession(session);
 
-    if (newPassword.length > 15) {
-      setError("New password cannot exceed 15 characters.");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
-      return;
-    }
-
-    if (currentManagerPassword === newPassword) {
-      setError("The new password must differ from the current password.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(`${API_URL}/api/auth/change-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          businessId: String(businessId),
-          currentPassword: currentManagerPassword,
-          newPassword,
-        }),
-      });
-
-      const data = await getResponseData(response);
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Could not change business password."
-        );
-      }
-
-      setCurrentManagerPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-
-      setMessage(
-        data.message || "Business account password changed successfully."
+    if (sessionStorageKey) {
+      localStorage.setItem(
+        sessionStorageKey,
+        JSON.stringify(session)
       );
-    } catch (err) {
-      setError(err.message || "Could not change business password.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmitFeedback = async (event) => {
-    event.preventDefault();
-    clearMessages();
-
-    const trimmedFeedback = feedbackText.trim();
-
-    if (businessId === undefined || businessId === null) {
-      setError("Business information is missing. Please log in again.");
-      return;
     }
 
-    if (!trimmedFeedback) {
-      setError("Please enter your feedback before submitting.");
-      return;
-    }
-
-    setSubmittingFeedback(true);
-
-    try {
-      const response = await fetch(`${API_URL}/api/feedback`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          businessId,
-          message: trimmedFeedback,
-        }),
-      });
-
-      const data = await getResponseData(response);
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not submit feedback.");
-      }
-
-      setFeedbackText("");
-      setMessage(
-        data.message || "Thank you. Your feedback has been submitted."
-      );
-    } catch (err) {
-      setError(
-        err.message ||
-          "Could not submit feedback. Please check your internet connection and try again."
-      );
-    } finally {
-      setSubmittingFeedback(false);
-    }
+    setActiveTab("Stock");
+    setActiveProfilePage(null);
+    setMenuOpen(false);
+    setProfileMenuOpen(false);
   };
 
   const handleLogout = () => {
-    setUnlocked(false);
+    if (sessionStorageKey) {
+      localStorage.removeItem(sessionStorageKey);
+    }
+
+    setManagerSession(null);
     setActiveTab("Stock");
-    setShowSettings(false);
+    setActiveProfilePage(null);
     setMenuOpen(false);
-
-    setCurrentManagerPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setFeedbackText("");
-
-    setLoading(false);
-    setSubmittingFeedback(false);
-    clearMessages();
+    setProfileMenuOpen(false);
   };
 
   const handleMenuSelect = (itemId) => {
     setMenuOpen(false);
-    clearMessages();
+    setProfileMenuOpen(false);
+    setActiveProfilePage(null);
 
     if (itemId === "Logout") {
       handleLogout();
       return;
     }
 
-    if (itemId === "More") {
-      setShowSettings(true);
-      return;
-    }
-
-    setShowSettings(false);
     setActiveTab(itemId);
+  };
+
+  const handleProfileSelect = (pageId) => {
+    setActiveProfilePage(pageId);
+    setProfileMenuOpen(false);
+    setMenuOpen(false);
+  };
+
+  const handleBusinessUpdated = (updatedBusiness) => {
+    setCurrentBusiness(updatedBusiness);
+
+    localStorage.setItem(
+      "stoka_business",
+      JSON.stringify(updatedBusiness)
+    );
   };
 
   const handleHomeClick = () => {
     setMenuOpen(false);
+    setProfileMenuOpen(false);
     onBack?.();
   };
 
@@ -232,7 +172,10 @@ export default function Manager({ business, onBack }) {
           aria-label="Open manager menu"
           aria-haspopup="true"
           aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((previous) => !previous)}
+          onClick={() => {
+            setMenuOpen((previous) => !previous);
+            setProfileMenuOpen(false);
+          }}
         >
           ⋮
         </button>
@@ -243,7 +186,10 @@ export default function Manager({ business, onBack }) {
               type="button"
               className="stoka-manager-menu-backdrop"
               aria-label="Close menu"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => {
+                setMenuOpen(false);
+                setProfileMenuOpen(false);
+              }}
             />
 
             <div className="stoka-manager-overflow-menu">
@@ -256,16 +202,13 @@ export default function Manager({ business, onBack }) {
                   key={item.id}
                   type="button"
                   className={
-                    unlocked && !showSettings && activeTab === item.id
+                    !activeProfilePage && activeTab === item.id
                       ? "stoka-manager-menu-item active"
                       : "stoka-manager-menu-item"
                   }
                   onClick={() => handleMenuSelect(item.id)}
                 >
-                  
-
-                  <span>{item.label}</span>
-
+                  <span>{item.icon} {item.label}</span>
                   <span className="stoka-manager-menu-arrow">›</span>
                 </button>
               ))}
@@ -275,18 +218,39 @@ export default function Manager({ business, onBack }) {
               <button
                 type="button"
                 className={
-                  showSettings
+                  activeProfilePage || profileMenuOpen
                     ? "stoka-manager-menu-item active"
                     : "stoka-manager-menu-item"
                 }
-                onClick={() => handleMenuSelect("More")}
+                onClick={() =>
+                  setProfileMenuOpen((previous) => !previous)
+                }
               >
-                
-                <span>More</span>
-                <span className="stoka-manager-menu-arrow">›</span>
+                <span>👤 Profile</span>
+                <span className="stoka-manager-menu-arrow">
+                  {profileMenuOpen ? "⌄" : "›"}
+                </span>
               </button>
 
-              
+              {profileMenuOpen && (
+                <div className="stoka-manager-profile-submenu">
+                  {profileItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={
+                        activeProfilePage === item.id
+                          ? "stoka-manager-menu-item active"
+                          : "stoka-manager-menu-item"
+                      }
+                      onClick={() => handleProfileSelect(item.id)}
+                    >
+                      <span>{item.icon} {item.label}</span>
+                      <span className="stoka-manager-menu-arrow">›</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div className="stoka-manager-menu-divider" />
 
@@ -295,8 +259,15 @@ export default function Manager({ business, onBack }) {
                 className="stoka-manager-menu-item stoka-manager-home-item"
                 onClick={handleHomeClick}
               >
-                
-                <span>Back to Home</span>
+                <span>🏠 Back to Home</span>
+              </button>
+
+              <button
+                type="button"
+                className="stoka-manager-menu-item"
+                onClick={() => handleMenuSelect("Logout")}
+              >
+                <span>🚪 Logout</span>
               </button>
             </div>
           </>
@@ -308,15 +279,9 @@ export default function Manager({ business, onBack }) {
   if (!unlocked) {
     return (
       <ManagerLogin
-        business={business}
+        business={currentBusiness}
         onBack={onBack}
-        onLogin={() => {
-          setUnlocked(true);
-          setActiveTab("Stock");
-          setShowSettings(false);
-          setMenuOpen(false);
-          clearMessages();
-        }}
+        onLogin={handleManagerLogin}
       />
     );
   }
@@ -326,220 +291,94 @@ export default function Manager({ business, onBack }) {
       {renderHeader()}
 
       <section className="stoka-manager-workspace">
-        {message && (
-          <p className="success-message manager-feedback" role="status">
-            {message}
-          </p>
-        )}
-
-        {error && (
-          <p className="error-message manager-feedback" role="alert">
-            {error}
-          </p>
-        )}
-
-        {showSettings ? (
+        {activeProfilePage ? (
           <section className="manager-selected-section">
-            <div className="manager-content manager-settings-grid">
-              <section className="card manager-password-card">
-                <div className="manager-panel-heading">
-                  <h3>Change business login password</h3>
-                </div>
-
-                <form
-                  onSubmit={handleChangePassword}
-                  className="manager-password-form"
-                >
-                  <div className="form-group">
-                    <label htmlFor="current-business-password">
-                      Current business password
-                    </label>
-
-                    <input
-                      id="current-business-password"
-                      type="password"
-                      value={currentManagerPassword}
-                      onChange={(event) =>
-                        setCurrentManagerPassword(event.target.value)
-                      }
-                      autoComplete="current-password"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="new-business-password">
-                      New business password
-                    </label>
-
-                    <input
-                      id="new-business-password"
-                      type="password"
-                      value={newPassword}
-                      onChange={(event) =>
-                        setNewPassword(event.target.value)
-                      }
-                      autoComplete="new-password"
-                      maxLength={15}
-                      required
-                    />
-
-                    <small>Maximum 15 characters.</small>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="confirm-business-password">
-                      Confirm new password
-                    </label>
-
-                    <input
-                      id="confirm-business-password"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(event) =>
-                        setConfirmPassword(event.target.value)
-                      }
-                      autoComplete="new-password"
-                      maxLength={15}
-                      required
-                    />
-                  </div>
-
+            <div className="manager-content">
+              <div className="manager-profile-page-heading">
+                <div>
                   <button
-                    type="submit"
-                    className="primary-button"
-                    disabled={loading}
+                    type="button"
+                    className="manager-profile-back-button"
+                    onClick={() => setActiveProfilePage(null)}
                   >
-                    {loading
-                      ? "Updating..."
-                      : "Change business password"}
+                    ← Back to Manager
                   </button>
-                </form>
-              </section>
 
-              <section className="card manager-password-card">
-                <div className="manager-panel-heading">
-                  <h3>Send feedback</h3>
+                  <h2>{profileTitles[activeProfilePage]}</h2>
                 </div>
+              </div>
 
-                <form onSubmit={handleSubmitFeedback}>
-                  <div className="form-group">
-                    <label htmlFor="manager-feedback-message">
-                      Your feedback
-                    </label>
+              {activeProfilePage === "BusinessProfile" && (
+                <BusinessProfile
+                  business={currentBusiness}
+                  onBusinessUpdated={handleBusinessUpdated}
+                  manager={manager}
+                  managerToken={managerToken}
+                />
+              )}
 
-                    <textarea
-                      id="manager-feedback-message"
-                      value={feedbackText}
-                      onChange={(event) =>
-                        setFeedbackText(event.target.value)
-                      }
-                      placeholder="Write your feedback here..."
-                      rows={8}
-                      maxLength={3000}
-                      required
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        resize: "vertical",
-                        backgroundColor: "white",
-                      }}
-                    />
-                  </div>
+              {activeProfilePage === "ManageUsers" && (
+                <ManageUsers
+                  business={currentBusiness}
+                  manager={manager}
+                  managerToken={managerToken}
+                />
+              )}
 
-                  <button
-                    type="submit"
-                    className="primary-button"
-                    disabled={submittingFeedback}
-                  >
-                    {submittingFeedback
-                      ? "Submitting..."
-                      : "Send feedback"}
-                  </button>
-                </form>
-              </section>
+              {activeProfilePage === "Subscribe" && (
+                <Subscribe />
+              )}
 
-              <section className="card manager-password-card">
-                <div className="manager-panel-heading">
-                  <h3>Contact Stoka</h3>
-                </div>
-
-                <p>
-                  Contact us on WhatsApp if you need help with Stoka.
-                </p>
-
-                <a
-                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-                    "Hello, I need assistance with Stoka."
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="primary-button"
-                  style={{
-                    display: "inline-block",
-                    textDecoration: "none",
-                    textAlign: "center",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  WhatsApp Us
-                </a>
-              </section>
-
-              <section className="card manager-password-card">
-                <div className="manager-panel-heading">
-                  <h3>Subscribe to Stoka</h3>
-                </div>
-
-                <p>
-                  Subscription activation is currently handled manually.
-                  After following the phone prompts, please contact Stoka
-                  to confirm your subscription or if you need help.
-                </p>
-
-                <a
-                  href={`tel:${SUBSCRIBE_CODE}`}
-                  className="primary-button"
-                  style={{
-                    display: "inline-block",
-                    textDecoration: "none",
-                    textAlign: "center",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  Subscribe
-                </a>
-
-                <p className="manager-security-note">
-                  This button opens your phone's dialer where supported.
-                  It does not automatically activate or confirm a subscription.
-                </p>
-              </section>
+              {activeProfilePage === "Feedback" && (
+                <Feedback
+                  business={currentBusiness}
+                  manager={manager}
+                  managerToken={managerToken}
+                />
+              )}
             </div>
           </section>
         ) : (
           <section className="manager-selected-section">
             <div className="manager-content">
               {activeTab === "Stock" && (
-                <Stock business={business} />
+                <Stock
+                  business={currentBusiness}
+                  manager={manager}
+                  managerToken={managerToken}
+                />
               )}
 
               {activeTab === "Purchases" && (
-                <AddStock business={business} />
+                <AddStock
+                  business={currentBusiness}
+                  manager={manager}
+                  managerToken={managerToken}
+                />
               )}
 
               {activeTab === "IE" && (
-                <IE business={business} />
+                <IE
+                  business={currentBusiness}
+                  manager={manager}
+                  managerToken={managerToken}
+                />
               )}
 
               {activeTab === "Tellers" && (
-                <TellerHistory businessId={businessId} />
+                <TellerHistory
+                  businessId={businessId}
+                  manager={manager}
+                  managerToken={managerToken}
+                />
               )}
 
               {activeTab === "Reports" && (
                 <Reports
-                  business={business}
+                  business={currentBusiness}
                   businessId={businessId}
+                  manager={manager}
+                  managerToken={managerToken}
                 />
               )}
             </div>

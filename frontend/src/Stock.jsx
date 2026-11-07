@@ -14,7 +14,7 @@ const emptyForm = {
   unitSellingPrice: "0",
 };
 
-export default function Stock({ business }) {
+export default function Stock({ business, manager, managerToken }) {
   const [view, setView] = useState("setup");
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyForm);
@@ -25,6 +25,13 @@ export default function Stock({ business }) {
   const [error, setError] = useState("");
 
   const businessId = business?.id;
+
+  const authHeaders = {
+    "Content-Type": "application/json",
+    ...(managerToken
+      ? { Authorization: `Bearer ${managerToken}` }
+      : {}),
+  };
 
   async function loadProducts() {
     if (!businessId) {
@@ -89,6 +96,12 @@ export default function Stock({ business }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (!managerToken) {
+      setError("Manager session is missing. Please log in again.");
+      return;
+    }
+
     setSaving(true);
     setMessage("");
     setError("");
@@ -100,7 +113,7 @@ export default function Stock({ business }) {
           : `${API_URL}/api/products`,
         {
           method: editingId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: authHeaders,
           body: JSON.stringify({
             businessId,
             stockName: form.stockName.trim(),
@@ -137,13 +150,21 @@ export default function Stock({ business }) {
       return;
     }
 
+    if (!managerToken) {
+      setError("Manager session is missing. Please log in again.");
+      return;
+    }
+
     setMessage("");
     setError("");
 
     try {
       const response = await fetch(
         `${API_URL}/api/products/${product.id}?businessId=${encodeURIComponent(businessId)}`,
-        { method: "DELETE" }
+        {
+          method: "DELETE",
+          headers: authHeaders,
+        }
       );
 
       const data = await response.json();
@@ -172,14 +193,25 @@ export default function Stock({ business }) {
     });
   }
 
+  function getEditedBy(product) {
+    return (
+      product.editedBy ||
+      product.edited_by ||
+      product.lastEditedBy ||
+      product.createdBy ||
+      product.created_by ||
+      "Not recorded"
+    );
+  }
+
   return (
     <div className="stock-workspace">
-      
-
-      
-
       {view === "purchases" ? (
-        <AddStock business={business} />
+        <AddStock
+          business={business}
+          manager={manager}
+          managerToken={managerToken}
+        />
       ) : (
         <>
           {message && (
@@ -198,7 +230,6 @@ export default function Stock({ business }) {
             <div className="stock-form-heading">
               <div>
                 <h3>{editingId ? "Edit stock item" : "Add stock item"}</h3>
-             
               </div>
 
               {editingId && (
@@ -312,9 +343,7 @@ export default function Stock({ business }) {
               <div className="stock-empty-state">Loading stock items...</div>
             ) : products.length === 0 ? (
               <div className="stock-empty-state">
-               
                 <h4>No stock items yet</h4>
-               
               </div>
             ) : (
               <div className="stock-table-wrapper">
@@ -327,6 +356,7 @@ export default function Stock({ business }) {
                       <th>Units per packaging</th>
                       <th>Selling price / unit</th>
                       <th>Current quantity</th>
+                      <th>Edited By</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -339,9 +369,8 @@ export default function Stock({ business }) {
                         <td>{product.packName}</td>
                         <td>{Number(product.unitsPerPack)}</td>
                         <td>{formatMoney(product.unitSellingPrice)}</td>
-                        <td>
-                          Go to other details in reports
-                        </td>
+                        <td>Go to other details in reports</td>
+                        <td>{getEditedBy(product)}</td>
                         <td>
                           <div className="stock-row-actions">
                             <button
