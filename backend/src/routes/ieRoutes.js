@@ -1,6 +1,7 @@
 
 import express from "express";
 import pool from "../config/database.js";
+import { requireManager } from "../middleware/managerAuth.js";
 
 const router = express.Router();
 
@@ -67,7 +68,12 @@ function getMonthRange(month, year) {
   return { start, end };
 }
 
-function validateEntry({ category, itemName, amount, transactionDate }) {
+function validateEntry({
+  category,
+  itemName,
+  amount,
+  transactionDate,
+}) {
   if (!VALID_CATEGORIES.includes(category)) {
     return "Select a valid I&E category.";
   }
@@ -106,7 +112,10 @@ async function verifyBusiness(businessId) {
   );
 
   if (!result.rows.length) {
-    return { error: "Business not found.", status: 404 };
+    return {
+      error: "Business not found.",
+      status: 404,
+    };
   }
 
   if (!result.rows[0].isActive) {
@@ -120,18 +129,12 @@ async function verifyBusiness(businessId) {
 }
 
 // GET /api/ie?businessId=B60001&month=10&year=2026
-router.get("/", async (req, res) => {
-  const { businessId } = req.query;
+router.get("/", requireManager, async (req, res) => {
+  const businessId = req.manager.businessId;
 
   const now = new Date();
   const month = req.query.month ?? now.getMonth() + 1;
   const year = req.query.year ?? now.getFullYear();
-
-  if (!businessId) {
-    return res.status(400).json({
-      message: "Business ID is required.",
-    });
-  }
 
   const range = getMonthRange(month, year);
 
@@ -160,7 +163,8 @@ router.get("/", async (req, res) => {
          notes,
          "transactionDate",
          "createdAt",
-         "updatedAt"
+         "updatedAt",
+         "editedBy"
        FROM "IEEntry"
        WHERE "businessId" = $1
          AND "transactionDate" >= $2::date
@@ -208,10 +212,15 @@ router.get("/", async (req, res) => {
     const totals = totalsResult.rows[0];
 
     const stockPurchases = Number(purchaseResult.rows[0].total);
+
     const additionalPurchaseCosts = Number(
       totals.additionalPurchaseCosts
     );
-    const operatingExpenses = Number(totals.operatingExpenses);
+
+    const operatingExpenses = Number(
+      totals.operatingExpenses
+    );
+
     const otherIncome = Number(totals.otherIncome);
 
     return res.json({
@@ -241,9 +250,11 @@ router.get("/", async (req, res) => {
 });
 
 // POST /api/ie
-router.post("/", async (req, res) => {
+router.post("/", requireManager, async (req, res) => {
+  const businessId = req.manager.businessId;
+  const managerUsername = req.manager.username;
+
   const {
-    businessId,
     category,
     itemName,
     amount,
@@ -251,13 +262,8 @@ router.post("/", async (req, res) => {
     transactionDate,
   } = req.body;
 
-  if (!businessId) {
-    return res.status(400).json({
-      message: "Business ID is required.",
-    });
-  }
-
-  const date = transactionDate || new Date().toISOString().slice(0, 10);
+  const date =
+    transactionDate || new Date().toISOString().slice(0, 10);
 
   const validationError = validateEntry({
     category,
@@ -267,7 +273,9 @@ router.post("/", async (req, res) => {
   });
 
   if (validationError) {
-    return res.status(400).json({ message: validationError });
+    return res.status(400).json({
+      message: validationError,
+    });
   }
 
   try {
@@ -282,8 +290,8 @@ router.post("/", async (req, res) => {
     const result = await pool.query(
       `INSERT INTO "IEEntry"
          ("businessId", category, "itemName", amount, notes,
-          "transactionDate")
-       VALUES ($1, $2, $3, $4, $5, $6)
+          "transactionDate", "editedBy")
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [
         businessId,
@@ -292,6 +300,7 @@ router.post("/", async (req, res) => {
         Number(amount),
         notes ? String(notes).trim() : null,
         date,
+        managerUsername,
       ]
     );
 
@@ -309,11 +318,12 @@ router.post("/", async (req, res) => {
 });
 
 // PUT /api/ie/:id
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireManager, async (req, res) => {
   const id = Number(req.params.id);
+  const businessId = req.manager.businessId;
+  const managerUsername = req.manager.username;
 
   const {
-    businessId,
     category,
     itemName,
     amount,
@@ -321,13 +331,9 @@ router.put("/:id", async (req, res) => {
     transactionDate,
   } = req.body;
 
-  if (
-    !Number.isInteger(id) ||
-    id <= 0 ||
-    !businessId
-  ) {
+  if (!Number.isInteger(id) || id <= 0) {
     return res.status(400).json({
-      message: "A valid entry ID and business ID are required.",
+      message: "A valid entry ID is required.",
     });
   }
 
@@ -339,7 +345,9 @@ router.put("/:id", async (req, res) => {
   });
 
   if (validationError) {
-    return res.status(400).json({ message: validationError });
+    return res.status(400).json({
+      message: validationError,
+    });
   }
 
   try {
@@ -358,8 +366,10 @@ router.put("/:id", async (req, res) => {
            amount = $3,
            notes = $4,
            "transactionDate" = $5,
-           "updatedAt" = NOW()
-       WHERE id = $6 AND "businessId" = $7
+           "updatedAt" = NOW(),
+           "editedBy" = $6
+       WHERE id = $7
+         AND "businessId" = $8
        RETURNING *`,
       [
         category,
@@ -367,6 +377,7 @@ router.put("/:id", async (req, res) => {
         Number(amount),
         notes ? String(notes).trim() : null,
         transactionDate,
+        managerUsername,
         id,
         businessId,
       ]
@@ -391,18 +402,14 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/ie/:id?businessId=B60001
-router.delete("/:id", async (req, res) => {
+// DELETE /api/ie/:id
+router.delete("/:id", requireManager, async (req, res) => {
   const id = Number(req.params.id);
-  const { businessId } = req.query;
+  const businessId = req.manager.businessId;
 
-  if (
-    !Number.isInteger(id) ||
-    id <= 0 ||
-    !businessId
-  ) {
+  if (!Number.isInteger(id) || id <= 0) {
     return res.status(400).json({
-      message: "A valid entry ID and business ID are required.",
+      message: "A valid entry ID is required.",
     });
   }
 
@@ -417,7 +424,8 @@ router.delete("/:id", async (req, res) => {
 
     const result = await pool.query(
       `DELETE FROM "IEEntry"
-       WHERE id = $1 AND "businessId" = $2
+       WHERE id = $1
+         AND "businessId" = $2
        RETURNING id`,
       [id, businessId]
     );

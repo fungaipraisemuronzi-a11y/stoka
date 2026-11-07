@@ -1,5 +1,7 @@
+
 import express from "express";
 import pool from "../config/database.js";
+import { requireManager } from "../middleware/managerAuth.js";
 
 const router = express.Router();
 
@@ -20,19 +22,12 @@ function normaliseStock(totalUnits, unitsPerPack) {
     Number((totalUnits - packs * unitsPerPack).toFixed(8))
   );
 
-  return {
-    packs,
-    units,
-  };
+  return { packs, units };
 }
 
 async function getBusinessAndProduct(client, businessId, productId) {
-  // Verify that the business exists.
-  // No isActive restriction is applied.
   const businessResult = await client.query(
-    `SELECT id
-     FROM "Business"
-     WHERE id = $1`,
+    `SELECT id FROM "Business" WHERE id = $1`,
     [businessId]
   );
 
@@ -42,7 +37,6 @@ async function getBusinessAndProduct(client, businessId, productId) {
     throw error;
   }
 
-  // Verify that the product belongs to this business.
   const productResult = await client.query(
     `SELECT *
      FROM "Product"
@@ -78,15 +72,10 @@ function calculatePurchase(
   };
 }
 
-// GET /api/stock/purchases?businessId=B60001
-router.get("/purchases", async (req, res) => {
-  const { businessId } = req.query;
-
-  if (!businessId) {
-    return res.status(400).json({
-      message: "Business ID is required.",
-    });
-  }
+// GET /api/stock/purchases
+// Manager username is returned with every purchase.
+router.get("/purchases", requireManager, async (req, res) => {
+  const businessId = req.manager.businessId;
 
   try {
     const result = await pool.query(
@@ -99,6 +88,7 @@ router.get("/purchases", async (req, res) => {
          sp."unitsAdded",
          sp."purchasePricePerPack",
          sp."totalCost",
+         sp."editedBy",
          sp."createdAt"
        FROM "StockPurchase" sp
        JOIN "Product" p ON p.id = sp."productId"
@@ -118,17 +108,18 @@ router.get("/purchases", async (req, res) => {
 });
 
 // POST /api/stock/purchases
-router.post("/purchases", async (req, res) => {
+router.post("/purchases", requireManager, async (req, res) => {
   const {
-    businessId,
     productId,
     packsAdded,
     unitsAdded,
     purchasePricePerPack,
   } = req.body;
 
+  const businessId = req.manager.businessId;
+  const managerUsername = req.manager.username;
+
   if (
-    !businessId ||
     !productId ||
     !validNonNegativeNumber(packsAdded) ||
     !validNonNegativeNumber(unitsAdded) ||
@@ -183,8 +174,8 @@ router.post("/purchases", async (req, res) => {
     const insertResult = await client.query(
       `INSERT INTO "StockPurchase"
          ("businessId", "productId", "packsAdded", "unitsAdded",
-          "purchasePricePerPack", "totalCost")
-       VALUES ($1, $2, $3, $4, $5, $6)
+          "purchasePricePerPack", "totalCost", "editedBy")
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [
         businessId,
@@ -193,6 +184,7 @@ router.post("/purchases", async (req, res) => {
         units,
         price,
         purchase.totalCost,
+        managerUsername,
       ]
     );
 
@@ -228,19 +220,18 @@ router.post("/purchases", async (req, res) => {
 });
 
 // PUT /api/stock/purchases/:id
-// Edit the quantity or purchase price of an existing purchase.
-router.put("/purchases/:id", async (req, res) => {
+router.put("/purchases/:id", requireManager, async (req, res) => {
   const {
-    businessId,
     packsAdded,
     unitsAdded,
     purchasePricePerPack,
   } = req.body;
 
+  const businessId = req.manager.businessId;
+  const managerUsername = req.manager.username;
   const purchaseId = Number(req.params.id);
 
   if (
-    !businessId ||
     !Number.isInteger(purchaseId) ||
     purchaseId <= 0 ||
     !validNonNegativeNumber(packsAdded) ||
@@ -328,14 +319,16 @@ router.put("/purchases/:id", async (req, res) => {
        SET "packsAdded" = $1,
            "unitsAdded" = $2,
            "purchasePricePerPack" = $3,
-           "totalCost" = $4
-       WHERE id = $5 AND "businessId" = $6
+           "totalCost" = $4,
+           "editedBy" = $5
+       WHERE id = $6 AND "businessId" = $7
        RETURNING *`,
       [
         packs,
         units,
         price,
         newPurchase.totalCost,
+        managerUsername,
         purchaseId,
         businessId,
       ]
@@ -372,18 +365,14 @@ router.put("/purchases/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/stock/purchases/:id?businessId=B60001
-router.delete("/purchases/:id", async (req, res) => {
-  const businessId = req.query.businessId;
+// DELETE /api/stock/purchases/:id
+router.delete("/purchases/:id", requireManager, async (req, res) => {
+  const businessId = req.manager.businessId;
   const purchaseId = Number(req.params.id);
 
-  if (
-    !businessId ||
-    !Number.isInteger(purchaseId) ||
-    purchaseId <= 0
-  ) {
+  if (!Number.isInteger(purchaseId) || purchaseId <= 0) {
     return res.status(400).json({
-      message: "A valid business ID and purchase ID are required.",
+      message: "A valid purchase ID is required.",
     });
   }
 
