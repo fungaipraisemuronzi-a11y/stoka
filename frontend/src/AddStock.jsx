@@ -106,17 +106,16 @@ export default function AddStock({ business, managerToken }) {
         ),
       ]);
 
-      setProducts(
-        Array.isArray(productData)
-          ? productData
-          : productData.products || []
-      );
+      const loadedProducts = Array.isArray(productData)
+        ? productData
+        : productData.products || [];
 
-      setPurchases(
-        Array.isArray(purchaseData)
-          ? purchaseData
-          : purchaseData.purchases || []
-      );
+      const loadedPurchases = Array.isArray(purchaseData)
+        ? purchaseData
+        : purchaseData.purchases || [];
+
+      setProducts(loadedProducts);
+      setPurchases(loadedPurchases);
     } catch (err) {
       setError(err.message || "Failed to load stock purchases.");
     } finally {
@@ -166,6 +165,31 @@ export default function AddStock({ business, managerToken }) {
     setSelectedProduct(product);
     setSearch(product.stockName);
     setShowProducts(false);
+  };
+
+  // =========================================
+  // GET PURCHASE PRODUCT NAME
+  // =========================================
+
+  const getPurchaseProductName = (purchase) => {
+    if (purchase.stockName) {
+      return purchase.stockName;
+    }
+
+    if (purchase.product?.stockName) {
+      return purchase.product.stockName;
+    }
+
+    const productId =
+      purchase.productId ??
+      purchase.product_id ??
+      purchase.product?.id;
+
+    const product = products.find(
+      (item) => String(item.id) === String(productId)
+    );
+
+    return product?.stockName || "Unknown product";
   };
 
   // =========================================
@@ -276,9 +300,13 @@ export default function AddStock({ business, managerToken }) {
   // =========================================
 
   const handleEdit = (purchase) => {
+    const productId =
+      purchase.productId ??
+      purchase.product_id ??
+      purchase.product?.id;
+
     const product = products.find(
-      (item) =>
-        String(item.id) === String(purchase.productId)
+      (item) => String(item.id) === String(productId)
     );
 
     if (!product) {
@@ -317,7 +345,7 @@ export default function AddStock({ business, managerToken }) {
     if (
       !window.confirm(
         `Delete this purchase of ${
-          purchase.stockName || "this product"
+          getPurchaseProductName(purchase)
         }?`
       )
     ) {
@@ -357,10 +385,6 @@ export default function AddStock({ business, managerToken }) {
     <div className="add-stock-page">
       <style>{`
 
-        /* =====================================
-           MAIN PAGE
-        ===================================== */
-
         .add-stock-page,
         .add-stock-page * {
           box-sizing: border-box;
@@ -376,10 +400,6 @@ export default function AddStock({ business, managerToken }) {
           color: #182230;
           font-family: "DM Sans", "Manrope", sans-serif;
         }
-
-        /* =====================================
-           HEADING
-        ===================================== */
 
         .as-heading {
           display: flex;
@@ -404,10 +424,6 @@ export default function AddStock({ business, managerToken }) {
           margin: 0;
         }
 
-        /* =====================================
-           CARDS
-        ===================================== */
-
         .as-card {
           width: 100%;
           min-width: 0;
@@ -425,10 +441,6 @@ export default function AddStock({ business, managerToken }) {
           font-size: 17px;
           font-weight: 800;
         }
-
-        /* =====================================
-           FORM
-        ===================================== */
 
         .as-form-grid {
           display: grid;
@@ -480,10 +492,6 @@ export default function AddStock({ business, managerToken }) {
           grid-column: 1 / -1;
         }
 
-        /* =====================================
-           PRODUCT SEARCH
-        ===================================== */
-
         .as-product-results {
           position: absolute;
           z-index: 50;
@@ -528,10 +536,6 @@ export default function AddStock({ business, managerToken }) {
           overflow-wrap: anywhere;
         }
 
-        /* =====================================
-           STOCK PREVIEW
-        ===================================== */
-
         .as-preview {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -560,10 +564,6 @@ export default function AddStock({ business, managerToken }) {
           color: #183d30;
           overflow-wrap: anywhere;
         }
-
-        /* =====================================
-           BUTTONS
-        ===================================== */
 
         .as-actions {
           display: flex;
@@ -606,10 +606,6 @@ export default function AddStock({ business, managerToken }) {
           cursor: not-allowed;
         }
 
-        /* =====================================
-           MESSAGES
-        ===================================== */
-
         .as-message {
           padding: 12px 14px;
           border-radius: 9px;
@@ -629,10 +625,6 @@ export default function AddStock({ business, managerToken }) {
           background: #ecfdf5;
           border: 1px solid #a7f3d0;
         }
-
-        /* =====================================
-           PURCHASE HISTORY
-        ===================================== */
 
         .as-table-wrap {
           width: 100%;
@@ -719,10 +711,6 @@ export default function AddStock({ business, managerToken }) {
           color: #64748b !important;
         }
 
-        /* =====================================
-           TABLET
-        ===================================== */
-
         @media (max-width: 800px) {
           .add-stock-page {
             gap: 16px;
@@ -736,10 +724,6 @@ export default function AddStock({ business, managerToken }) {
             gap: 13px;
           }
         }
-
-        /* =====================================
-           MOBILE
-        ===================================== */
 
         @media (max-width: 600px) {
           .add-stock-page {
@@ -835,10 +819,6 @@ export default function AddStock({ business, managerToken }) {
             padding: 8px 10px;
           }
         }
-
-        /* =====================================
-           SMALL PHONES
-        ===================================== */
 
         @media (max-width: 360px) {
           .as-card {
@@ -1095,11 +1075,13 @@ export default function AddStock({ business, managerToken }) {
                   purchases.map((purchase) => (
                     <tr key={purchase.id}>
                       <td>
-                        {formatDate(purchase.createdAt)}
+                        {formatDate(
+                          purchase.createdAt ?? purchase.created_at
+                        )}
                       </td>
 
                       <td>
-                        {purchase.stockName || "Unknown product"}
+                        {getPurchaseProductName(purchase)}
                       </td>
 
                       <td>
