@@ -56,7 +56,7 @@ function currentMonthYear() {
   };
 }
 
-export default function IE({ business }) {
+export default function IE({ business, managerToken }) {
   const initialPeriod = useMemo(() => currentMonthYear(), []);
 
   const [month, setMonth] = useState(initialPeriod.month);
@@ -73,11 +73,57 @@ export default function IE({ business }) {
   const businessId = business?.id;
   const options = CATEGORY_OPTIONS[form.category] || [];
 
+  // API request with improved error handling.
+  const request = async (url, requestOptions = {}) => {
+    const response = await fetch(url, {
+      ...requestOptions,
+      headers: {
+        "Content-Type": "application/json",
+        ...(managerToken
+          ? { Authorization: `Bearer ${managerToken}` }
+          : {}),
+        ...requestOptions.headers,
+      },
+    });
+
+    const responseText = await response.text();
+
+    let data = {};
+
+    try {
+      data = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      data = { message: responseText };
+    }
+
+    if (!response.ok) {
+      console.error("I&E API Error:", {
+        status: response.status,
+        url,
+        response: data,
+      });
+
+      throw new Error(
+        data.message ||
+          data.error ||
+          `Server error (${response.status})`
+      );
+    }
+
+    return data;
+  };
+
   const loadData = useCallback(async () => {
     if (!businessId) {
       setError(
         "Business information is missing. Please return to Home and open Manager again."
       );
+      setLoading(false);
+      return;
+    }
+
+    if (!managerToken) {
+      setError("Manager session is missing. Please log in again.");
       setLoading(false);
       return;
     }
@@ -92,28 +138,20 @@ export default function IE({ business }) {
         year,
       });
 
-      const response = await fetch(
+      const data = await request(
         `${API_URL}/api/ie?${query.toString()}`
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Could not load I&E records."
-        );
-      }
 
       setEntries(Array.isArray(data.entries) ? data.entries : []);
       setSummary(data.summary || null);
     } catch (loadError) {
-      setError(loadError.message);
+      console.error("Failed to load I&E records:", loadError);
+      setError(loadError.message || "Failed to load I&E records.");
     } finally {
       setLoading(false);
     }
-  }, [businessId, month, year]);
+  }, [businessId, month, year, managerToken]);
 
-  // Automatically load records when the selected month or year changes.
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -165,6 +203,16 @@ export default function IE({ business }) {
       return;
     }
 
+    if (!managerToken) {
+      setError("Manager session is missing. Please log in again.");
+      return;
+    }
+
+    if (!form.amount || Number(form.amount) <= 0) {
+      setError("Enter a valid amount greater than zero.");
+      return;
+    }
+
     setSaving(true);
     setError("");
     setNotice("");
@@ -183,21 +231,10 @@ export default function IE({ business }) {
         ? `${API_URL}/api/ie/${editingId}`
         : `${API_URL}/api/ie`;
 
-      const response = await fetch(url, {
+      await request(url, {
         method: editingId ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(payload),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Could not save this entry."
-        );
-      }
 
       setNotice(
         editingId
@@ -206,11 +243,10 @@ export default function IE({ business }) {
       );
 
       resetForm();
-
-      // Reload the selected month's records automatically.
       await loadData();
     } catch (saveError) {
-      setError(saveError.message);
+      console.error("Failed to save I&E entry:", saveError);
+      setError(saveError.message || "Failed to record I&E entry.");
     } finally {
       setSaving(false);
     }
@@ -218,7 +254,7 @@ export default function IE({ business }) {
 
   async function deleteEntry(entry) {
     const confirmed = window.confirm(
-      `Delete “${entry.itemName}” dated ${String(
+      `Delete "${entry.itemName}" dated ${String(
         entry.transactionDate
       ).slice(0, 10)}?`
     );
@@ -233,31 +269,21 @@ export default function IE({ business }) {
         businessId: String(businessId),
       });
 
-      const response = await fetch(
+      await request(
         `${API_URL}/api/ie/${entry.id}?${query.toString()}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE" }
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Could not delete this entry."
-        );
-      }
 
       setNotice("Entry deleted successfully.");
 
-      if (editingId === entry.id) {
+      if (String(editingId) === String(entry.id)) {
         resetForm();
       }
 
-      // Reload the selected month's records automatically.
       await loadData();
     } catch (deleteError) {
-      setError(deleteError.message);
+      console.error("Failed to delete I&E entry:", deleteError);
+      setError(deleteError.message || "Failed to delete I&E entry.");
     }
   }
 
@@ -289,7 +315,6 @@ export default function IE({ business }) {
   return (
     <div className="ie-workspace">
       <style>{`
-        /* Keep the three summary cards on one line, including phones. */
         .ie-workspace .ie-summary-grid {
           display: grid !important;
           grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -322,6 +347,10 @@ export default function IE({ business }) {
           display: block;
           font-size: 10px;
           line-height: 1.3;
+        }
+
+        .ie-workspace .ie-table {
+          min-width: 950px;
         }
 
         @media (max-width: 480px) {
@@ -566,8 +595,6 @@ export default function IE({ business }) {
             </button>
           </div>
         </form>
-
-        
       </section>
 
       <section className="ie-panel">
@@ -578,6 +605,15 @@ export default function IE({ business }) {
               {monthName} {year} records
             </h3>
           </div>
+
+          <button
+            type="button"
+            className="ie-secondary-button"
+            onClick={loadData}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Refresh"}
+          </button>
         </div>
 
         {loading ? (
@@ -586,9 +622,7 @@ export default function IE({ business }) {
           </div>
         ) : entries.length === 0 ? (
           <div className="ie-empty-state">
-            
             <strong>No manual entries for this month yet</strong>
-            
           </div>
         ) : (
           <div className="ie-table-wrap">
@@ -600,6 +634,7 @@ export default function IE({ business }) {
                   <th>Item</th>
                   <th>Notes</th>
                   <th className="ie-amount-column">Amount</th>
+                  <th>Edited By</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -608,10 +643,7 @@ export default function IE({ business }) {
                 {entries.map((entry) => (
                   <tr key={entry.id}>
                     <td>
-                      {String(entry.transactionDate || "").slice(
-                        0,
-                        10
-                      )}
+                      {String(entry.transactionDate || "").slice(0, 10)}
                     </td>
 
                     <td>
@@ -633,6 +665,10 @@ export default function IE({ business }) {
 
                     <td className="ie-amount-column">
                       {money(entry.amount)}
+                    </td>
+
+                    <td>
+                      {entry.editedBy || "Not recorded"}
                     </td>
 
                     <td>

@@ -9,6 +9,7 @@ export default function Teller({ business, onBack, onLogin }) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
   const [loading, setLoading] = useState(false);
 
   function changeMode(nextMode) {
@@ -16,12 +17,21 @@ export default function Teller({ business, onBack, onLogin }) {
     setName("");
     setPassword("");
     setMessage("");
+    setMessageType("");
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (!business?.id) {
+      setMessage("Business information is missing. Please log in again.");
+      setMessageType("error");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
+    setMessageType("");
 
     try {
       const endpoint =
@@ -48,7 +58,12 @@ export default function Teller({ business, onBack, onLogin }) {
       }
 
       if (mode === "create") {
-        setMessage("Teller created successfully. You can now log in.");
+        setMessage(
+          data.message ||
+            "Your registration request has been submitted. Please wait for the Primary Manager to approve your account."
+        );
+
+        setMessageType("success");
         setMode("login");
         setPassword("");
       } else {
@@ -61,6 +76,7 @@ export default function Teller({ business, onBack, onLogin }) {
       }
     } catch (error) {
       setMessage(error.message || "Unable to connect to the server.");
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
@@ -69,14 +85,12 @@ export default function Teller({ business, onBack, onLogin }) {
   return (
     <main className="teller-auth-page">
       <section className="teller-auth-card">
-        
-
-        
         <div className="teller-mode-switch">
           <button
             type="button"
             className={mode === "login" ? "active" : ""}
             onClick={() => changeMode("login")}
+            disabled={loading}
           >
             Login
           </button>
@@ -85,24 +99,27 @@ export default function Teller({ business, onBack, onLogin }) {
             type="button"
             className={mode === "create" ? "active" : ""}
             onClick={() => changeMode("create")}
+            disabled={loading}
           >
             New Teller
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <label htmlFor="tellerName">Teller name</label>
+          <label htmlFor="tellerName">Teller username</label>
+
           <input
             id="tellerName"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Enter teller name"
+            placeholder="Enter teller username"
             autoComplete="username"
             maxLength={100}
             required
           />
 
           <label htmlFor="tellerPassword">Password</label>
+
           <input
             id="tellerPassword"
             type="password"
@@ -112,6 +129,7 @@ export default function Teller({ business, onBack, onLogin }) {
             autoComplete={
               mode === "login" ? "current-password" : "new-password"
             }
+            minLength={mode === "create" ? 4 : undefined}
             required
           />
 
@@ -124,24 +142,28 @@ export default function Teller({ business, onBack, onLogin }) {
               ? "Please wait..."
               : mode === "login"
                 ? "Login as Teller"
-                : "Create Teller"}
+                : "Submit Approval Request"}
           </button>
         </form>
 
         {message && (
-          <p className="teller-message" role="alert">
+          <p
+            className={`teller-message ${messageType}`}
+            role="alert"
+          >
             {message}
           </p>
         )}
+
         <button
           type="button"
           className="teller-back-button"
           onClick={onBack}
+          disabled={loading}
         >
           Back
         </button>
       </section>
-      
     </main>
   );
 }

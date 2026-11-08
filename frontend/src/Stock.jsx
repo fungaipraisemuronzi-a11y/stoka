@@ -15,7 +15,7 @@ const emptyForm = {
 };
 
 export default function Stock({ business, manager, managerToken }) {
-  const [view, setView] = useState("setup");
+  const [view] = useState("setup");
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
@@ -25,6 +25,8 @@ export default function Stock({ business, manager, managerToken }) {
   const [error, setError] = useState("");
 
   const businessId = business?.id;
+
+  const managerUsername = manager?.username || "Unknown manager";
 
   const authHeaders = {
     "Content-Type": "application/json",
@@ -68,7 +70,11 @@ export default function Stock({ business, manager, managerToken }) {
 
   function handleChange(event) {
     const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
+
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
   }
 
   function resetForm() {
@@ -91,7 +97,10 @@ export default function Stock({ business, manager, managerToken }) {
 
     document
       .getElementById("stock-form")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
   }
 
   async function handleSubmit(event) {
@@ -132,7 +141,9 @@ export default function Stock({ business, manager, managerToken }) {
       }
 
       setMessage(data.message || "Stock item saved successfully.");
+
       resetForm();
+
       await loadProducts();
     } catch (err) {
       setError(err.message);
@@ -160,7 +171,9 @@ export default function Stock({ business, manager, managerToken }) {
 
     try {
       const response = await fetch(
-        `${API_URL}/api/products/${product.id}?businessId=${encodeURIComponent(businessId)}`,
+        `${API_URL}/api/products/${product.id}?businessId=${encodeURIComponent(
+          businessId
+        )}`,
         {
           method: "DELETE",
           headers: authHeaders,
@@ -173,9 +186,12 @@ export default function Stock({ business, manager, managerToken }) {
         throw new Error(data.message || "Could not delete the stock item.");
       }
 
-      if (editingId === product.id) resetForm();
+      if (editingId === product.id) {
+        resetForm();
+      }
 
       setMessage(data.message || "Stock item deleted successfully.");
+
       await loadProducts();
     } catch (err) {
       setError(
@@ -193,6 +209,7 @@ export default function Stock({ business, manager, managerToken }) {
     });
   }
 
+  // Display the manager username returned by the backend.
   function getEditedBy(product) {
     return (
       product.editedBy ||
@@ -229,7 +246,9 @@ export default function Stock({ business, manager, managerToken }) {
           <section className="stock-form-card" id="stock-form">
             <div className="stock-form-heading">
               <div>
-                <h3>{editingId ? "Edit stock item" : "Add stock item"}</h3>
+                <h3>
+                  {editingId ? "Edit stock item" : "Add stock item"}
+                </h3>
               </div>
 
               {editingId && (
@@ -284,7 +303,9 @@ export default function Stock({ business, manager, managerToken }) {
               </div>
 
               <div className="stock-field">
-                <label htmlFor="unitsPerPack">Units per packaging</label>
+                <label htmlFor="unitsPerPack">
+                  Units per packaging
+                </label>
                 <input
                   id="unitsPerPack"
                   name="unitsPerPack"
@@ -298,7 +319,9 @@ export default function Stock({ business, manager, managerToken }) {
               </div>
 
               <div className="stock-field">
-                <label htmlFor="unitSellingPrice">Unit selling price</label>
+                <label htmlFor="unitSellingPrice">
+                  Unit selling price
+                </label>
                 <input
                   id="unitSellingPrice"
                   name="unitSellingPrice"
@@ -335,12 +358,15 @@ export default function Stock({ business, manager, managerToken }) {
               </div>
 
               <span className="stock-count">
-                {products.length} {products.length === 1 ? "item" : "items"}
+                {products.length}{" "}
+                {products.length === 1 ? "item" : "items"}
               </span>
             </div>
 
             {loading ? (
-              <div className="stock-empty-state">Loading stock items...</div>
+              <div className="stock-empty-state">
+                Loading stock items...
+              </div>
             ) : products.length === 0 ? (
               <div className="stock-empty-state">
                 <h4>No stock items yet</h4>
@@ -364,13 +390,26 @@ export default function Stock({ business, manager, managerToken }) {
                   <tbody>
                     {products.map((product) => (
                       <tr key={product.id}>
-                        <td><strong>{product.stockName}</strong></td>
+                        <td>
+                          <strong>{product.stockName}</strong>
+                        </td>
+
                         <td>{product.unitName}</td>
+
                         <td>{product.packName}</td>
+
                         <td>{Number(product.unitsPerPack)}</td>
+
                         <td>{formatMoney(product.unitSellingPrice)}</td>
+
                         <td>Go to other details in reports</td>
-                        <td>{getEditedBy(product)}</td>
+
+                        <td>
+                          <strong>
+                            {getEditedBy(product)}
+                          </strong>
+                        </td>
+
                         <td>
                           <div className="stock-row-actions">
                             <button
