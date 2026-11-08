@@ -86,6 +86,15 @@ async function writeManagerAudit(
   beforeData,
   afterData
 ) {
+  const businessId = manager.businessId ?? manager.business_id;
+  const managerNumber = manager.managerNumber ?? manager.manager_number;
+
+  if (!businessId || !manager.id || !manager.username) {
+    throw new Error("Manager audit information is incomplete.");
+  }
+
+  const recordId = afterData?.id ?? beforeData?.id;
+
   await client.query(
     `INSERT INTO manager_audit_logs
        (
@@ -101,14 +110,14 @@ async function writeManagerAudit(
        )
      VALUES ($1, $2, $3, $4, 'manager_account', $5, $6, $7, $8)`,
     [
-      manager.business_id,
+      businessId,
       manager.id,
       manager.username,
-      manager.manager_number,
-      String(afterData.id ?? beforeData.id),
+      managerNumber ?? null,
+      recordId,
       action,
-      JSON.stringify(beforeData),
-      JSON.stringify(afterData),
+      JSON.stringify(beforeData ?? {}),
+      JSON.stringify(afterData ?? {}),
     ]
   );
 }

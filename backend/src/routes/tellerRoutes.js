@@ -9,6 +9,13 @@ const router = express.Router();
 // HELPER: WRITE MANAGER AUDIT LOG
 // --------------------------------------------------
 async function writeAuditLog(manager, teller, action, beforeData, afterData) {
+  const businessId = manager.businessId ?? manager.business_id;
+  const managerNumber = manager.managerNumber ?? manager.manager_number;
+
+  if (!businessId || !manager.id || !manager.username) {
+    throw new Error("Manager audit information is incomplete.");
+  }
+
   await pool.query(
     `INSERT INTO manager_audit_logs
       (
@@ -24,15 +31,15 @@ async function writeAuditLog(manager, teller, action, beforeData, afterData) {
       )
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
     [
-      manager.businessId,
+      businessId,
       manager.id,
       manager.username,
-      manager.managerNumber,
+      managerNumber ?? null,
       "teller",
       teller.id,
       action,
-      JSON.stringify(beforeData),
-      JSON.stringify(afterData),
+      JSON.stringify(beforeData ?? {}),
+      JSON.stringify(afterData ?? {}),
     ]
   );
 }
