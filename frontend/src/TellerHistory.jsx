@@ -148,8 +148,14 @@ const quantity = (value) =>
     maximumFractionDigits: 4,
   });
 
-async function fetchJson(url) {
-  const response = await fetch(url);
+// FETCH DATA WITH MANAGER AUTHORIZATION
+async function fetchJson(url, managerToken) {
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${managerToken}`,
+    },
+  });
+
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
@@ -159,8 +165,9 @@ async function fetchJson(url) {
   return data;
 }
 
-export default function TellerHistory({ businessId }) {
+export default function TellerHistory({ businessId, managerToken }) {
   const [activeHistory, setActiveHistory] = useState("Sales");
+
   const [sales, setSales] = useState([]);
   const [returns, setReturns] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
@@ -179,6 +186,11 @@ export default function TellerHistory({ businessId }) {
       return;
     }
 
+    if (!managerToken) {
+      setError("Manager login is required. Please log in again.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -188,21 +200,34 @@ export default function TellerHistory({ businessId }) {
       const [salesData, returnsData, withdrawalsData, tellersData] =
         await Promise.all([
           fetchJson(
-            `${API_URL}/api/sales?businessId=${encodedBusinessId}`
+            `${API_URL}/api/sales?businessId=${encodedBusinessId}`,
+            managerToken
           ),
+
           fetchJson(
-            `${API_URL}/api/returns?businessId=${encodedBusinessId}`
+            `${API_URL}/api/returns?businessId=${encodedBusinessId}`,
+            managerToken
           ),
+
           fetchJson(
-            `${API_URL}/api/withdrawals?businessId=${encodedBusinessId}`
+            `${API_URL}/api/withdrawals?businessId=${encodedBusinessId}`,
+            managerToken
           ),
+
           fetchJson(
-            `${API_URL}/api/tellers/business/${encodedBusinessId}`
+            `${API_URL}/api/tellers/business/${encodedBusinessId}`,
+            managerToken
           ),
         ]);
 
-      setSales(Array.isArray(salesData.sales) ? salesData.sales : []);
-      setReturns(Array.isArray(returnsData.returns) ? returnsData.returns : []);
+      setSales(
+        Array.isArray(salesData.sales) ? salesData.sales : []
+      );
+
+      setReturns(
+        Array.isArray(returnsData.returns) ? returnsData.returns : []
+      );
+
       setWithdrawals(
         Array.isArray(withdrawalsData.withdrawals)
           ? withdrawalsData.withdrawals
@@ -221,7 +246,7 @@ export default function TellerHistory({ businessId }) {
     } finally {
       setLoading(false);
     }
-  }, [businessId]);
+  }, [businessId, managerToken]);
 
   useEffect(() => {
     loadHistory();
@@ -356,12 +381,14 @@ export default function TellerHistory({ businessId }) {
           style={styles.field}
         >
           <label style={styles.label}>Teller</label>
+
           <select
             style={styles.input}
             value={selectedTeller}
             onChange={(event) => setSelectedTeller(event.target.value)}
           >
             <option value="all">All tellers</option>
+
             {tellers.map((teller) => (
               <option key={teller.id} value={String(teller.id)}>
                 {teller.name}
@@ -373,6 +400,7 @@ export default function TellerHistory({ businessId }) {
 
         <div style={styles.field}>
           <label style={styles.label}>From date</label>
+
           <input
             style={styles.input}
             type="date"
@@ -384,6 +412,7 @@ export default function TellerHistory({ businessId }) {
 
         <div style={styles.field}>
           <label style={styles.label}>To date</label>
+
           <input
             style={styles.input}
             type="date"
@@ -447,16 +476,20 @@ export default function TellerHistory({ businessId }) {
                     <th style={styles.th}>Payment</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {filteredSales.map((sale) => (
                     <tr key={sale.id}>
                       <td style={styles.td}>{formatDate(sale.createdAt)}</td>
+
                       <td style={styles.td}>
                         {sale.receiptNumber || `Sale #${sale.id}`}
                       </td>
+
                       <td style={styles.td}>
                         {sale.tellerName || "Unknown teller"}
                       </td>
+
                       <td style={styles.td}>
                         {Array.isArray(sale.items)
                           ? sale.items
@@ -467,11 +500,14 @@ export default function TellerHistory({ businessId }) {
                               .join(", ")
                           : "—"}
                       </td>
+
                       <td style={styles.td}>{money(sale.subtotal)}</td>
                       <td style={styles.td}>{money(sale.discountTotal)}</td>
+
                       <td style={styles.td}>
                         <strong>{money(sale.totalAmount)}</strong>
                       </td>
+
                       <td style={styles.td}>
                         {sale.paymentMethod || "—"}
                       </td>
@@ -494,21 +530,26 @@ export default function TellerHistory({ businessId }) {
                     <th style={styles.th}>Refund</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {filteredReturns.map((record) => (
                     <tr key={record.id}>
                       <td style={styles.td}>{formatDate(record.createdAt)}</td>
+
                       <td style={styles.td}>
                         {record.returnNumber || `Return #${record.id}`}
                       </td>
+
                       <td style={styles.td}>
                         {record.receiptNumber ||
                           record.originalReceiptNumber ||
                           "—"}
                       </td>
+
                       <td style={styles.td}>
                         {record.tellerName || "Unknown teller"}
                       </td>
+
                       <td style={styles.td}>
                         {Array.isArray(record.items)
                           ? record.items
@@ -519,7 +560,9 @@ export default function TellerHistory({ businessId }) {
                               .join(", ")
                           : "—"}
                       </td>
+
                       <td style={styles.td}>{record.reason || "—"}</td>
+
                       <td style={styles.td}>
                         <strong>{money(record.totalRefund)}</strong>
                       </td>
@@ -542,25 +585,32 @@ export default function TellerHistory({ businessId }) {
                     <th style={styles.th}>Reason</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {filteredWithdrawals.map((record) => (
                     <tr key={record.id}>
                       <td style={styles.td}>{formatDate(record.createdAt)}</td>
+
                       <td style={styles.td}>
                         {record.tellerName || "Unknown teller"}
                       </td>
+
                       <td style={styles.td}>
                         {record.productName || "—"}
                       </td>
+
                       <td style={styles.td}>
                         {quantity(record.packsWithdrawn)}
                       </td>
+
                       <td style={styles.td}>
                         {quantity(record.unitsWithdrawn)}
                       </td>
+
                       <td style={styles.td}>
                         <strong>{quantity(record.totalUnits)}</strong>
                       </td>
+
                       <td style={styles.td}>{record.reason || "—"}</td>
                     </tr>
                   ))}

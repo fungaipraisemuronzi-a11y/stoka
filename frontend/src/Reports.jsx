@@ -27,7 +27,6 @@ const getList = (data, ...keys) => {
   return [];
 };
 
-// Use the accounting date first for I&E entries.
 const getDate = (item) =>
   new Date(
     item?.transactionDate ||
@@ -62,10 +61,6 @@ const dateLabel = (date) =>
     year: "numeric",
   });
 
-/*
- * Combine repeated income or expense entries with the same item name.
- * This combines their amounts in the report display only.
- */
 const combineEntries = (entries) => {
   const grouped = new Map();
 
@@ -268,9 +263,29 @@ function Table({
   );
 }
 
+// ALL REPORT REQUESTS INCLUDE MANAGER AUTHORIZATION
+async function fetchJson(url, managerToken) {
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${managerToken}`,
+    },
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || "Failed to load report data."
+    );
+  }
+
+  return data;
+}
+
 export default function Reports({
   business,
   businessId: suppliedBusinessId,
+  managerToken,
 }) {
   const businessId = suppliedBusinessId || business?.id;
 
@@ -294,11 +309,15 @@ export default function Reports({
       return;
     }
 
+    if (!managerToken) {
+      setError("Manager login is required. Please log in again.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      // Split the selected month into the values expected by /api/ie.
       const [selectedYear, selectedMonth] = month.split("-");
 
       const ieQuery = new URLSearchParams({
@@ -317,19 +336,9 @@ export default function Reports({
       ];
 
       const responses = await Promise.all(
-        endpoints.map(async (endpoint) => {
-          const response = await fetch(`${API_URL}${endpoint}`);
-          const data = await response.json().catch(() => ({}));
-
-          if (!response.ok) {
-            throw new Error(
-              data?.message ||
-                `Could not load ${endpoint.split("?")[0]}`
-            );
-          }
-
-          return data;
-        })
+        endpoints.map((endpoint) =>
+          fetchJson(`${API_URL}${endpoint}`, managerToken)
+        )
       );
 
       setProducts(getList(responses[0], "products"));
@@ -337,8 +346,6 @@ export default function Reports({
       setReturns(getList(responses[2], "returns"));
       setPurchases(getList(responses[3], "purchases"));
       setWithdrawals(getList(responses[4], "withdrawals"));
-
-      // The backend returns { entries, summary }.
       setIEEntries(getList(responses[5], "entries"));
     } catch (err) {
       setError(
@@ -348,7 +355,7 @@ export default function Reports({
     } finally {
       setLoading(false);
     }
-  }, [businessId, month]);
+  }, [businessId, managerToken, month]);
 
   useEffect(() => {
     loadReports();
@@ -547,8 +554,6 @@ export default function Reports({
     const monthPurchases = purchases.filter(inSelectedMonth);
     const monthWithdrawals = withdrawals.filter(inSelectedMonth);
 
-    // I&E entries have already been fetched for the selected month.
-    // Filter again to ensure only matching transaction dates are used.
     const monthIE = ieEntries.filter(inSelectedMonth);
 
     const totalSales = monthSales.reduce(
@@ -568,7 +573,6 @@ export default function Reports({
       0
     );
 
-    // Additional costs entered manually in I&E.
     const purchaseCosts = monthIE
       .filter((item) => item.category === "purchase_cost")
       .reduce((sum, item) => sum + number(item.amount), 0);
@@ -581,7 +585,6 @@ export default function Reports({
       (item) => item.category === "operating_expense"
     );
 
-    // Use the full recorded amounts. No proration.
     const otherIncome = incomes.reduce(
       (sum, item) => sum + number(item.amount),
       0
@@ -704,9 +707,6 @@ export default function Reports({
     [report.expenses]
   );
 
-  /*
-   * Every current product is included, even if it had zero sales.
-   */
   const goodsOnDemand = useMemo(() => {
     const start = monthStart(month);
     const end = nextMonthStart(month);
@@ -844,7 +844,7 @@ export default function Reports({
 
   const reportTabs = [
     ["profit", "Profit and Loss"],
-    ["demand", "Goods on Demand"],
+    ["demand", "Wanted goods"],
     ["stock", "Other Details"],
   ];
 
@@ -1035,8 +1035,6 @@ export default function Reports({
             ]}
             rows={pnlRows}
           />
-
-          
         </section>
       )}
 
@@ -1105,8 +1103,6 @@ export default function Reports({
 
       {activeReport === "stock" && (
         <section className="stoka-report-panel" style={styles.panel}>
-        
-
           <Table
             columns={[
               { key: "name", label: "Product" },
