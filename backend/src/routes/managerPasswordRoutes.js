@@ -95,6 +95,10 @@ async function writeManagerAudit(
 
   const recordId = afterData?.id ?? beforeData?.id;
 
+  if (recordId === undefined || recordId === null) {
+    throw new Error("Manager audit record ID is missing.");
+  }
+
   await client.query(
     `INSERT INTO manager_audit_logs
        (
@@ -114,7 +118,7 @@ async function writeManagerAudit(
       manager.id,
       manager.username,
       managerNumber ?? null,
-      recordId,
+      String(recordId),
       action,
       JSON.stringify(beforeData ?? {}),
       JSON.stringify(afterData ?? {}),
@@ -154,7 +158,6 @@ async function verifyBusinessCredentials(
 
 // --------------------------------------------------
 // GET MANAGER STATUS
-// GET /api/manager-passwords/status?businessId=B60001
 // --------------------------------------------------
 
 router.get("/status", async (req, res) => {
@@ -184,7 +187,7 @@ router.get("/status", async (req, res) => {
       [businessId]
     );
 
-    res.json({
+    return res.json({
       exists: Number(result.rows[0].total) > 0,
       total: Number(result.rows[0].total),
       approved: Number(result.rows[0].approved),
@@ -192,7 +195,7 @@ router.get("/status", async (req, res) => {
   } catch (error) {
     console.error("Manager status error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Could not check manager accounts.",
     });
   }
@@ -200,7 +203,6 @@ router.get("/status", async (req, res) => {
 
 // --------------------------------------------------
 // FIRST MANAGER SETUP
-// POST /api/manager-passwords/setup
 // --------------------------------------------------
 
 router.post("/setup", async (req, res) => {
@@ -319,7 +321,6 @@ router.post("/setup", async (req, res) => {
 
 // --------------------------------------------------
 // MANAGER LOGIN
-// POST /api/manager-passwords/login
 // --------------------------------------------------
 
 router.post("/login", async (req, res) => {
@@ -425,7 +426,6 @@ router.post("/login", async (req, res) => {
 
 // --------------------------------------------------
 // ADDITIONAL MANAGER REGISTRATION
-// POST /api/manager-passwords/register
 // --------------------------------------------------
 
 router.post("/register", async (req, res) => {
@@ -569,7 +569,6 @@ router.post("/register", async (req, res) => {
 
 // --------------------------------------------------
 // GET CURRENT MANAGER
-// GET /api/manager-passwords/me
 // --------------------------------------------------
 
 router.get("/me", requireManager, async (req, res) => {
@@ -603,7 +602,6 @@ router.get("/me", requireManager, async (req, res) => {
 // --------------------------------------------------
 // GET ALL MANAGER ACCOUNTS
 // PRIMARY MANAGER ONLY
-// GET /api/manager-passwords/accounts
 // --------------------------------------------------
 
 router.get(
@@ -669,8 +667,6 @@ router.get(
 
 // --------------------------------------------------
 // APPROVE MANAGER
-// PRIMARY MANAGER ONLY
-// POST /api/manager-passwords/accounts/:id/approve
 // --------------------------------------------------
 
 router.post(
@@ -733,7 +729,7 @@ router.post(
       await writeManagerAudit(
         client,
         req.manager,
-        "approve",
+        "APPROVE",
         publicManager(manager),
         publicManager(updated.rows[0])
       );
@@ -760,8 +756,6 @@ router.post(
 
 // --------------------------------------------------
 // REJECT MANAGER
-// PRIMARY MANAGER ONLY
-// POST /api/manager-passwords/accounts/:id/reject
 // --------------------------------------------------
 
 router.post(
@@ -818,7 +812,7 @@ router.post(
       await writeManagerAudit(
         client,
         req.manager,
-        "reject",
+        "REJECT",
         publicManager(manager),
         publicManager(updated.rows[0])
       );
@@ -845,8 +839,6 @@ router.post(
 
 // --------------------------------------------------
 // DEACTIVATE MANAGER
-// PRIMARY MANAGER ONLY
-// POST /api/manager-passwords/accounts/:id/deactivate
 // --------------------------------------------------
 
 router.post(
@@ -906,7 +898,7 @@ router.post(
       await writeManagerAudit(
         client,
         req.manager,
-        "deactivate",
+        "DEACTIVATE",
         publicManager(manager),
         publicManager(updated.rows[0])
       );
@@ -933,8 +925,6 @@ router.post(
 
 // --------------------------------------------------
 // REACTIVATE MANAGER
-// PRIMARY MANAGER ONLY
-// POST /api/manager-passwords/accounts/:id/reactivate
 // --------------------------------------------------
 
 router.post(
@@ -994,7 +984,7 @@ router.post(
       await writeManagerAudit(
         client,
         req.manager,
-        "reactivate",
+        "REACTIVATE",
         publicManager(manager),
         publicManager(updated.rows[0])
       );
@@ -1021,8 +1011,6 @@ router.post(
 
 // --------------------------------------------------
 // SOFT DELETE MANAGER
-// PRIMARY MANAGER ONLY
-// POST /api/manager-passwords/accounts/:id/delete
 // --------------------------------------------------
 
 router.post(
@@ -1083,7 +1071,7 @@ router.post(
       await writeManagerAudit(
         client,
         req.manager,
-        "delete",
+        "DELETE",
         publicManager(manager),
         publicManager(updated.rows[0])
       );
@@ -1110,8 +1098,6 @@ router.post(
 
 // --------------------------------------------------
 // CHANGE MANAGER PASSWORD
-// PATCH /api/manager-passwords/change-password
-// PATCH /api/manager-passwords/change
 // --------------------------------------------------
 
 async function changeManagerPassword(req, res) {
