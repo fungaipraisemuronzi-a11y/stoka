@@ -409,7 +409,7 @@ export default function ManageUsers({
           onClick={fetchUsers}
           disabled={loading}
         >
-          ↻ Refresh
+          Refresh
         </button>
       </div>
 

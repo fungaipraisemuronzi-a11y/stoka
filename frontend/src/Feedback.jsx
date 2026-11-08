@@ -68,17 +68,11 @@ export default function Feedback({ business }) {
     <div className="feedback-page">
       <div className="feedback-heading">
         <h2>Feedback</h2>
-        <p>Help us improve Stoka by sharing your experience.</p>
+        <p>Help us improve YoStoka by sharing your experience.</p>
       </div>
 
       <section className="feedback-card">
-        <div className="feedback-card-heading">
-          <span className="feedback-icon">💬</span>
-          <div>
-            <h3>Send us feedback</h3>
-            <p>Tell us about a problem, suggestion or improvement.</p>
-          </div>
-        </div>
+       
 
         {message && <p className="success-message">{message}</p>}
         {error && <p className="error-message">{error}</p>}

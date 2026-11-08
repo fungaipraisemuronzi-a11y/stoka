@@ -251,25 +251,14 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
   return (
     <div className="business-profile-page">
 
-      <div className="business-profile-heading">
-        <div>
-          <h2>Business Profile</h2>
-          <p>Manage your business information and account security.</p>
-        </div>
-      </div>
+      
 
       {message && <p className="success-message">{message}</p>}
       {error && <p className="error-message">{error}</p>}
 
       {/* BUSINESS INFORMATION */}
       <section className="business-profile-card">
-        <div className="business-profile-card-heading">
-          <span className="business-profile-icon">🏢</span>
-          <div>
-            <h3>Business information</h3>
-            <p>Update your business name and login username.</p>
-          </div>
-        </div>
+        
 
         <form onSubmit={handleProfileUpdate}>
           <div className="business-profile-fields">
@@ -330,10 +319,10 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
       {/* BUSINESS PASSWORD */}
       <section className="business-profile-card">
         <div className="business-profile-card-heading">
-          <span className="business-profile-icon">🔐</span>
+         
           <div>
-            <h3>Business login password</h3>
-            <p>Change the password used to log into Stoka.</p>
+            <h3>Change the Business login password</h3>
+           
           </div>
         </div>
 
@@ -390,10 +379,10 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
       {/* MANAGER PASSWORD */}
       <section className="business-profile-card">
         <div className="business-profile-card-heading">
-          <span className="business-profile-icon">🛡️</span>
+          
           <div>
-            <h3>Manager password</h3>
-            <p>Change the password protecting the manager workspace.</p>
+            <h3>Change the Manager password</h3>
+          
           </div>
         </div>
 
@@ -450,7 +439,7 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
       {/* DELETE BUSINESS ACCOUNT */}
       <section className="business-profile-card delete-business-card">
         <div className="business-profile-card-heading">
-          <span className="business-profile-icon">⚠️</span>
+        
           <div>
             <h3>Delete business account</h3>
             <p>
