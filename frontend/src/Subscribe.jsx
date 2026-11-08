@@ -12,7 +12,7 @@ export default function Subscribe() {
       <section className="subscribe-card">
        
 
-        <h3>Subscribe to Stoka</h3>
+       
 
         <p>
           Follow the USSD instructions on your phone to make your

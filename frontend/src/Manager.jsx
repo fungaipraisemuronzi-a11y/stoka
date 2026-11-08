@@ -158,7 +158,7 @@ export default function Manager({ business, onBack }) {
   const renderHeader = () => (
     <header className="stoka-manager-header">
       <div className="stoka-manager-brand">
-        <span className="stoka-manager-brand-name">Stoka</span>
+        <span className="stoka-manager-brand-name">YoStoka</span>
       </div>
 
       <div className="stoka-manager-business">

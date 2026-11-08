@@ -396,12 +396,7 @@ export default function ManageUsers({
   return (
     <div className="manage-users-page">
       <div className="manage-users-heading">
-        <div>
-          <h2>Manage Users</h2>
-          <p>
-            Manage teller and manager access to your business.
-          </p>
-        </div>
+        
 
         <button
           type="button"
