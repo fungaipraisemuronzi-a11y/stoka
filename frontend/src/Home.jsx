@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Manager from "./Manager";
 import Sales from "./Sales";
@@ -5,10 +6,8 @@ import Teller from "./Teller";
 import ChangePassword from "./ChangePassword";
 import "./Home.css";
 
-
 export default function Home({ business, onLogout }) {
   const [selectedArea, setSelectedArea] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const [activeTeller, setActiveTeller] = useState(() => {
     try {
@@ -25,7 +24,6 @@ export default function Home({ business, onLogout }) {
   });
 
   function openTellerLogin() {
-    setMenuOpen(false);
     setActiveTeller(null);
     localStorage.removeItem("stoka_teller");
     setSelectedArea("TellerLogin");
@@ -43,7 +41,6 @@ export default function Home({ business, onLogout }) {
   }
 
   function openManager() {
-    setMenuOpen(false);
     setSelectedArea("Manager");
   }
 
@@ -56,7 +53,6 @@ export default function Home({ business, onLogout }) {
   }
 
   function handleLogout() {
-    setMenuOpen(false);
     onLogout();
   }
 
@@ -120,14 +116,11 @@ export default function Home({ business, onLogout }) {
           </button>
 
           <div className="small-brand">
-           
             <span>Stoka</span>
           </div>
         </header>
 
         <section className="placeholder-card">
-         
-
           <h1>{selectedArea}</h1>
 
           <p className="placeholder-description">
@@ -155,61 +148,30 @@ export default function Home({ business, onLogout }) {
 
           <div className="welcome-text">
             <h1>{business.businessName}</h1>
-           
           </div>
 
-          <div className="overflow-container">
-            <button
-              type="button"
-              className="overflow-button"
-              aria-label="Open menu"
-              aria-expanded={menuOpen}
-              aria-haspopup="true"
-              onClick={() => setMenuOpen((open) => !open)}
+          <button
+            type="button"
+            className="logout-power-button"
+            onClick={handleLogout}
+            aria-label="Logout"
+            title="Logout"
+          >
+            <svg
+              width="23"
+              height="23"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
             >
-              ⋮
-            </button>
-
-            {menuOpen && (
-              <>
-                <button
-                  type="button"
-                  className="menu-backdrop"
-                  aria-label="Close menu"
-                  onClick={() => setMenuOpen(false)}
-                />
-
-                <div className="overflow-menu">
-                  <button
-                    type="button"
-                    onClick={openTellerLogin}
-                  >
-                   
-                    Teller
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={openManager}
-                  >
-                   
-                    Manager
-                  </button>
-
-                  <div className="menu-divider" />
-
-                  <button
-                    type="button"
-                    className="menu-logout"
-                    onClick={handleLogout}
-                  >
-                   
-                    Logout
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+              <path d="M12 2v10" />
+              <path d="M5.5 5.5a9 9 0 1 0 13 0" />
+            </svg>
+          </button>
         </section>
       </header>
 
@@ -245,7 +207,9 @@ export default function Home({ business, onLogout }) {
 
             <div className="workspace-card-text">
               <h3>Manager</h3>
-              <p>Stock, I&E, tellers and reports</p>
+              <p>
+                Stock, I&E, tellers and reports
+              </p>
             </div>
           </button>
         </div>
