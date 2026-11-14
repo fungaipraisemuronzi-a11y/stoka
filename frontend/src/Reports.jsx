@@ -1165,7 +1165,7 @@ export default function Reports({
                           fontWeight: 800,
                         }}
                       >
-                        LOW STOCK
+                       
                       </span>
                     )}
                   </div>
