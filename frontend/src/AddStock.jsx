@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from "react";
 
 const API_URL = "https://stoka-of78.onrender.com";
@@ -13,12 +12,8 @@ const number = (value) => Number(value || 0);
 
 const formatDate = (value) => {
   if (!value) return "";
-
   const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) return "";
-
-  return date.toLocaleString();
+  return Number.isNaN(date.getTime()) ? "" : date.toLocaleString();
 };
 
 export default function AddStock({ business, managerToken }) {
@@ -26,7 +21,6 @@ export default function AddStock({ business, managerToken }) {
 
   const [products, setProducts] = useState([]);
   const [purchases, setPurchases] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -35,18 +29,14 @@ export default function AddStock({ business, managerToken }) {
   const [search, setSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProducts, setShowProducts] = useState(false);
-
   const [editingId, setEditingId] = useState(null);
 
   const [form, setForm] = useState({
     packsAdded: "",
     unitsAdded: "",
     purchasePricePerPack: "",
+    lowStockLevel: "",
   });
-
-  // =========================================
-  // API REQUEST
-  // =========================================
 
   const request = async (url, options = {}) => {
     const response = await fetch(url, {
@@ -63,17 +53,11 @@ export default function AddStock({ business, managerToken }) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error(
-        data.message || data.error || "Request failed."
-      );
+      throw new Error(data.message || data.error || "Request failed.");
     }
 
     return data;
   };
-
-  // =========================================
-  // LOAD PRODUCTS AND PURCHASE HISTORY
-  // =========================================
 
   const loadData = useCallback(async () => {
     if (!businessId) {
@@ -98,7 +82,6 @@ export default function AddStock({ business, managerToken }) {
             businessId
           )}`
         ),
-
         request(
           `${API_URL}/api/stock/purchases?businessId=${encodeURIComponent(
             businessId
@@ -106,16 +89,17 @@ export default function AddStock({ business, managerToken }) {
         ),
       ]);
 
-      const loadedProducts = Array.isArray(productData)
-        ? productData
-        : productData.products || [];
+      setProducts(
+        Array.isArray(productData)
+          ? productData
+          : productData.products || []
+      );
 
-      const loadedPurchases = Array.isArray(purchaseData)
-        ? purchaseData
-        : purchaseData.purchases || [];
-
-      setProducts(loadedProducts);
-      setPurchases(loadedPurchases);
+      setPurchases(
+        Array.isArray(purchaseData)
+          ? purchaseData
+          : purchaseData.purchases || []
+      );
     } catch (err) {
       setError(err.message || "Failed to load stock purchases.");
     } finally {
@@ -127,15 +111,8 @@ export default function AddStock({ business, managerToken }) {
     loadData();
   }, [loadData]);
 
-  // =========================================
-  // FORM HELPERS
-  // =========================================
-
   const updateForm = (field, value) => {
-    setForm((previous) => ({
-      ...previous,
-      [field]: value,
-    }));
+    setForm((previous) => ({ ...previous, [field]: value }));
   };
 
   const resetForm = () => {
@@ -143,17 +120,13 @@ export default function AddStock({ business, managerToken }) {
       packsAdded: "",
       unitsAdded: "",
       purchasePricePerPack: "",
+      lowStockLevel: "",
     });
-
     setSelectedProduct(null);
     setSearch("");
     setEditingId(null);
     setShowProducts(false);
   };
-
-  // =========================================
-  // PRODUCT SEARCH
-  // =========================================
 
   const filteredProducts = products.filter((product) =>
     String(product.stockName || "")
@@ -164,21 +137,17 @@ export default function AddStock({ business, managerToken }) {
   const selectProduct = (product) => {
     setSelectedProduct(product);
     setSearch(product.stockName);
+    setForm((previous) => ({
+      ...previous,
+      lowStockLevel: String(product.lowStockLevel ?? 0),
+    }));
     setShowProducts(false);
   };
 
-  // =========================================
-  // GET PURCHASE PRODUCT NAME
-  // =========================================
-
   const getPurchaseProductName = (purchase) => {
-    if (purchase.stockName) {
-      return purchase.stockName;
-    }
-
-    if (purchase.product?.stockName) {
-      return purchase.product.stockName;
-    }
+    if (purchase.productName) return purchase.productName;
+    if (purchase.stockName) return purchase.stockName;
+    if (purchase.product?.stockName) return purchase.product.stockName;
 
     const productId =
       purchase.productId ??
@@ -192,30 +161,15 @@ export default function AddStock({ business, managerToken }) {
     return product?.stockName || "Unknown product";
   };
 
-  // =========================================
-  // CALCULATIONS
-  // =========================================
-
-  const unitsPerPack =
-    number(selectedProduct?.unitsPerPack) || 1;
-
+  const unitsPerPack = number(selectedProduct?.unitsPerPack) || 1;
   const packs = number(form.packsAdded);
   const looseUnits = number(form.unitsAdded);
   const pricePerPack = number(form.purchasePricePerPack);
-
-  const totalUnits =
-    packs * unitsPerPack + looseUnits;
-
-  const estimatedCost =
-    packs * pricePerPack;
-
-  // =========================================
-  // SAVE PURCHASE
-  // =========================================
+  const totalUnits = packs * unitsPerPack + looseUnits;
+  const estimatedCost = packs * pricePerPack;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setError("");
     setSuccess("");
 
@@ -234,10 +188,7 @@ export default function AddStock({ business, managerToken }) {
       return;
     }
 
-    if (
-      !Number.isInteger(packs) ||
-      !Number.isInteger(looseUnits)
-    ) {
+    if (!Number.isInteger(packs) || !Number.isInteger(looseUnits)) {
       setError("Packs and loose units must be whole numbers.");
       return;
     }
@@ -252,41 +203,44 @@ export default function AddStock({ business, managerToken }) {
       return;
     }
 
+    const lowStockLevel = Number(form.lowStockLevel);
+
+    if (
+      form.lowStockLevel === "" ||
+      !Number.isInteger(lowStockLevel) ||
+      lowStockLevel < 0
+    ) {
+      setError("Enter a valid low stock level using a whole number.");
+      return;
+    }
+
     const payload = {
       businessId,
       productId: selectedProduct.id,
       packsAdded: packs,
       unitsAdded: looseUnits,
       purchasePricePerPack: pricePerPack,
+      lowStockLevel,
     };
 
     try {
       setSaving(true);
 
       if (editingId) {
-        await request(
-          `${API_URL}/api/stock/purchases/${editingId}`,
-          {
-            method: "PUT",
-            body: JSON.stringify(payload),
-          }
-        );
-
+        await request(`${API_URL}/api/stock/purchases/${editingId}`, {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        });
         setSuccess("Purchase updated successfully.");
       } else {
-        await request(
-          `${API_URL}/api/stock/purchases`,
-          {
-            method: "POST",
-            body: JSON.stringify(payload),
-          }
-        );
-
+        await request(`${API_URL}/api/stock/purchases`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
         setSuccess("Stock purchase recorded successfully.");
       }
 
       resetForm();
-
       await loadData();
     } catch (err) {
       setError(err.message || "Failed to save purchase.");
@@ -294,10 +248,6 @@ export default function AddStock({ business, managerToken }) {
       setSaving(false);
     }
   };
-
-  // =========================================
-  // EDIT PURCHASE
-  // =========================================
 
   const handleEdit = (purchase) => {
     const productId =
@@ -316,7 +266,6 @@ export default function AddStock({ business, managerToken }) {
 
     setError("");
     setSuccess("");
-
     setSelectedProduct(product);
     setSearch(product.stockName);
 
@@ -326,27 +275,19 @@ export default function AddStock({ business, managerToken }) {
       purchasePricePerPack: String(
         purchase.purchasePricePerPack ?? 0
       ),
+      lowStockLevel: String(product.lowStockLevel ?? 0),
     });
 
     setEditingId(purchase.id);
     setShowProducts(false);
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  // =========================================
-  // DELETE PURCHASE
-  // =========================================
 
   const handleDelete = async (purchase) => {
     if (
       !window.confirm(
-        `Delete this purchase of ${
-          getPurchaseProductName(purchase)
-        }?`
+        `Delete this purchase of ${getPurchaseProductName(purchase)}?`
       )
     ) {
       return;
@@ -357,12 +298,10 @@ export default function AddStock({ business, managerToken }) {
 
     try {
       await request(
-        `${API_URL}/api/stock/purchases/${
-          purchase.id
-        }?businessId=${encodeURIComponent(businessId)}`,
-        {
-          method: "DELETE",
-        }
+        `${API_URL}/api/stock/purchases/${purchase.id}?businessId=${encodeURIComponent(
+          businessId
+        )}`,
+        { method: "DELETE" }
       );
 
       setSuccess("Purchase deleted successfully.");
@@ -377,14 +316,9 @@ export default function AddStock({ business, managerToken }) {
     }
   };
 
-  // =========================================
-  // PAGE
-  // =========================================
-
   return (
     <div className="add-stock-page">
       <style>{`
-
         .add-stock-page,
         .add-stock-page * {
           box-sizing: border-box;
@@ -401,35 +335,11 @@ export default function AddStock({ business, managerToken }) {
           font-family: "DM Sans", "Manrope", sans-serif;
         }
 
-        .as-heading {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 12px;
-          min-width: 0;
-        }
-
-        .as-heading h2 {
-          margin: 0 0 5px;
-          color: #12372c;
-          font-size: 23px;
-          font-weight: 800;
-        }
-
-        .as-muted {
-          color: #64748b;
-          font-size: 13px;
-          line-height: 1.5;
-          margin: 0;
-        }
-
         .as-card {
           width: 100%;
           min-width: 0;
-          max-width: 100%;
           padding: 20px;
-          background: #ffffff;
+          background: #fff;
           border: 1px solid #e2e8f0;
           border-radius: 15px;
           box-shadow: 0 3px 12px rgba(15, 23, 42, .04);
@@ -440,6 +350,13 @@ export default function AddStock({ business, managerToken }) {
           color: #183d30;
           font-size: 17px;
           font-weight: 800;
+        }
+
+        .as-muted {
+          color: #64748b;
+          font-size: 13px;
+          line-height: 1.5;
+          margin: 0;
         }
 
         .as-form-grid {
@@ -468,14 +385,13 @@ export default function AddStock({ business, managerToken }) {
           width: 100%;
           min-width: 0;
           min-height: 44px;
-          box-sizing: border-box;
           border: 1px solid #cbd5e1;
           border-radius: 9px;
           padding: 11px 12px;
           font-family: inherit;
           font-size: 14px;
           outline: none;
-          background: #ffffff;
+          background: #fff;
           color: #182230;
         }
 
@@ -498,11 +414,9 @@ export default function AddStock({ business, managerToken }) {
           top: calc(100% + 2px);
           left: 0;
           right: 0;
-          width: 100%;
-          max-width: 100%;
           max-height: 220px;
           overflow-y: auto;
-          background: #ffffff;
+          background: #fff;
           border: 1px solid #dbe3eb;
           border-radius: 9px;
           box-shadow: 0 8px 20px rgba(15, 23, 42, .12);
@@ -514,7 +428,7 @@ export default function AddStock({ business, managerToken }) {
           padding: 12px;
           border: 0;
           border-bottom: 1px solid #f1f5f9;
-          background: #ffffff;
+          background: #fff;
           text-align: left;
           cursor: pointer;
           font-family: inherit;
@@ -544,7 +458,6 @@ export default function AddStock({ business, managerToken }) {
           border-radius: 11px;
           background: #f8fafc;
           margin-top: 16px;
-          min-width: 0;
         }
 
         .as-preview div {
@@ -580,12 +493,12 @@ export default function AddStock({ business, managerToken }) {
           font-size: 13px;
           font-weight: 800;
           cursor: pointer;
-          transition: 0.2s ease;
+          transition: .2s ease;
         }
 
         .as-primary {
           background: #087f5b;
-          color: #ffffff;
+          color: #fff;
         }
 
         .as-primary:hover {
@@ -641,7 +554,7 @@ export default function AddStock({ business, managerToken }) {
           border-collapse: collapse;
           min-width: 850px;
           font-size: 13px;
-          background: #ffffff;
+          background: #fff;
         }
 
         .as-table th,
@@ -732,18 +645,6 @@ export default function AddStock({ business, managerToken }) {
             gap: 14px;
           }
 
-          .as-heading {
-            align-items: flex-start;
-          }
-
-          .as-heading h2 {
-            font-size: 20px;
-          }
-
-          .as-muted {
-            font-size: 12px;
-          }
-
           .as-card {
             width: 100%;
             padding: 13px;
@@ -800,10 +701,6 @@ export default function AddStock({ business, managerToken }) {
             min-height: 45px;
           }
 
-          .as-table-wrap {
-            border-radius: 9px;
-          }
-
           .as-table {
             min-width: 850px;
           }
@@ -833,55 +730,19 @@ export default function AddStock({ business, managerToken }) {
           .as-preview strong {
             font-size: 13px;
           }
-
-          .as-heading h2 {
-            font-size: 19px;
-          }
         }
-
       `}</style>
 
-      {/* PAGE HEADING */}
-
-      <div className="as-heading">
-        <div>
-          <h2>Add Stock</h2>
-
-          <p className="as-muted">
-            Record stock purchases and manage purchase history.
-          </p>
-        </div>
-      </div>
-
-      {/* MESSAGES */}
-
-      {error && (
-        <div className="as-message as-error">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="as-message as-success">
-          {success}
-        </div>
-      )}
-
-      {/* PURCHASE FORM */}
+      {error && <div className="as-message as-error">{error}</div>}
+      {success && <div className="as-message as-success">{success}</div>}
 
       <section className="as-card">
-        <h3>
-          {editingId ? "Edit Purchase" : "Record New Purchase"}
-        </h3>
+        <h3>{editingId ? "Edit Purchase" : "Record New Purchase"}</h3>
 
         <form onSubmit={handleSubmit}>
           <div className="as-form-grid">
-
-            {/* PRODUCT SEARCH */}
-
             <div className="as-field as-full">
               <label>Search Stock Item</label>
-
               <input
                 type="text"
                 value={search}
@@ -889,40 +750,41 @@ export default function AddStock({ business, managerToken }) {
                 onChange={(event) => {
                   setSearch(event.target.value);
                   setSelectedProduct(null);
+                  setForm((previous) => ({
+                    ...previous,
+                    lowStockLevel: "",
+                  }));
                   setShowProducts(true);
                 }}
                 onFocus={() => setShowProducts(true)}
                 autoComplete="off"
               />
 
-              {showProducts &&
-                search.trim() &&
-                !selectedProduct && (
-                  <div className="as-product-results">
-                    {filteredProducts.length ? (
-                      filteredProducts.map((product) => (
-                        <button
-                          type="button"
-                          className="as-product-option"
-                          key={product.id}
-                          onClick={() => selectProduct(product)}
-                        >
-                          <strong>{product.stockName}</strong>
-
-                          <span className="as-muted">
-                            {" "}— {product.packName || "Pack"} contains{" "}
-                            {product.unitsPerPack || 1}{" "}
-                            {product.unitName || "units"}
-                          </span>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="as-product-option">
-                        No matching stock items found.
-                      </div>
-                    )}
-                  </div>
-                )}
+              {showProducts && search.trim() && !selectedProduct && (
+                <div className="as-product-results">
+                  {filteredProducts.length ? (
+                    filteredProducts.map((product) => (
+                      <button
+                        type="button"
+                        className="as-product-option"
+                        key={product.id}
+                        onClick={() => selectProduct(product)}
+                      >
+                        <strong>{product.stockName}</strong>
+                        <span className="as-muted">
+                          {" "}— {product.packName || "Pack"} contains{" "}
+                          {product.unitsPerPack || 1}{" "}
+                          {product.unitName || "units"}
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="as-product-option">
+                      No matching stock items found.
+                    </div>
+                  )}
+                </div>
+              )}
 
               {selectedProduct && (
                 <div className="as-selected">
@@ -931,13 +793,10 @@ export default function AddStock({ business, managerToken }) {
               )}
             </div>
 
-            {/* PACKS */}
-
             <div className="as-field">
               <label>
                 Packs Added ({selectedProduct?.packName || "Packs"})
               </label>
-
               <input
                 type="number"
                 min="0"
@@ -950,13 +809,10 @@ export default function AddStock({ business, managerToken }) {
               />
             </div>
 
-            {/* LOOSE UNITS */}
-
             <div className="as-field">
               <label>
                 Loose Units ({selectedProduct?.unitName || "Units"})
               </label>
-
               <input
                 type="number"
                 min="0"
@@ -969,48 +825,53 @@ export default function AddStock({ business, managerToken }) {
               />
             </div>
 
-            {/* PURCHASE PRICE */}
-
             <div className="as-field as-full">
               <label>Purchase Price Per Pack</label>
-
               <input
                 type="number"
                 min="0"
                 step="0.01"
                 value={form.purchasePricePerPack}
                 onChange={(event) =>
-                  updateForm(
-                    "purchasePricePerPack",
-                    event.target.value
-                  )
+                  updateForm("purchasePricePerPack", event.target.value)
                 }
                 placeholder="0.00"
               />
             </div>
 
+            <div className="as-field as-full">
+              <label>Low Stock Level (Units)</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={form.lowStockLevel}
+                onChange={(event) =>
+                  updateForm("lowStockLevel", event.target.value)
+                }
+                placeholder="Enter minimum stock quantity"
+              />
+              <p className="as-muted">
+                This is the minimum stock quantity used to identify low stock
+                in Reports.
+              </p>
+            </div>
           </div>
-
-          {/* CALCULATIONS */}
 
           <div className="as-preview">
             <div>
               <span>Total Units Added</span>
               <strong>{totalUnits.toLocaleString()}</strong>
             </div>
-
             <div>
               <span>Units Per Pack</span>
               <strong>{unitsPerPack.toLocaleString()}</strong>
             </div>
-
             <div>
               <span>Estimated Purchase Cost</span>
               <strong>{money(estimatedCost)}</strong>
             </div>
           </div>
-
-          {/* FORM ACTIONS */}
 
           <div className="as-actions">
             <button
@@ -1039,15 +900,11 @@ export default function AddStock({ business, managerToken }) {
         </form>
       </section>
 
-      {/* PURCHASE HISTORY */}
-
       <section className="as-card">
         <h3>Purchase History</h3>
 
         {loading ? (
-          <p className="as-muted">
-            Loading purchase history...
-          </p>
+          <p className="as-muted">Loading purchase history...</p>
         ) : (
           <div className="as-table-wrap">
             <table className="as-table">
@@ -1079,31 +936,16 @@ export default function AddStock({ business, managerToken }) {
                           purchase.createdAt ?? purchase.created_at
                         )}
                       </td>
-
-                      <td>
-                        {getPurchaseProductName(purchase)}
-                      </td>
-
+                      <td>{getPurchaseProductName(purchase)}</td>
                       <td>
                         {number(purchase.packsAdded).toLocaleString()}
                       </td>
-
                       <td>
                         {number(purchase.unitsAdded).toLocaleString()}
                       </td>
-
-                      <td>
-                        {money(purchase.purchasePricePerPack)}
-                      </td>
-
-                      <td>
-                        {money(purchase.totalCost)}
-                      </td>
-
-                      <td>
-                        {purchase.editedBy || "Not recorded"}
-                      </td>
-
+                      <td>{money(purchase.purchasePricePerPack)}</td>
+                      <td>{money(purchase.totalCost)}</td>
+                      <td>{purchase.editedBy || "Not recorded"}</td>
                       <td>
                         <div className="as-row-actions">
                           <button
@@ -1113,7 +955,6 @@ export default function AddStock({ business, managerToken }) {
                           >
                             Edit
                           </button>
-
                           <button
                             type="button"
                             className="as-small-button as-delete"

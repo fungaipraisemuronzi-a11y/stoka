@@ -99,7 +99,7 @@ export async function requireManager(req, res, next) {
       error.name === "TokenExpiredError"
     ) {
       return res.status(401).json({
-        message: "Your manager session is invalid or has expired.",
+        message: "Your manager session is has expired. Please logout and Login again",
       });
     }
 

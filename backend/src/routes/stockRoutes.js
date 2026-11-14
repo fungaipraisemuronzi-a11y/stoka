@@ -1,4 +1,3 @@
-
 import express from "express";
 import pool from "../config/database.js";
 import { requireManager } from "../middleware/managerAuth.js";
@@ -11,6 +10,16 @@ function validNonNegativeNumber(value) {
     value !== null &&
     value !== "" &&
     Number.isFinite(Number(value)) &&
+    Number(value) >= 0
+  );
+}
+
+function validLowStockLevel(value) {
+  return (
+    value !== undefined &&
+    value !== null &&
+    value !== "" &&
+    Number.isInteger(Number(value)) &&
     Number(value) >= 0
   );
 }
@@ -73,7 +82,7 @@ function calculatePurchase(
 }
 
 // GET /api/stock/purchases
-// Manager username is returned with every purchase.
+// Low-stock levels are intentionally not displayed in Purchase History.
 router.get("/purchases", requireManager, async (req, res) => {
   const businessId = req.manager.businessId;
 
@@ -114,6 +123,7 @@ router.post("/purchases", requireManager, async (req, res) => {
     packsAdded,
     unitsAdded,
     purchasePricePerPack,
+    lowStockLevel,
   } = req.body;
 
   const businessId = req.manager.businessId;
@@ -129,6 +139,12 @@ router.post("/purchases", requireManager, async (req, res) => {
     return res.status(400).json({
       message:
         "Enter a product, a valid quantity, and a valid purchase price.",
+    });
+  }
+
+  if (!validLowStockLevel(lowStockLevel)) {
+    return res.status(400).json({
+      message: "Enter a valid low stock level using a whole number.",
     });
   }
 
@@ -154,6 +170,7 @@ router.post("/purchases", requireManager, async (req, res) => {
     const packs = Number(packsAdded);
     const units = Number(unitsAdded);
     const price = Number(purchasePricePerPack);
+    const threshold = Number(lowStockLevel);
 
     const purchase = calculatePurchase(
       packs,
@@ -192,9 +209,16 @@ router.post("/purchases", requireManager, async (req, res) => {
       `UPDATE "Product"
        SET "stockPacks" = $1,
            "stockUnits" = $2,
+           "lowStockLevel" = $3,
            "updatedAt" = NOW()
-       WHERE id = $3 AND "businessId" = $4`,
-      [updatedStock.packs, updatedStock.units, productId, businessId]
+       WHERE id = $4 AND "businessId" = $5`,
+      [
+        updatedStock.packs,
+        updatedStock.units,
+        threshold,
+        productId,
+        businessId,
+      ]
     );
 
     await client.query("COMMIT");
@@ -225,6 +249,7 @@ router.put("/purchases/:id", requireManager, async (req, res) => {
     packsAdded,
     unitsAdded,
     purchasePricePerPack,
+    lowStockLevel,
   } = req.body;
 
   const businessId = req.manager.businessId;
@@ -241,6 +266,12 @@ router.put("/purchases/:id", requireManager, async (req, res) => {
   ) {
     return res.status(400).json({
       message: "Enter valid purchase quantities and price.",
+    });
+  }
+
+  if (!validLowStockLevel(lowStockLevel)) {
+    return res.status(400).json({
+      message: "Enter a valid low stock level using a whole number.",
     });
   }
 
@@ -286,6 +317,7 @@ router.put("/purchases/:id", requireManager, async (req, res) => {
     const packs = Number(packsAdded);
     const units = Number(unitsAdded);
     const price = Number(purchasePricePerPack);
+    const threshold = Number(lowStockLevel);
 
     const newPurchase = calculatePurchase(
       packs,
@@ -338,9 +370,16 @@ router.put("/purchases/:id", requireManager, async (req, res) => {
       `UPDATE "Product"
        SET "stockPacks" = $1,
            "stockUnits" = $2,
+           "lowStockLevel" = $3,
            "updatedAt" = NOW()
-       WHERE id = $3 AND "businessId" = $4`,
-      [updatedStock.packs, updatedStock.units, product.id, businessId]
+       WHERE id = $4 AND "businessId" = $5`,
+      [
+        updatedStock.packs,
+        updatedStock.units,
+        threshold,
+        product.id,
+        businessId,
+      ]
     );
 
     await client.query("COMMIT");
@@ -440,7 +479,12 @@ router.delete("/purchases/:id", requireManager, async (req, res) => {
            "stockUnits" = $2,
            "updatedAt" = NOW()
        WHERE id = $3 AND "businessId" = $4`,
-      [updatedStock.packs, updatedStock.units, product.id, businessId]
+      [
+        updatedStock.packs,
+        updatedStock.units,
+        product.id,
+        businessId,
+      ]
     );
 
     await client.query(

@@ -9,8 +9,10 @@ function validateProduct(body) {
   const stockName = String(body.stockName ?? "").trim();
   const unitName = String(body.unitName ?? "").trim();
   const packName = String(body.packName ?? "").trim();
+
   const unitsPerPack = Number(body.unitsPerPack);
   const unitSellingPrice = Number(body.unitSellingPrice);
+  const lowStockLevel = Number(body.lowStockLevel ?? 0);
 
   if (!stockName || !unitName || !packName) {
     return {
@@ -30,6 +32,12 @@ function validateProduct(body) {
     };
   }
 
+  if (!Number.isInteger(lowStockLevel) || lowStockLevel < 0) {
+    return {
+      error: "Low stock level must be a non-negative whole number.",
+    };
+  }
+
   return {
     product: {
       stockName,
@@ -37,6 +45,7 @@ function validateProduct(body) {
       packName,
       unitsPerPack,
       unitSellingPrice,
+      lowStockLevel,
     },
   };
 }
@@ -44,9 +53,7 @@ function validateProduct(body) {
 async function getBusinessId(value) {
   const businessId = String(value ?? "").trim();
 
-  if (!businessId) {
-    return null;
-  }
+  if (!businessId) return null;
 
   const result = await pool.query(
     'SELECT id FROM "Business" WHERE id = $1',
@@ -56,7 +63,7 @@ async function getBusinessId(value) {
   return result.rows.length ? businessId : null;
 }
 
-// GET /api/products?businessId=B60001
+// GET PRODUCTS
 router.get("/", async (req, res) => {
   try {
     const businessId = await getBusinessId(req.query.businessId);
@@ -76,6 +83,7 @@ router.get("/", async (req, res) => {
          "packName",
          "unitsPerPack",
          "unitSellingPrice",
+         "lowStockLevel",
          "stockPacks",
          "stockUnits",
          "createdAt",
@@ -99,8 +107,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// POST /api/products
-// Only an authenticated, approved manager can create stock.
+// CREATE PRODUCT
 router.post("/", requireManager, async (req, res) => {
   try {
     const businessId = req.manager.businessId;
@@ -120,6 +127,7 @@ router.post("/", requireManager, async (req, res) => {
       packName,
       unitsPerPack,
       unitSellingPrice,
+      lowStockLevel,
     } = validation.product;
 
     const result = await pool.query(
@@ -130,9 +138,10 @@ router.post("/", requireManager, async (req, res) => {
          "packName",
          "unitsPerPack",
          "unitSellingPrice",
+         "lowStockLevel",
          "editedBy"
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
         businessId,
@@ -141,6 +150,7 @@ router.post("/", requireManager, async (req, res) => {
         packName,
         unitsPerPack,
         unitSellingPrice,
+        lowStockLevel,
         managerUsername,
       ]
     );
@@ -164,8 +174,7 @@ router.post("/", requireManager, async (req, res) => {
   }
 });
 
-// PUT /api/products/:id
-// Records the username of the manager who last edited the item.
+// UPDATE PRODUCT
 router.put("/:id", requireManager, async (req, res) => {
   try {
     const productId = Number(req.params.id);
@@ -192,6 +201,7 @@ router.put("/:id", requireManager, async (req, res) => {
       packName,
       unitsPerPack,
       unitSellingPrice,
+      lowStockLevel,
     } = validation.product;
 
     const result = await pool.query(
@@ -202,10 +212,11 @@ router.put("/:id", requireManager, async (req, res) => {
          "packName" = $3,
          "unitsPerPack" = $4,
          "unitSellingPrice" = $5,
-         "editedBy" = $6,
+         "lowStockLevel" = $6,
+         "editedBy" = $7,
          "updatedAt" = NOW()
-       WHERE id = $7
-         AND "businessId" = $8
+       WHERE id = $8
+         AND "businessId" = $9
        RETURNING *`,
       [
         stockName,
@@ -213,6 +224,7 @@ router.put("/:id", requireManager, async (req, res) => {
         packName,
         unitsPerPack,
         unitSellingPrice,
+        lowStockLevel,
         managerUsername,
         productId,
         businessId,
@@ -244,7 +256,7 @@ router.put("/:id", requireManager, async (req, res) => {
   }
 });
 
-// DELETE /api/products/:id?businessId=B60001
+// DELETE PRODUCT
 router.delete("/:id", requireManager, async (req, res) => {
   try {
     const productId = Number(req.params.id);

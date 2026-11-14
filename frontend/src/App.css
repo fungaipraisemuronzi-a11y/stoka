@@ -2003,10 +2003,8 @@ input:focus-visible {
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1px solid #dce8e1;
-  border-radius: 13px;
-  background: #f5f8f6;
-  color: #087b52;
+  background: white;
+  color: #0d0e0d;
   font-size: 29px;
   font-weight: 800;
   cursor: pointer;
