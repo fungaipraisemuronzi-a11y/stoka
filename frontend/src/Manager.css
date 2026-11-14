@@ -42,3 +42,195 @@
   color: #065c43;
   text-decoration: underline;
 }
+
+/* =========================================
+   STOKA MANAGER - FULL SCREEN LAYOUT
+========================================= */
+
+.stoka-manager-page {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* =========================================
+   FULL WIDTH HEADER
+========================================= */
+
+.stoka-manager-header {
+  width: 100%;
+  max-width: 100%;
+  min-height: 68px;
+  padding: 12px 24px;
+  margin: 0;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* =========================================
+   MAIN WORKSPACE
+========================================= */
+
+.stoka-manager-workspace {
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 22px 24px;
+  box-sizing: border-box;
+}
+
+.manager-selected-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.manager-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================================
+   PROFILE PAGE HEADING
+========================================= */
+
+.manager-profile-page-heading {
+  width: 100%;
+  max-width: 100%;
+  min-height: 55px;
+  margin: 0 0 22px;
+  padding: 0;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.manager-profile-page-heading h2 {
+  margin: 0;
+  color: #182230;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+/* =========================================
+   PROFILE SUBMENU
+========================================= */
+
+.stoka-manager-profile-submenu {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 12px;
+  border-left: 2px solid #e6f5ee;
+  margin-left: 12px;
+}
+
+.stoka-manager-profile-submenu .stoka-manager-menu-item {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 13px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
+/* =========================================
+   BACK BUTTON
+========================================= */
+
+.manager-profile-back-button {
+  border: none;
+  background: transparent;
+  color: #087f5b;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.manager-profile-back-button:hover {
+  color: #065c43;
+  text-decoration: underline;
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS
+========================================= */
+
+@media (max-width: 768px) {
+  .stoka-manager-header {
+    width: 100%;
+    min-height: 60px;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .stoka-manager-workspace {
+    width: 100%;
+    padding: 16px 12px;
+  }
+
+  .manager-selected-section,
+  .manager-content {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  .manager-profile-page-heading {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .manager-profile-page-heading h2 {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 420px) {
+  .stoka-manager-header {
+    padding: 9px 10px;
+  }
+
+  .stoka-manager-workspace {
+    padding: 12px 9px;
+  }
+
+  .manager-profile-page-heading h2 {
+    font-size: 19px;
+  }
+}
+
+/* Prevent child pages from exceeding the screen */
+
+.stoka-manager-page *,
+.stoka-manager-page *::before,
+.stoka-manager-page *::after {
+  box-sizing: border-box;
+}
