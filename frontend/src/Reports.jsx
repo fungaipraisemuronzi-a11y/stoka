@@ -173,10 +173,6 @@ const styles = {
     textAlign: "left",
     verticalAlign: "middle",
   },
-  right: {
-    textAlign: "right",
-    whiteSpace: "nowrap",
-  },
   total: {
     fontWeight: 700,
     background: "#f8fafc",
@@ -239,7 +235,17 @@ function Table({
             </tr>
           ) : (
             rows.map((row, index) => (
-              <tr key={row.id ?? `${row.name ?? "row"}-${index}`}>
+              <tr
+                key={row.id ?? `${row.name ?? "row"}-${index}`}
+                style={
+                  row.isLowStock
+                    ? {
+                        background: "#fef2f2",
+                        color: "#b91c1c",
+                      }
+                    : {}
+                }
+              >
                 {columns.map((column) => (
                   <td
                     key={column.key}
@@ -247,6 +253,13 @@ function Table({
                       ...styles.td,
                       textAlign: column.right ? "right" : "left",
                       ...(row.bold ? styles.total : {}),
+                      ...(row.isLowStock
+                        ? {
+                            color: "#b91c1c",
+                            fontWeight: 700,
+                            borderBottom: "1px solid #fecaca",
+                          }
+                        : {}),
                     }}
                   >
                     {column.render
@@ -767,6 +780,7 @@ export default function Reports({
     });
   }, [sales, products, month, ranking]);
 
+  // CURRENT STOCK AND LOW-STOCK STATUS
   const remainingStock = useMemo(() => {
     return products.map((product) => {
       const id = String(product.id);
@@ -774,6 +788,7 @@ export default function Reports({
       const loose = number(product.stockUnits);
       const unitsPerPack = number(product.unitsPerPack);
       const totalUnits = packs * unitsPerPack + loose;
+      const lowStockLevel = number(product.lowStockLevel);
       const ledger = stockLedger.currentValues.get(id);
 
       return {
@@ -784,6 +799,12 @@ export default function Reports({
         packs,
         loose,
         totalUnits,
+        lowStockLevel,
+        isLowStock:
+          product.lowStockLevel !== null &&
+          product.lowStockLevel !== undefined &&
+          product.lowStockLevel !== "" &&
+          totalUnits <= lowStockLevel,
         stockValue: ledger?.value ?? 0,
       };
     });
@@ -1103,9 +1124,53 @@ export default function Reports({
 
       {activeReport === "stock" && (
         <section className="stoka-report-panel" style={styles.panel}>
+          <div style={{ ...styles.controls, marginBottom: 12 }}>
+            <strong style={{ fontSize: 14 }}>
+              Remaining Stock
+            </strong>
+
+            <span
+              style={{
+                fontSize: 12,
+                color: "#b91c1c",
+                background: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: 6,
+                padding: "5px 9px",
+                fontWeight: 700,
+              }}
+            >
+              Low stock highlighted in red
+            </span>
+          </div>
+
           <Table
             columns={[
-              { key: "name", label: "Product" },
+              {
+                key: "name",
+                label: "Product",
+                render: (row) => (
+                  <div>
+                    <div>{row.name}</div>
+                    {row.isLowStock && (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          marginTop: 4,
+                          padding: "3px 7px",
+                          borderRadius: 5,
+                          background: "#fee2e2",
+                          color: "#b91c1c",
+                          fontSize: 10,
+                          fontWeight: 800,
+                        }}
+                      >
+                        LOW STOCK
+                      </span>
+                    )}
+                  </div>
+                ),
+              },
               {
                 key: "packs",
                 label: "Packaging remaining",
@@ -1124,7 +1189,15 @@ export default function Reports({
                 key: "totalUnits",
                 label: "Total individual units",
                 right: true,
-                render: (row) => quantity(row.totalUnits),
+                render: (row) =>
+                  quantity(row.totalUnits),
+              },
+              {
+                key: "lowStockLevel",
+                label: "Low stock level",
+                right: true,
+                render: (row) =>
+                  quantity(row.lowStockLevel),
               },
               {
                 key: "stockValue",
@@ -1137,8 +1210,9 @@ export default function Reports({
           />
 
           <p style={{ ...styles.muted, marginTop: 14 }}>
-            Stock value is an estimate based on recorded purchase costs,
-            not selling prices.
+            Products at or below their low-stock level are highlighted
+            in red. Stock value is an estimate based on recorded
+            purchase costs, not selling prices.
           </p>
         </section>
       )}

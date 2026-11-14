@@ -12,6 +12,7 @@ const emptyForm = {
   packName: "",
   unitsPerPack: "1",
   unitSellingPrice: "0",
+  lowStockLevel: "0",
 };
 
 export default function Stock({ business, manager, managerToken }) {
@@ -25,8 +26,6 @@ export default function Stock({ business, manager, managerToken }) {
   const [error, setError] = useState("");
 
   const businessId = business?.id;
-
-  const managerUsername = manager?.username || "Unknown manager";
 
   const authHeaders = {
     "Content-Type": "application/json",
@@ -89,18 +88,17 @@ export default function Stock({ business, manager, managerToken }) {
       packName: product.packName || "",
       unitsPerPack: String(product.unitsPerPack ?? 1),
       unitSellingPrice: String(product.unitSellingPrice ?? 0),
+      lowStockLevel: String(product.lowStockLevel ?? 0),
     });
 
     setEditingId(product.id);
     setMessage("");
     setError("");
 
-    document
-      .getElementById("stock-form")
-      ?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+    document.getElementById("stock-form")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   }
 
   async function handleSubmit(event) {
@@ -130,6 +128,7 @@ export default function Stock({ business, manager, managerToken }) {
             packName: form.packName.trim(),
             unitsPerPack: Number(form.unitsPerPack),
             unitSellingPrice: Number(form.unitSellingPrice),
+            lowStockLevel: Number(form.lowStockLevel),
           }),
         }
       );
@@ -143,7 +142,6 @@ export default function Stock({ business, manager, managerToken }) {
       setMessage(data.message || "Stock item saved successfully.");
 
       resetForm();
-
       await loadProducts();
     } catch (err) {
       setError(err.message);
@@ -191,7 +189,6 @@ export default function Stock({ business, manager, managerToken }) {
       }
 
       setMessage(data.message || "Stock item deleted successfully.");
-
       await loadProducts();
     } catch (err) {
       setError(
@@ -209,7 +206,6 @@ export default function Stock({ business, manager, managerToken }) {
     });
   }
 
-  // Display the manager username returned by the backend.
   function getEditedBy(product) {
     return (
       product.editedBy ||
@@ -334,6 +330,26 @@ export default function Stock({ business, manager, managerToken }) {
                 />
               </div>
 
+              <div className="stock-field">
+                <label htmlFor="lowStockLevel">
+                  Minimum stock level
+                </label>
+                <input
+                  id="lowStockLevel"
+                  name="lowStockLevel"
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={form.lowStockLevel}
+                  onChange={handleChange}
+                  placeholder="e.g. 10"
+                  required
+                />
+                <small>
+                  Minimum number of individual units you want to keep in stock.
+                </small>
+              </div>
+
               <div className="stock-form-actions">
                 <button
                   className="stock-save-button"
@@ -381,6 +397,7 @@ export default function Stock({ business, manager, managerToken }) {
                       <th>Packaging</th>
                       <th>Units per packaging</th>
                       <th>Selling price / unit</th>
+                      <th>Minimum stock</th>
                       <th>Current quantity</th>
                       <th>Edited By</th>
                       <th>Actions</th>
@@ -402,12 +419,17 @@ export default function Stock({ business, manager, managerToken }) {
 
                         <td>{formatMoney(product.unitSellingPrice)}</td>
 
+                        <td>
+                          <strong>
+                            {Number(product.lowStockLevel ?? 0)}
+                          </strong>{" "}
+                          {product.unitName}
+                        </td>
+
                         <td>Go to other details in reports</td>
 
                         <td>
-                          <strong>
-                            {getEditedBy(product)}
-                          </strong>
+                          <strong>{getEditedBy(product)}</strong>
                         </td>
 
                         <td>
