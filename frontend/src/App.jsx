@@ -163,13 +163,11 @@ export default function App() {
             className="cover-logo"
             onClick={() => switchPage("cover")}
           >
-            <div className="logo-icon">
-              <span>🛒</span>
-            </div>
+            
 
             <div>
               <h1>YoStoka</h1>
-              <p>Stock Made Easy</p>
+              
             </div>
           </div>
 
@@ -194,9 +192,7 @@ export default function App() {
         <section className="cover-hero">
 
           <div className="hero-content">
-            <span className="hero-label">
-              SMART BUSINESS MANAGEMENT
-            </span>
+          
 
             <h2>
               Smarter Stock Management
@@ -225,11 +221,7 @@ export default function App() {
               </button>
             </div>
 
-            <div className="hero-benefits">
-              <div>✓ Fast & Reliable</div>
-              <div>✓ Secure & Trusted</div>
-              <div>✓ Grow Your Business</div>
-            </div>
+           
           </div>
 
           <div className="hero-decoration">
@@ -257,17 +249,14 @@ export default function App() {
 
           <div className="feature-card">
             <div className="feature-heading">
-              <span>🛒</span>
+             
               <h3>Teller Functions</h3>
             </div>
 
-            <p>
-              Simple selling tools accessible from any device.
-            </p>
-
+           
             <ul>
               <li>Sell using a phone, tablet or laptop</li>
-              <li>Record and track sales</li>
+              <li>Recordsales</li>
               <li>Process customer returns</li>
               <li>Record stock withdrawals</li>
             </ul>
@@ -275,19 +264,19 @@ export default function App() {
 
           <div className="feature-card">
             <div className="feature-heading">
-              <span>⚙</span>
+             
               <h3>Manager Functions</h3>
             </div>
 
-            <p>
-              Powerful management tools for your business.
-            </p>
+          
 
             <ul>
               <li>Manage stock, incomes and expenses</li>
               <li>View sales history and remaining stock</li>
               <li>View profit and loss reports</li>
-              <li>Manage system users</li>
+              <li>Manage users</li>
+              <li>View teller activities</li>
+              <li>And many more</li>
             </ul>
           </div>
 
@@ -295,7 +284,7 @@ export default function App() {
 
         {/* SUPPORT */}
         <section className="cover-support">
-          <div className="support-icon">☎</div>
+          
 
           <div className="support-content">
             <h2>Ongoing Support</h2>
@@ -307,7 +296,7 @@ export default function App() {
           </div>
 
           <a
-            href="https://wa.me/263YOURNUMBER"
+            href="https://wa.me/263777847204"
             target="_blank"
             rel="noopener noreferrer"
             className="whatsapp-button"
@@ -317,12 +306,7 @@ export default function App() {
         </section>
 
         {/* FOOTER */}
-        <footer className="cover-footer">
-          <h2>YoStoka</h2>
-          <p>Manage. Sell. Grow.</p>
-          <span>Stock Management System</span>
-          <small>© {new Date().getFullYear()} YoStoka. All rights reserved.</small>
-        </footer>
+       
 
       </main>
     );
