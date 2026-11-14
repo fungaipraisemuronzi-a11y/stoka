@@ -15,7 +15,7 @@ const emptyForm = {
 };
 
 export default function App() {
-  const [page, setPage] = useState("login");
+  const [page, setPage] = useState("cover");
   const [form, setForm] = useState(emptyForm);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -105,23 +105,18 @@ export default function App() {
         };
 
     try {
-      const response = await fetch(
-        `${API_URL}${endpoint}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Request failed."
-        );
+        throw new Error(data.message || "Request failed.");
       }
 
       localStorage.setItem(
@@ -143,10 +138,11 @@ export default function App() {
     localStorage.removeItem("stoka_business");
     setBusiness(null);
     setForm(emptyForm);
-    setPage("login");
+    setPage("cover");
     setMessage("");
   }
 
+  // Existing authenticated home
   if (business) {
     return (
       <Home
@@ -156,15 +152,201 @@ export default function App() {
     );
   }
 
+  // PUBLIC COVER PAGE
+  if (page === "cover") {
+    return (
+      <main className="cover-page">
+
+        {/* HEADER */}
+        <header className="cover-header">
+          <div
+            className="cover-logo"
+            onClick={() => switchPage("cover")}
+          >
+            <div className="logo-icon">
+              <span>🛒</span>
+            </div>
+
+            <div>
+              <h1>YoStoka</h1>
+              <p>Stock Made Easy</p>
+            </div>
+          </div>
+
+          <nav className="cover-nav">
+            <button
+              className="cover-login"
+              onClick={() => switchPage("login")}
+            >
+              Login
+            </button>
+
+            <button
+              className="cover-register"
+              onClick={() => switchPage("register")}
+            >
+              Create Account
+            </button>
+          </nav>
+        </header>
+
+        {/* HERO */}
+        <section className="cover-hero">
+
+          <div className="hero-content">
+            <span className="hero-label">
+              SMART BUSINESS MANAGEMENT
+            </span>
+
+            <h2>
+              Smarter Stock Management
+              <span> for Your Business</span>
+            </h2>
+
+            <p>
+              YoStoka is a powerful and easy-to-use stock
+              management system that helps you sell, track
+              and grow your business efficiently.
+            </p>
+
+            <div className="hero-actions">
+              <button
+                className="cover-register hero-button"
+                onClick={() => switchPage("register")}
+              >
+                Get Started
+              </button>
+
+              <button
+                className="cover-login hero-button"
+                onClick={() => switchPage("login")}
+              >
+                Sign In
+              </button>
+            </div>
+
+            <div className="hero-benefits">
+              <div>✓ Fast & Reliable</div>
+              <div>✓ Secure & Trusted</div>
+              <div>✓ Grow Your Business</div>
+            </div>
+          </div>
+
+          <div className="hero-decoration">
+            <div className="hero-circle">
+              <div className="hero-circle-inner">
+                <span className="hero-cart">▦</span>
+                <h3>YoStoka</h3>
+                <p>Manage. Sell. Grow.</p>
+
+                <div className="hero-bars">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        {/* FEATURES */}
+        <section className="cover-features">
+
+          <div className="feature-card">
+            <div className="feature-heading">
+              <span>🛒</span>
+              <h3>Teller Functions</h3>
+            </div>
+
+            <p>
+              Simple selling tools accessible from any device.
+            </p>
+
+            <ul>
+              <li>Sell using a phone, tablet or laptop</li>
+              <li>Record and track sales</li>
+              <li>Process customer returns</li>
+              <li>Record stock withdrawals</li>
+            </ul>
+          </div>
+
+          <div className="feature-card">
+            <div className="feature-heading">
+              <span>⚙</span>
+              <h3>Manager Functions</h3>
+            </div>
+
+            <p>
+              Powerful management tools for your business.
+            </p>
+
+            <ul>
+              <li>Manage stock, incomes and expenses</li>
+              <li>View sales history and remaining stock</li>
+              <li>View profit and loss reports</li>
+              <li>Manage system users</li>
+            </ul>
+          </div>
+
+        </section>
+
+        {/* SUPPORT */}
+        <section className="cover-support">
+          <div className="support-icon">☎</div>
+
+          <div className="support-content">
+            <h2>Ongoing Support</h2>
+
+            <p>
+              We are here to help! Contact us on WhatsApp
+              and receive assistance whenever you need it.
+            </p>
+          </div>
+
+          <a
+            href="https://wa.me/263YOURNUMBER"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="whatsapp-button"
+          >
+            Contact Us on WhatsApp →
+          </a>
+        </section>
+
+        {/* FOOTER */}
+        <footer className="cover-footer">
+          <h2>YoStoka</h2>
+          <p>Manage. Sell. Grow.</p>
+          <span>Stock Management System</span>
+          <small>© {new Date().getFullYear()} YoStoka. All rights reserved.</small>
+        </footer>
+
+      </main>
+    );
+  }
+
+  // LOGIN AND REGISTRATION
   return (
     <main className="app-container auth-background">
+
       <section className="auth-card">
+
+        <button
+          type="button"
+          className="back-to-cover"
+          onClick={() => switchPage("cover")}
+        >
+          ← Back to Home
+        </button>
 
         <div className="auth-heading">
           <label>
             {page === "login"
-              ? "Stoka Sign in"
-              : "Stoka Business Register"}
+              ? "YoStoka Sign In"
+              : "YoStoka Business Register"}
           </label>
         </div>
 
@@ -187,12 +369,10 @@ export default function App() {
         </div>
 
         <form onSubmit={handleSubmit}>
+
           {page === "register" && (
             <>
-              <label htmlFor="businessName">
-                Business name
-              </label>
-
+              <label htmlFor="businessName">Business name</label>
               <input
                 id="businessName"
                 name="businessName"
@@ -203,10 +383,7 @@ export default function App() {
                 required
               />
 
-              <label htmlFor="location">
-                Business location
-              </label>
-
+              <label htmlFor="location">Business location</label>
               <input
                 id="location"
                 name="location"
@@ -217,10 +394,7 @@ export default function App() {
                 required
               />
 
-              <label htmlFor="phone">
-                Phone number
-              </label>
-
+              <label htmlFor="phone">Phone number</label>
               <input
                 id="phone"
                 name="phone"
@@ -234,10 +408,7 @@ export default function App() {
             </>
           )}
 
-          <label htmlFor="username">
-            Username
-          </label>
-
+          <label htmlFor="username">Username</label>
           <input
             id="username"
             name="username"
@@ -247,14 +418,11 @@ export default function App() {
             autoComplete="username"
             maxLength={15}
             pattern="[a-zA-Z0-9]+"
-            title="Use letters and numbers only. No spaces or special characters."
+            title="Use letters and numbers only."
             required
           />
 
-          <label htmlFor="password">
-            Password
-          </label>
-
+          <label htmlFor="password">Password</label>
           <input
             id="password"
             name="password"
@@ -302,6 +470,7 @@ export default function App() {
                 ? "Login"
                 : "Create account"}
           </button>
+
         </form>
 
         {message && (

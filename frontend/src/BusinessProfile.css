@@ -1,101 +1,676 @@
 
+/* =========================================
+   STOKA - BUSINESS PROFILE
+========================================= */
+
 .business-profile-page {
-  display: grid;
-  gap: 20px;
-  color: #182230;
-}
-
-.business-profile-heading {
+  width: 100%;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+  color: #182230;
+  font-family: "DM Sans", sans-serif;
+}
+
+/* =========================================
+   PAGE HEADING
+========================================= */
+
+.bp-page-heading {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
 }
 
-.business-profile-heading h2 {
+.bp-page-heading h2 {
   margin: 0 0 6px;
+  color: #12372c;
+  font-size: 25px;
+  font-weight: 800;
 }
 
-.business-profile-heading p,
-.business-profile-card-heading p {
+.bp-page-heading p {
   margin: 0;
-  color: #667085;
+  color: #718096;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* =========================================
+   NOTIFICATIONS
+========================================= */
+
+.bp-alert {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 16px;
+  border-radius: 11px;
   font-size: 13px;
+  line-height: 1.6;
+  font-weight: 600;
 }
 
-.business-profile-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 22px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
+.bp-alert > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  font-weight: 900;
 }
 
-.business-profile-card-heading {
+.bp-success {
+  color: #087f5b;
+  background: #e6f5ee;
+  border: 1px solid #c5e9d8;
+}
+
+.bp-success > span {
+  background: #087f5b;
+  color: white;
+}
+
+.bp-error {
+  color: #b42318;
+  background: #fff1f0;
+  border: 1px solid #ffd2ce;
+}
+
+.bp-error > span {
+  background: #b42318;
+  color: white;
+}
+
+/* =========================================
+   BUSINESS AND USER INFORMATION
+========================================= */
+
+.bp-information-grid {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+}
+
+.bp-information-card {
+  flex: 1 1 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e1ebe5;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(20, 50, 35, 0.05);
+}
+
+/* CARD HEADER */
+
+.bp-card-header {
   display: flex;
   align-items: center;
   gap: 13px;
-  margin-bottom: 22px;
+  min-height: 72px;
+  padding: 17px 21px;
+  background: #d9f3e5;
+  border-bottom: 1px solid #c9ead8;
 }
 
-.business-profile-card-heading h3 {
-  margin: 0 0 5px;
-  font-size: 17px;
-}
-
-.business-profile-icon {
-  width: 43px;
-  height: 43px;
-  border-radius: 11px;
-  display: grid;
-  place-items: center;
-  background: #e6f5ee;
-  font-size: 21px;
+.bp-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 39px;
+  height: 39px;
+  border-radius: 11px;
+  background: #087f5b;
+  color: #ffffff;
+  font-size: 22px;
 }
 
-.business-profile-fields {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 17px;
-  margin-bottom: 20px;
-}
-
-.business-profile-fields .form-group {
+.bp-card-header h3 {
   margin: 0;
+  color: #12372c;
+  font-size: 17px;
+  font-weight: 800;
 }
 
-.business-profile-fields input {
+/* CARD CONTENT */
+
+.bp-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  padding: 21px;
+}
+
+/* =========================================
+   FORM FIELDS
+========================================= */
+
+.bp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bp-field label,
+.bp-profile-confirm > label {
+  color: #26364d;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.bp-field input,
+.bp-password-input input {
   width: 100%;
+  min-width: 0;
+  height: 47px;
+  padding: 0 13px;
+  border: 1px solid #d5deea;
+  border-radius: 10px;
+  outline: none;
+  background: #ffffff;
+  color: #182230;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
 }
 
-.business-profile-fields small {
-  display: block;
-  color: #667085;
-  margin-top: 6px;
+.bp-field input:focus,
+.bp-password-input input:focus {
+  border-color: #087f5b;
+  box-shadow: 0 0 0 3px rgba(8, 127, 91, 0.09);
+}
+
+.bp-field small {
+  color: #718096;
   font-size: 12px;
+  line-height: 1.6;
 }
 
-.business-profile-card .primary-button {
-  min-width: 190px;
+/* =========================================
+   PASSWORD INPUTS
+========================================= */
+
+.bp-password-input {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  position: relative;
 }
 
-.business-profile-page .success-message,
-.business-profile-page .error-message {
+.bp-password-input input {
+  flex: 1;
+  padding: 0 43px 0 13px;
+}
+
+.bp-password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #53645a;
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.bp-password-toggle:hover {
+  color: #087f5b;
+}
+
+.bp-profile-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* =========================================
+   SAVE BUTTONS
+========================================= */
+
+.bp-save-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 45px;
+  padding: 11px 18px;
+  border: 1px solid #087f5b;
+  border-radius: 10px;
+  background: #087f5b;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.bp-save-button:hover {
+  background: #065c43;
+  border-color: #065c43;
+  box-shadow: 0 4px 10px rgba(8, 127, 91, 0.15);
+}
+
+.bp-section-save {
+  width: 100%;
+  margin-top: auto;
+}
+
+.bp-save-button:disabled,
+.bp-reset-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   PASSWORD SECTIONS
+========================================= */
+
+.bp-password-card {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 21px;
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid #e1e8e2;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(20, 50, 35, 0.045);
+  box-sizing: border-box;
+}
+
+/* SECTION HEADING */
+
+.bp-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.bp-section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #087f5b;
+  color: white;
+  font-size: 25px;
+}
+
+.bp-section-heading h3 {
+  margin: 0 0 5px;
+  color: #142d24;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.bp-section-heading p {
   margin: 0;
+  color: #718096;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
-@media (max-width: 650px) {
-  .business-profile-card {
-    padding: 16px;
+/* PASSWORD FORM */
+
+.bp-password-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.bp-password-grid {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 15px;
+  width: 100%;
+}
+
+.bp-password-grid .bp-field {
+  flex: 1 1 190px;
+  min-width: 0;
+}
+
+/* =========================================
+   PASSWORD GUIDANCE
+========================================= */
+
+.bp-password-guidance {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border: 1px solid #bce8d0;
+  border-radius: 11px;
+  background: #e6f5ee;
+  color: #245b43;
+}
+
+.bp-guidance-shield {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #087f5b;
+  color: white;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.bp-password-guidance p {
+  margin: 3px 0;
+  color: #245b43;
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+/* =========================================
+   RESET AND SAVE ACTIONS
+========================================= */
+
+.bp-individual-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bp-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+
+.bp-reset-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 19px;
+  border: 1px solid #cbd5df;
+  border-radius: 10px;
+  background: #f5f7fa;
+  color: #34443b;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.bp-reset-button:hover {
+  background: #e9eef2;
+  border-color: #aebbc8;
+}
+
+/* =========================================
+   DELETE BUSINESS
+========================================= */
+
+.bp-delete-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 19px 21px;
+  border: 1px solid #f2d2d0;
+  border-radius: 13px;
+  background: #fffafa;
+}
+
+.bp-delete-card > div {
+  flex: 1 1 250px;
+}
+
+.bp-delete-card h3 {
+  margin: 0 0 6px;
+  color: #a52a24;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.bp-delete-card p {
+  margin: 0;
+  color: #8b6c6a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.bp-delete-card button {
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid #c0392b;
+  border-radius: 9px;
+  background: #fff0ef;
+  color: #b42318;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.bp-delete-card button:hover {
+  background: #c0392b;
+  color: #ffffff;
+}
+
+.bp-delete-card button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   TABLET RESPONSIVE
+========================================= */
+
+@media (max-width: 800px) {
+  .business-profile-page {
+    gap: 17px;
   }
 
-  .business-profile-fields {
-    grid-template-columns: 1fr;
+  .bp-information-grid {
     gap: 15px;
   }
 
-  .business-profile-card .primary-button {
+  .bp-information-card {
+    flex: 1 1 260px;
+  }
+
+  .bp-password-card {
+    padding: 19px;
+  }
+
+  .bp-password-grid {
+    gap: 13px;
+  }
+
+  .bp-password-grid .bp-field {
+    flex: 1 1 220px;
+  }
+}
+
+/* =========================================
+   MOBILE RESPONSIVE
+========================================= */
+
+@media (max-width: 600px) {
+  .business-profile-page {
+    gap: 15px;
+  }
+
+  .bp-page-heading h2 {
+    font-size: 21px;
+  }
+
+  .bp-page-heading p {
+    font-size: 12px;
+  }
+
+  .bp-information-grid {
+    flex-direction: column;
+  }
+
+  .bp-information-card {
+    flex: 1 1 auto;
     width: 100%;
+  }
+
+  .bp-card-header {
+    min-height: 62px;
+    padding: 13px 16px;
+  }
+
+  .bp-card-header h3 {
+    font-size: 15px;
+  }
+
+  .bp-card-content {
+    padding: 17px;
+    gap: 15px;
+  }
+
+  .bp-password-card {
+    gap: 17px;
+    padding: 17px;
+    border-radius: 13px;
+  }
+
+  .bp-section-heading {
+    align-items: flex-start;
+    gap: 11px;
+  }
+
+  .bp-section-icon {
+    width: 43px;
+    height: 43px;
+    font-size: 21px;
+  }
+
+  .bp-section-heading h3 {
+    font-size: 16px;
+  }
+
+  .bp-section-heading p {
+    font-size: 12px;
+  }
+
+  .bp-password-grid {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .bp-password-grid .bp-field {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .bp-password-guidance {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .bp-guidance-shield {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+
+  .bp-password-guidance p {
+    font-size: 11px;
+  }
+
+  .bp-individual-actions {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .bp-individual-actions button {
+    width: 100%;
+  }
+
+  .bp-actions {
+    justify-content: stretch;
+  }
+
+  .bp-actions button {
+    width: 100%;
+  }
+
+  .bp-delete-card {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .bp-delete-card button {
+    width: 100%;
+  }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 380px) {
+  .bp-page-heading h2 {
+    font-size: 19px;
+  }
+
+  .bp-card-content {
+    padding: 14px;
+  }
+
+  .bp-password-card {
+    padding: 14px;
+  }
+
+  .bp-section-heading h3 {
+    font-size: 14px;
+  }
+
+  .bp-field input,
+  .bp-password-input input {
+    height: 44px;
+    font-size: 13px;
   }
 }

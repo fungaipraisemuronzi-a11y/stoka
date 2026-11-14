@@ -207,8 +207,8 @@ export default function ManagerLogin({ business, onBack, onLogin }) {
     mode === "setup"
       ? "Create the first manager account for this business."
       : mode === "register"
-        ? "Submit a manager registration for Primary Manager approval."
-        : "Sign in using your manager username and password.";
+        ? "Submit a manager registration for approval."
+        : "Sign in to your manager account";
 
   if (checkingStatus) {
     return (

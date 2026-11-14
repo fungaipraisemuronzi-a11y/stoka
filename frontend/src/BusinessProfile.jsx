@@ -1,23 +1,98 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./BusinessProfile.css";
 
 const API_URL = "https://stoka-of78.onrender.com";
 
-export default function BusinessProfile({ business, onBusinessUpdated }) {
+const getBusinessName = (business) =>
+  business?.businessName ||
+  business?.business_name ||
+  business?.name ||
+  "";
+
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  visible,
+  onToggle,
+  autoComplete = "current-password",
+  minLength,
+  maxLength,
+  required = true,
+}) {
+  return (
+    <div className="bp-field">
+      <label htmlFor={id}>{label}</label>
+
+      <div className="bp-password-input">
+       
+
+        <input
+          id={id}
+          type={visible ? "text" : "password"}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          minLength={minLength}
+          maxLength={maxLength}
+          required={required}
+        />
+
+        <button
+          type="button"
+          className="bp-password-toggle"
+          onClick={onToggle}
+          aria-label={visible ? "Hide password" : "Show password"}
+        >
+          {visible ? "◉" : "◉̸"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function BusinessProfile({
+  business,
+  managerToken,
+  onBusinessUpdated,
+}) {
   const [businessName, setBusinessName] = useState(
-    business?.businessName || business?.business_name || business?.name || ""
+    getBusinessName(business)
   );
 
-  const [username, setUsername] = useState(business?.username || "");
+  const [username, setUsername] = useState(
+    business?.username || ""
+  );
 
-  const [currentBusinessPassword, setCurrentBusinessPassword] = useState("");
+  const [businessNamePassword, setBusinessNamePassword] = useState("");
+  const [usernamePassword, setUsernamePassword] = useState("");
+
+  const [currentBusinessPassword, setCurrentBusinessPassword] =
+    useState("");
   const [newBusinessPassword, setNewBusinessPassword] = useState("");
-  const [confirmBusinessPassword, setConfirmBusinessPassword] = useState("");
+  const [confirmBusinessPassword, setConfirmBusinessPassword] =
+    useState("");
 
-  const [currentManagerPassword, setCurrentManagerPassword] = useState("");
+  const [currentManagerPassword, setCurrentManagerPassword] =
+    useState("");
   const [newManagerPassword, setNewManagerPassword] = useState("");
-  const [confirmManagerPassword, setConfirmManagerPassword] = useState("");
+  const [confirmManagerPassword, setConfirmManagerPassword] =
+    useState("");
+
+  const [showNamePassword, setShowNamePassword] = useState(false);
+  const [showUsernamePassword, setShowUsernamePassword] = useState(false);
+
+  const [showBusinessOld, setShowBusinessOld] = useState(false);
+  const [showBusinessNew, setShowBusinessNew] = useState(false);
+  const [showBusinessConfirm, setShowBusinessConfirm] = useState(false);
+
+  const [showManagerOld, setShowManagerOld] = useState(false);
+  const [showManagerNew, setShowManagerNew] = useState(false);
+  const [showManagerConfirm, setShowManagerConfirm] = useState(false);
 
   const [loading, setLoading] = useState("");
   const [message, setMessage] = useState("");
@@ -25,79 +100,189 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
 
   const businessId = business?.id;
 
-  const clearMessages = () => {
+  useEffect(() => {
+    setBusinessName(getBusinessName(business));
+    setUsername(business?.username || "");
+  }, [business]);
+
+  function clearMessages() {
     setMessage("");
     setError("");
-  };
+  }
 
-  const getData = async (response) => {
+  async function getData(response) {
     try {
       return await response.json();
     } catch {
       return {};
     }
-  };
+  }
 
-  // Update business information
-  const handleProfileUpdate = async (event) => {
+  function updateBusinessLocally(updatedBusiness) {
+    if (!updatedBusiness) return;
+
+    localStorage.setItem(
+      "stoka_business",
+      JSON.stringify(updatedBusiness)
+    );
+
+    onBusinessUpdated?.(updatedBusiness);
+
+    setBusinessName(getBusinessName(updatedBusiness));
+    setUsername(updatedBusiness.username || "");
+  }
+
+  // --------------------------------------------------
+  // UPDATE BUSINESS NAME
+  // PATCH /api/auth/profile
+  // --------------------------------------------------
+  async function handleBusinessNameSave(event) {
     event.preventDefault();
     clearMessages();
 
-    if (!businessId || !currentBusinessPassword) {
-      setError("Please enter your current business password.");
+    if (!businessId) {
+      setError("Business information is missing. Please log in again.");
       return;
     }
 
-    if (!/^[a-zA-Z0-9]+$/.test(username.trim())) {
-      setError("Username must contain letters and numbers only.");
+    if (!businessName.trim()) {
+      setError("Business name is required.");
       return;
     }
 
-    setLoading("profile");
+    if (!businessNamePassword) {
+      setError("Enter your current business password.");
+      return;
+    }
+
+    setLoading("business-name");
 
     try {
       const response = await fetch(`${API_URL}/api/auth/profile`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           businessId: String(businessId),
-          businessName,
+          businessName: businessName.trim(),
           username: username.trim().toLowerCase(),
-          currentPassword: currentBusinessPassword,
+          currentPassword: businessNamePassword,
         }),
       });
 
       const data = await getData(response);
 
       if (!response.ok) {
-        throw new Error(data.message || "Could not update profile.");
+        throw new Error(
+          data.message || "Could not update business name."
+        );
       }
 
-      localStorage.setItem("stoka_business", JSON.stringify(data.business));
+      if (data.business) {
+        updateBusinessLocally(data.business);
+      }
 
-      onBusinessUpdated?.(data.business);
-
-      setCurrentBusinessPassword("");
-      setMessage(data.message || "Business profile updated successfully.");
+      setBusinessNamePassword("");
+      setMessage("Business name updated successfully.");
     } catch (err) {
-      setError(err.message || "Could not update business profile.");
+      setError(err.message);
     } finally {
       setLoading("");
     }
-  };
+  }
 
-  // Change business password
-  const handleBusinessPasswordChange = async (event) => {
+  // --------------------------------------------------
+  // UPDATE USERNAME
+  // PATCH /api/auth/profile
+  // --------------------------------------------------
+  async function handleUsernameSave(event) {
     event.preventDefault();
     clearMessages();
 
+    if (!businessId) {
+      setError("Business information is missing. Please log in again.");
+      return;
+    }
+
+    const cleanUsername = username.trim().toLowerCase();
+
+    if (!/^[a-zA-Z0-9]+$/.test(cleanUsername)) {
+      setError("Username must contain letters and numbers only.");
+      return;
+    }
+
+    if (!usernamePassword) {
+      setError("Enter your current business password.");
+      return;
+    }
+
+    setLoading("username");
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/profile`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          businessId: String(businessId),
+          businessName: businessName.trim(),
+          username: cleanUsername,
+          currentPassword: usernamePassword,
+        }),
+      });
+
+      const data = await getData(response);
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Could not update username."
+        );
+      }
+
+      if (data.business) {
+        updateBusinessLocally(data.business);
+      }
+
+      setUsernamePassword("");
+      setMessage("Username updated successfully.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading("");
+    }
+  }
+
+  // --------------------------------------------------
+  // CHANGE BUSINESS LOGIN PASSWORD
+  // POST /api/auth/change-password
+  // --------------------------------------------------
+  async function handleBusinessPasswordChange(event) {
+    event.preventDefault();
+    clearMessages();
+
+    if (!businessId) {
+      setError("Business information is missing. Please log in again.");
+      return;
+    }
+
+    if (
+      !currentBusinessPassword ||
+      !newBusinessPassword ||
+      !confirmBusinessPassword
+    ) {
+      setError("Complete all business password fields.");
+      return;
+    }
+
     if (newBusinessPassword.length > 15) {
-      setError("Password cannot exceed 15 characters.");
+      setError("Business password cannot exceed 15 characters.");
       return;
     }
 
     if (newBusinessPassword !== confirmBusinessPassword) {
-      setError("New passwords do not match.");
+      setError("New business passwords do not match.");
       return;
     }
 
@@ -109,38 +294,74 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
     setLoading("business-password");
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/change-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessId: String(businessId),
-          currentPassword: currentBusinessPassword,
-          newPassword: newBusinessPassword,
-        }),
-      });
+      const response = await fetch(
+        `${API_URL}/api/auth/change-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            businessId: String(businessId),
+            currentPassword: currentBusinessPassword,
+            newPassword: newBusinessPassword,
+          }),
+        }
+      );
 
       const data = await getData(response);
 
       if (!response.ok) {
-        throw new Error(data.message || "Could not change password.");
+        throw new Error(
+          data.message || "Could not change business password."
+        );
       }
 
       setCurrentBusinessPassword("");
       setNewBusinessPassword("");
       setConfirmBusinessPassword("");
 
-      setMessage(data.message || "Business password changed successfully.");
+      setShowBusinessOld(false);
+      setShowBusinessNew(false);
+      setShowBusinessConfirm(false);
+
+      setMessage("Business login password changed successfully.");
     } catch (err) {
-      setError(err.message || "Could not change business password.");
+      setError(err.message);
     } finally {
       setLoading("");
     }
-  };
+  }
 
-  // Change manager password
-  const handleManagerPasswordChange = async (event) => {
+  // --------------------------------------------------
+  // CHANGE MANAGER LOGIN PASSWORD
+  // PATCH /api/manager-passwords/change-password
+  // Requires manager JWT
+  // --------------------------------------------------
+  async function handleManagerPasswordChange(event) {
     event.preventDefault();
     clearMessages();
+
+    if (!businessId) {
+      setError("Business information is missing. Please log in again.");
+      return;
+    }
+
+    if (!managerToken) {
+      setError(
+        "Manager session is missing. Please log out and log in to the Manager account again."
+      );
+      return;
+    }
+
+    if (
+      !currentManagerPassword ||
+      !newManagerPassword ||
+      !confirmManagerPassword
+    ) {
+      setError("Complete all manager password fields.");
+      return;
+    }
 
     if (newManagerPassword.length < 6) {
       setError("Manager password must contain at least 6 characters.");
@@ -161,12 +382,14 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
 
     try {
       const response = await fetch(
-        `${API_URL}/api/manager-passwords/change`,
+        `${API_URL}/api/manager-passwords/change-password`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${managerToken}`,
+          },
           body: JSON.stringify({
-            businessId: String(businessId),
             currentPassword: currentManagerPassword,
             newPassword: newManagerPassword,
           }),
@@ -176,24 +399,70 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
       const data = await getData(response);
 
       if (!response.ok) {
-        throw new Error(data.message || "Could not change manager password.");
+        throw new Error(
+          data.message || "Could not change manager password."
+        );
       }
 
       setCurrentManagerPassword("");
       setNewManagerPassword("");
       setConfirmManagerPassword("");
 
-      setMessage(data.message || "Manager password changed successfully.");
+      setShowManagerOld(false);
+      setShowManagerNew(false);
+      setShowManagerConfirm(false);
+
+      setMessage("Manager login password changed successfully.");
     } catch (err) {
-      setError(err.message || "Could not change manager password.");
+      setError(err.message);
     } finally {
       setLoading("");
     }
-  };
+  }
 
-  // Delete business account
-  const handleDeleteBusiness = async () => {
+  // --------------------------------------------------
+  // RESET ALL FIELDS
+  // --------------------------------------------------
+  function resetForm() {
+    setBusinessName(getBusinessName(business));
+    setUsername(business?.username || "");
+
+    setBusinessNamePassword("");
+    setUsernamePassword("");
+
+    setCurrentBusinessPassword("");
+    setNewBusinessPassword("");
+    setConfirmBusinessPassword("");
+
+    setCurrentManagerPassword("");
+    setNewManagerPassword("");
+    setConfirmManagerPassword("");
+
+    setShowNamePassword(false);
+    setShowUsernamePassword(false);
+
+    setShowBusinessOld(false);
+    setShowBusinessNew(false);
+    setShowBusinessConfirm(false);
+
+    setShowManagerOld(false);
+    setShowManagerNew(false);
+    setShowManagerConfirm(false);
+
     clearMessages();
+  }
+
+  // --------------------------------------------------
+  // DELETE BUSINESS ACCOUNT
+  // DELETE /api/auth/delete/:id
+  // --------------------------------------------------
+  async function handleDeleteBusiness() {
+    clearMessages();
+
+    if (!businessId) {
+      setError("Business information is missing. Please log in again.");
+      return;
+    }
 
     const confirmed = window.confirm(
       "WARNING: You are about to permanently delete this business account.\n\n" +
@@ -207,9 +476,7 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
       "Enter your current business password to confirm account deletion:"
     );
 
-    if (password === null || !password.trim()) {
-      return;
-    }
+    if (password === null || !password.trim()) return;
 
     setLoading("delete");
 
@@ -239,43 +506,114 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
       localStorage.removeItem("stoka_teller");
 
       alert("Business account deleted successfully.");
-
       window.location.href = "/";
     } catch (err) {
-      setError(err.message || "Could not delete business account.");
+      setError(err.message);
     } finally {
       setLoading("");
     }
-  };
+  }
 
   return (
     <div className="business-profile-page">
+     
 
-      
+      {message && (
+        <div className="bp-alert bp-success" role="status">
+          <span>✓</span>
+          {message}
+        </div>
+      )}
 
-      {message && <p className="success-message">{message}</p>}
-      {error && <p className="error-message">{error}</p>}
+      {error && (
+        <div className="bp-alert bp-error" role="alert">
+          <span>!</span>
+          {error}
+        </div>
+      )}
 
-      {/* BUSINESS INFORMATION */}
-      <section className="business-profile-card">
-        
+      {/* BUSINESS NAME */}
+      <div className="bp-information-grid">
+        <section className="bp-information-card">
+          <div className="bp-card-header">
+           
+            <h3>Business Name</h3>
+          </div>
 
-        <form onSubmit={handleProfileUpdate}>
-          <div className="business-profile-fields">
+          <form
+            className="bp-card-content"
+            onSubmit={handleBusinessNameSave}
+          >
+            <div className="bp-field">
+             
 
-            <div className="form-group">
-              <label>Business name</label>
               <input
+                id="bp-business-name"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 maxLength={25}
                 required
               />
+
+              
             </div>
 
-            <div className="form-group">
-              <label>Username</label>
+            <div className="bp-profile-confirm">
+              <label htmlFor="bp-name-password">
+                Enter your business password to change
+              </label>
+
+              <div className="bp-password-input">
+                <input
+                  id="bp-name-password"
+                  type={showNamePassword ? "text" : "password"}
+                  value={businessNamePassword}
+                  onChange={(e) =>
+                    setBusinessNamePassword(e.target.value)
+                  }
+                  placeholder="Confirm your password"
+                  autoComplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="bp-password-toggle"
+                  onClick={() => setShowNamePassword((v) => !v)}
+                >
+                  {showNamePassword ? "◉" : "◉̸"}
+                </button>
+              </div>
+            </div>
+
+            <button
+              className="bp-save-button bp-section-save"
+              type="submit"
+              disabled={Boolean(loading)}
+            >
+              {loading === "business-name"
+                ? "Saving..."
+                : "✓ Save Business Name"}
+            </button>
+          </form>
+        </section>
+
+        {/* USERNAME */}
+        <section className="bp-information-card">
+          <div className="bp-card-header">
+           
+            <h3>Username</h3>
+          </div>
+
+          <form
+            className="bp-card-content"
+            onSubmit={handleUsernameSave}
+          >
+            <div className="bp-field">
+             
+
               <input
+                id="bp-username"
                 value={username}
                 onChange={(e) =>
                   setUsername(
@@ -286,181 +624,245 @@ export default function BusinessProfile({ business, onBusinessUpdated }) {
                 }
                 maxLength={15}
                 pattern="[a-zA-Z0-9]+"
-                title="Letters and numbers only."
                 required
               />
-              <small>Letters and numbers only. Maximum 15 characters.</small>
+
+             
             </div>
 
-            <div className="form-group">
-              <label>Current business password</label>
-              <input
-                type="password"
-                value={currentBusinessPassword}
-                onChange={(e) => setCurrentBusinessPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-              />
-              <small>Required to confirm profile changes.</small>
+            <div className="bp-profile-confirm">
+              <label htmlFor="bp-username-password">
+                Enter your business password to change
+              </label>
+
+              <div className="bp-password-input">
+                <input
+                  id="bp-username-password"
+                  type={showUsernamePassword ? "text" : "password"}
+                  value={usernamePassword}
+                  onChange={(e) =>
+                    setUsernamePassword(e.target.value)
+                  }
+                  placeholder="Confirm your password"
+                  autoComplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="bp-password-toggle"
+                  onClick={() => setShowUsernamePassword((v) => !v)}
+                >
+                  {showUsernamePassword ? "◉" : "◉̸"}
+                </button>
+              </div>
             </div>
 
-          </div>
+            <button
+              className="bp-save-button bp-section-save"
+              type="submit"
+              disabled={Boolean(loading)}
+            >
+              {loading === "username"
+                ? "Saving..."
+                : "✓ Save Username"}
+            </button>
+          </form>
+        </section>
+      </div>
 
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={Boolean(loading)}
-          >
-            {loading === "profile" ? "Saving..." : "Save business information"}
-          </button>
-        </form>
-      </section>
-
-      {/* BUSINESS PASSWORD */}
-      <section className="business-profile-card">
-        <div className="business-profile-card-heading">
-         
+      {/* BUSINESS LOGIN PASSWORD */}
+      <section className="bp-password-card">
+        <div className="bp-section-heading">
+        
           <div>
-            <h3>Change the Business login password</h3>
+            <h3>Change Business Login Password</h3>
            
           </div>
         </div>
 
         <form onSubmit={handleBusinessPasswordChange}>
-          <div className="business-profile-fields">
+          <div className="bp-password-grid">
+            <PasswordField
+              id="bp-business-old"
+              label="Old Password"
+              value={currentBusinessPassword}
+              onChange={(e) =>
+                setCurrentBusinessPassword(e.target.value)
+              }
+              placeholder="Enter old password"
+              visible={showBusinessOld}
+              onToggle={() => setShowBusinessOld((v) => !v)}
+            />
 
-            <div className="form-group">
-              <label>Current password</label>
-              <input
-                type="password"
-                value={currentBusinessPassword}
-                onChange={(e) => setCurrentBusinessPassword(e.target.value)}
-                required
-              />
-            </div>
+            <PasswordField
+              id="bp-business-new"
+              label="New Password"
+              value={newBusinessPassword}
+              onChange={(e) => setNewBusinessPassword(e.target.value)}
+              placeholder="Enter new password"
+              visible={showBusinessNew}
+              onToggle={() => setShowBusinessNew((v) => !v)}
+              autoComplete="new-password"
+              maxLength={15}
+            />
 
-            <div className="form-group">
-              <label>New password</label>
-              <input
-                type="password"
-                value={newBusinessPassword}
-                onChange={(e) => setNewBusinessPassword(e.target.value)}
-                maxLength={15}
-                required
-              />
-              <small>Maximum 15 characters.</small>
-            </div>
-
-            <div className="form-group">
-              <label>Confirm new password</label>
-              <input
-                type="password"
-                value={confirmBusinessPassword}
-                onChange={(e) => setConfirmBusinessPassword(e.target.value)}
-                maxLength={15}
-                required
-              />
-            </div>
-
+            <PasswordField
+              id="bp-business-confirm"
+              label="Confirm New Password"
+              value={confirmBusinessPassword}
+              onChange={(e) =>
+                setConfirmBusinessPassword(e.target.value)
+              }
+              placeholder="Confirm new password"
+              visible={showBusinessConfirm}
+              onToggle={() => setShowBusinessConfirm((v) => !v)}
+              autoComplete="new-password"
+              maxLength={15}
+            />
           </div>
 
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={Boolean(loading)}
-          >
-            {loading === "business-password"
-              ? "Updating..."
-              : "Change business password"}
-          </button>
+          
+
+          <div className="bp-individual-actions">
+            <button
+              type="button"
+              className="bp-reset-button"
+              onClick={() => {
+                setCurrentBusinessPassword("");
+                setNewBusinessPassword("");
+                setConfirmBusinessPassword("");
+                setShowBusinessOld(false);
+                setShowBusinessNew(false);
+                setShowBusinessConfirm(false);
+                clearMessages();
+              }}
+              disabled={Boolean(loading)}
+            >
+              Reset
+            </button>
+
+            <button
+              type="submit"
+              className="bp-save-button"
+              disabled={Boolean(loading)}
+            >
+              {loading === "business-password"
+                ? "Updating..."
+                : "✓ Save Business Password"}
+            </button>
+          </div>
         </form>
       </section>
 
-      {/* MANAGER PASSWORD */}
-      <section className="business-profile-card">
-        <div className="business-profile-card-heading">
-          
+      {/* MANAGER LOGIN PASSWORD */}
+      <section className="bp-password-card">
+        <div className="bp-section-heading">
+         
           <div>
-            <h3>Change the Manager password</h3>
-          
+            <h3>Change Manager Password</h3>
+           
           </div>
         </div>
 
         <form onSubmit={handleManagerPasswordChange}>
-          <div className="business-profile-fields">
+          <div className="bp-password-grid">
+            <PasswordField
+              id="bp-manager-old"
+              label="Old Password"
+              value={currentManagerPassword}
+              onChange={(e) =>
+                setCurrentManagerPassword(e.target.value)
+              }
+              placeholder="Enter old password"
+              visible={showManagerOld}
+              onToggle={() => setShowManagerOld((v) => !v)}
+            />
 
-            <div className="form-group">
-              <label>Current manager password</label>
-              <input
-                type="password"
-                value={currentManagerPassword}
-                onChange={(e) => setCurrentManagerPassword(e.target.value)}
-                required
-              />
-            </div>
+            <PasswordField
+              id="bp-manager-new"
+              label="New Password"
+              value={newManagerPassword}
+              onChange={(e) => setNewManagerPassword(e.target.value)}
+              placeholder="Enter new password"
+              visible={showManagerNew}
+              onToggle={() => setShowManagerNew((v) => !v)}
+              autoComplete="new-password"
+              minLength={6}
+            />
 
-            <div className="form-group">
-              <label>New manager password</label>
-              <input
-                type="password"
-                value={newManagerPassword}
-                onChange={(e) => setNewManagerPassword(e.target.value)}
-                minLength={6}
-                required
-              />
-              <small>At least 6 characters.</small>
-            </div>
-
-            <div className="form-group">
-              <label>Confirm new manager password</label>
-              <input
-                type="password"
-                value={confirmManagerPassword}
-                onChange={(e) => setConfirmManagerPassword(e.target.value)}
-                minLength={6}
-                required
-              />
-            </div>
-
+            <PasswordField
+              id="bp-manager-confirm"
+              label="Confirm New Password"
+              value={confirmManagerPassword}
+              onChange={(e) =>
+                setConfirmManagerPassword(e.target.value)
+              }
+              placeholder="Confirm new password"
+              visible={showManagerConfirm}
+              onToggle={() => setShowManagerConfirm((v) => !v)}
+              autoComplete="new-password"
+              minLength={6}
+            />
           </div>
 
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={Boolean(loading)}
-          >
-            {loading === "manager-password"
-              ? "Updating..."
-              : "Change manager password"}
-          </button>
+          <div className="bp-individual-actions">
+            <button
+              type="button"
+              className="bp-reset-button"
+              onClick={() => {
+                setCurrentManagerPassword("");
+                setNewManagerPassword("");
+                setConfirmManagerPassword("");
+                setShowManagerOld(false);
+                setShowManagerNew(false);
+                setShowManagerConfirm(false);
+                clearMessages();
+              }}
+              disabled={Boolean(loading)}
+            >
+              Reset
+            </button>
+
+            <button
+              type="submit"
+              className="bp-save-button"
+              disabled={Boolean(loading)}
+            >
+              {loading === "manager-password"
+                ? "Updating..."
+                : "✓ Save Manager Password"}
+            </button>
+          </div>
         </form>
       </section>
 
-      {/* DELETE BUSINESS ACCOUNT */}
-      <section className="business-profile-card delete-business-card">
-        <div className="business-profile-card-heading">
-        
-          <div>
-            <h3>Delete business account</h3>
-            <p>
-              Permanently delete this business account from Stoka.
-              This action cannot be undone.
-            </p>
-          </div>
-        </div>
+      {/* RESET ALL */}
+      <div className="bp-actions">
+        <button
+          type="button"
+          className="bp-reset-button"
+          onClick={resetForm}
+          disabled={Boolean(loading)}
+        >
+          ↶ Reset All
+        </button>
+      </div>
+
+      {/* DELETE BUSINESS */}
+      <section className="bp-delete-card">
+       
 
         <button
           type="button"
-          className="delete-business-button"
           onClick={handleDeleteBusiness}
           disabled={Boolean(loading) || !businessId}
         >
           {loading === "delete"
-            ? "Deleting account..."
+            ? "Deleting..."
             : "Delete Business Account"}
         </button>
       </section>
-
     </div>
   );
 }

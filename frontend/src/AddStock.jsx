@@ -872,7 +872,7 @@ export default function AddStock({ business, managerToken }) {
             {/* PRODUCT SEARCH */}
 
             <div className="as-field as-full">
-              <label>Search Stock Item</label>
+              
 
               <input
                 type="text"

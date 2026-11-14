@@ -398,14 +398,7 @@ export default function ManageUsers({
       <div className="manage-users-heading">
         
 
-        <button
-          type="button"
-          className="manage-users-refresh"
-          onClick={fetchUsers}
-          disabled={loading}
-        >
-          Refresh
-        </button>
+      
       </div>
 
       {error && (

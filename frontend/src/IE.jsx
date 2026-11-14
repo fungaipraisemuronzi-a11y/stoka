@@ -465,13 +465,11 @@ export default function IE({ business, managerToken }) {
       <section className="ie-panel">
         <div className="ie-panel-heading">
           <div>
-            <p className="ie-eyebrow">
-              {editingId ? "UPDATE RECORD" : "NEW RECORD"}
-            </p>
+           
 
             <h3>
               {editingId
-                ? "Edit I&E entry"
+                ? "Edit entry"
                 : "Add an income or expense"}
             </h3>
           </div>

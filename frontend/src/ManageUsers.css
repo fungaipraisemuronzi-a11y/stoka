@@ -1,20 +1,25 @@
 
 /* =========================================
    STOKA - MANAGE USERS
+   Modern Flexbox Design
 ========================================= */
 
 .manage-users-page {
   width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
   color: #182230;
   font-family: "DM Sans", sans-serif;
 }
 
-/* PAGE HEADING */
+/* =========================================
+   PAGE HEADING
+========================================= */
 
 .manage-users-heading {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -33,6 +38,7 @@
   margin: 0;
   color: #718096;
   font-size: 14px;
+  line-height: 1.6;
 }
 
 /* REFRESH BUTTON */
@@ -41,10 +47,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 10px 16px;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 18px;
   border: 1px solid #cce5d8;
-  border-radius: 10px;
+  border-radius: 11px;
   background: #e6f5ee;
   color: #087f5b;
   font-size: 13px;
@@ -55,20 +62,29 @@
 
 .manage-users-refresh:hover {
   background: #d4efe1;
+  border-color: #a8dcc1;
+  transform: translateY(-1px);
 }
 
 .manage-users-refresh:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
 }
 
-/* MESSAGES */
+/* =========================================
+   MESSAGES
+========================================= */
 
 .manage-users-message {
-  padding: 13px 16px;
-  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 17px;
+  border-radius: 11px;
   font-size: 13px;
   line-height: 1.6;
+  font-weight: 600;
 }
 
 .manage-users-message.error {
@@ -89,9 +105,12 @@
   border: 1px solid #f5dfad;
 }
 
-/* FILTERS */
+/* =========================================
+   FILTERS
+========================================= */
 
 .manage-users-filters {
+  width: 100%;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -103,7 +122,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 9px 15px;
+  min-height: 40px;
+  padding: 8px 16px;
   border: 1px solid #e0e9e3;
   border-radius: 30px;
   background: #ffffff;
@@ -117,23 +137,25 @@
 .manage-users-filter:hover {
   border-color: #087f5b;
   color: #087f5b;
+  background: #f5fbf7;
 }
 
 .manage-users-filter.active {
   color: #ffffff;
   background: #087f5b;
   border-color: #087f5b;
+  box-shadow: 0 3px 9px rgba(8, 127, 91, 0.16);
 }
 
 .manage-users-filter span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 21px;
-  height: 21px;
-  padding: 0 5px;
+  min-width: 23px;
+  height: 23px;
+  padding: 0 6px;
   border-radius: 20px;
-  background: rgba(0, 0, 0, 0.07);
+  background: rgba(0, 0, 0, 0.06);
   font-size: 11px;
   font-weight: 800;
 }
@@ -142,87 +164,103 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* TABLE CONTAINER */
+/* =========================================
+   TABLE CONTAINER
+========================================= */
 
 .manage-users-table-container {
   width: 100%;
   min-width: 0;
   overflow-x: auto;
   background: #ffffff;
-  border: 1px solid #e5eee8;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(20, 50, 35, 0.04);
+  border: 1px solid #e2ebe5;
+  border-radius: 16px;
+  box-shadow: 0 5px 18px rgba(20, 50, 35, 0.055);
 }
 
-/* TABLE */
+/* =========================================
+   TABLE
+========================================= */
 
 .manage-users-table {
   width: 100%;
-  min-width: 750px;
-  border-collapse: collapse;
+  min-width: 760px;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
 }
 
 .manage-users-table thead {
-  background: #f3f8f5;
+  background: #eff8f3;
 }
 
 .manage-users-table th {
-  padding: 15px 17px;
+  padding: 17px 18px;
   color: #52645a;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.45px;
   white-space: nowrap;
-  border-bottom: 1px solid #e4ede7;
+  border-bottom: 1px solid #e0ebe4;
 }
 
 .manage-users-table td {
-  padding: 15px 17px;
+  padding: 16px 18px;
   color: #34443b;
   font-size: 13px;
   border-bottom: 1px solid #edf2ee;
   vertical-align: middle;
 }
 
+.manage-users-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.manage-users-table tbody tr:hover {
+  background: #f7fbf8;
+}
+
 .manage-users-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.manage-users-table tbody tr:hover {
-  background: #fbfdfb;
-}
-
-/* USERNAME */
+/* =========================================
+   USERNAME
+========================================= */
 
 .manage-users-username {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 9px;
   color: #183d30;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .manage-users-primary {
   display: inline-flex;
   align-items: center;
-  padding: 4px 8px;
+  justify-content: center;
+  padding: 5px 9px;
   border-radius: 20px;
   background: #e6f5ee;
   color: #087f5b;
   font-size: 10px;
   font-weight: 800;
+  white-space: nowrap;
 }
 
-/* STATUS */
+/* =========================================
+   STATUS
+========================================= */
 
 .manage-users-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 11px;
+  min-width: 75px;
+  padding: 7px 12px;
   border-radius: 30px;
   background: #eef2f0;
   color: #64746a;
@@ -256,19 +294,25 @@
   color: #64748b;
 }
 
-/* ACTION BUTTONS */
+/* =========================================
+   ACTION BUTTONS
+========================================= */
 
 .manage-users-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 7px;
+  gap: 8px;
 }
 
 .manage-users-actions button {
-  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 8px 13px;
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
   font-size: 11px;
   font-weight: 800;
   cursor: pointer;
@@ -276,12 +320,17 @@
   transition: 0.2s ease;
 }
 
+.manage-users-actions button:hover {
+  transform: translateY(-1px);
+}
+
 .manage-users-actions button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
-/* APPROVE */
+/* APPROVE / REACTIVATE */
 
 .manage-users-approve {
   background: #087f5b;
@@ -330,66 +379,108 @@
 .manage-users-no-actions {
   color: #9aa69f;
   font-size: 13px;
+  font-weight: 600;
 }
 
-/* EMPTY / LOADING STATE */
+/* =========================================
+   EMPTY / LOADING STATE
+========================================= */
 
 .manage-users-empty {
+  width: 100%;
+  min-height: 220px;
+  padding: 35px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 190px;
-  padding: 30px 20px;
   text-align: center;
   color: #89968e;
   font-size: 13px;
+  box-sizing: border-box;
 }
 
 .manage-users-empty h3 {
-  margin: 10px 0 5px;
+  margin: 12px 0 6px;
   color: #34443b;
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 800;
 }
 
 .manage-users-empty p {
   margin: 0;
   color: #89968e;
   font-size: 13px;
+  line-height: 1.6;
 }
 
 .manage-users-empty-icon {
+  width: 55px;
+  height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
   border-radius: 50%;
   background: #e6f5ee;
-  font-size: 24px;
+  font-size: 25px;
 }
 
-/* NOTE */
+/* =========================================
+   NOTE
+========================================= */
 
 .manage-users-note {
-  padding: 14px 16px;
-  border-left: 3px solid #087f5b;
-  border-radius: 8px;
-  background: #f5f9f6;
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 15px 17px;
+  border-left: 4px solid #087f5b;
+  border-radius: 9px;
+  background: #f3f9f5;
   color: #718096;
   font-size: 12px;
   line-height: 1.7;
 }
 
 .manage-users-note strong {
+  flex-shrink: 0;
   color: #087f5b;
 }
 
-/* RESPONSIVE */
+/* =========================================
+   TABLET
+========================================= */
 
-@media (max-width: 700px) {
+@media (max-width: 800px) {
+  .manage-users-page {
+    gap: 18px;
+  }
+
+  .manage-users-heading h2 {
+    font-size: 22px;
+  }
+
+  .manage-users-table {
+    min-width: 730px;
+  }
+
+  .manage-users-table th,
+  .manage-users-table td {
+    padding: 14px;
+  }
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
   .manage-users-page {
     gap: 16px;
+  }
+
+  .manage-users-heading {
+    align-items: flex-start;
   }
 
   .manage-users-heading h2 {
@@ -397,21 +488,32 @@
   }
 
   .manage-users-heading p {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .manage-users-refresh {
-    padding: 9px 13px;
+    min-height: 38px;
+    padding: 8px 13px;
   }
 
   .manage-users-filters {
-    gap: 7px;
+    gap: 8px;
   }
 
   .manage-users-filter {
-    padding: 8px 12px;
+    min-height: 37px;
+    padding: 7px 12px;
     gap: 7px;
     font-size: 12px;
+  }
+
+  .manage-users-filter span {
+    min-width: 20px;
+    height: 20px;
+  }
+
+  .manage-users-table-container {
+    border-radius: 12px;
   }
 
   .manage-users-table {
@@ -421,12 +523,37 @@
   .manage-users-table th,
   .manage-users-table td {
     padding: 12px;
+    font-size: 12px;
+  }
+
+  .manage-users-actions {
+    gap: 6px;
+  }
+
+  .manage-users-actions button {
+    min-height: 32px;
+    padding: 7px 10px;
+    font-size: 10px;
+  }
+
+  .manage-users-message {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .manage-users-note {
+    padding: 12px;
+    font-size: 11px;
   }
 }
 
-@media (max-width: 400px) {
-  .manage-users-heading {
-    align-items: flex-start;
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 380px) {
+  .manage-users-page {
+    gap: 14px;
   }
 
   .manage-users-heading h2 {
@@ -442,7 +569,7 @@
     font-size: 11px;
   }
 
-  .manage-users-note {
-    font-size: 11px;
+  .manage-users-table {
+    min-width: 680px;
   }
 }

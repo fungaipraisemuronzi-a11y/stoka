@@ -296,13 +296,7 @@ export default function Manager({ business, onBack }) {
             <div className="manager-content">
               <div className="manager-profile-page-heading">
                 <div>
-                  <button
-                    type="button"
-                    className="manager-profile-back-button"
-                    onClick={() => setActiveProfilePage(null)}
-                  >
-                    ← Back to Manager
-                  </button>
+               
 
                   <h2>{profileTitles[activeProfilePage]}</h2>
                 </div>
